@@ -1,0 +1,218 @@
+:root {
+    /* Font */
+    --font-family: 'Roboto', Arial, sans-serif;
+
+    /* Text Colors */
+    --text-passive: #a3a8a8; /* Background text or non-selected text */
+    --text: #3b3b3b;         /* Normal text */
+    --text-active: #000000;  /* Foreground or selected text */
+
+    /* Background Colors */
+    --background: #f9f9f9;           /* Page background */
+    --background-selected: #e5e5e5;  /* Background of selected elements */
+    --foreground: #ffffff;           /* Foreground elements */
+
+    /* Highlight Colors */
+    --primary: #4c6ef5;       /* Theme highlight color */
+    --secondary: #b48ead;     /* Theme secondary highlight color */
+
+    /* Status Colors */
+    --warning: #ffcc00;       /* Warning message color */
+    --error: #ff4d4d;         /* Error message color */
+
+    /* Shadows */
+    --shadow-light: rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    --shadow-dark: rgba(0, 0, 0, 0.15);  /* Prominent shadow */
+}
+
+/* Dark Theme */
+.dark-theme {
+    --text-passive: #a3a3a3;
+    --text: #ffffff;
+    --text-active: #ffffff;
+
+    --background: #1e1e1e;
+    --background-selected: #444444;
+    --foreground: #303030;
+
+    --primary: #83a1d6;
+    --secondary: #a15e8d;
+
+    --warning: #f0ad4e;
+    --error: #f45b69;
+
+    --shadow-light: rgba(255, 255, 255, 0.05);
+    --shadow-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* General Reset */
+body, h1, h2, p, input, button, form {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: var(--font-family);
+    background: var(--background);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Container Styling */
+.container {
+    text-align: center;
+    max-width: 600px;
+    background: var(--foreground);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px var(--shadow-dark);
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+/* Heading Styling */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    color: var(--text-active);
+    animation: slideIn 1s ease-in-out;
+}
+
+/* Form Container */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Form Styling */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--background-selected);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px var(--shadow-light);
+    animation: fadeIn 1s ease-in-out;
+}
+
+.form h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-active);
+}
+
+/* Input and Button Styling */
+input, button {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 1rem;
+    font-family: var(--font-family);
+}
+
+input {
+    width: 100%;
+    background: var(--foreground);
+    color: var(--text);
+    outline: none;
+    box-shadow: 0 2px 8px var(--shadow-light);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus {
+    background: var(--background-selected);
+    box-shadow: 0 2px 8px var(--shadow-dark);
+}
+
+button {
+    background: var(--primary);
+    color: var(--text-active);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background: var(--secondary);
+    transform: scale(1.05);
+}
+
+/* File Input Wrapper */
+.file-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+/* Hide Default File Input */
+.custom-file-input {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+/* Custom File Label */
+.custom-file-label {
+    background: var(--primary);
+    color: var(--text-active);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.custom-file-label:hover {
+    background: var(--secondary);
+}
+
+/* File Name Display */
+#file-name {
+    font-size: 0.9rem;
+    color: var(--text-passive);
+    font-family: var(--font-family);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Responsive Styling */
+.file-input-wrapper input:focus + .custom-file-label {
+    outline: 2px solid var(--primary);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

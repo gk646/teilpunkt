@@ -1,0 +1,9 @@
+[submodule "external/httplib"]
+	path = external/httplib
+	url = https://github.com/yhirose/cpp-httplib
+[submodule "external/spdlog"]
+	path = external/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "external/libsodium"]
+	path = external/libsodium
+	url = https://github.com/jedisct1/libsodium.git
