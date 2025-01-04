@@ -1,12 +1,12 @@
-#ifndef SESSIONSTORAGE_H
-#define SESSIONSTORAGE_H
+#ifndef TPUNKT_SESSIONSTORAGE_H
+#define TPUNKT_SESSIONSTORAGE_H
 
 #include "auth/Session.h"
 
-struct SessionStorage final{
+struct SessionStorage final
+{
 
 };
 
 
-
-#endif //SESSIONSTORAGE_H
+#endif //TPUNKT_SESSIONSTORAGE_H
