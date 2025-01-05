@@ -3,14 +3,22 @@
 
 #include <cstdint>
 
-namespace tpunk{
+namespace tpunkt
+{
 
-enum class StorageEndpointType : uint8_t {
-LOCAL_FILE_SYSTEM,
-};
+    enum class StorageEndpointType : uint8_t
+    {
+        LOCAL_FILE_SYSTEM,
+    };
 
-struct StorageEndpoint {
+    struct StorageEndpoint
+    {
+        StorageEndpointType type;
+    };
 
-};
-}
+    struct LocalFileSystemEndpoint final : StorageEndpoint
+    {
+    };
+
+} // namespace tpunkt
 #endif //TPUNKT_STORAGEENDPOINT_H

@@ -1,12 +1,17 @@
 #ifndef TPUNKT_CONFIG_H
 #define TPUNKT_CONFIG_H
 
+// Crypto
 
-//
 #define TPUNKT_SESSION_ID_BYTES 32
 
-
 // Authentication
+
+
+// Storage
+
+#define TPUNKT_FILE_NAME_LEN 50
+
 
 // Monitoring
 

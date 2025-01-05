@@ -1,5 +1,5 @@
-#ifndef AUTHENTICATOR_H
-#define AUTHENTICATOR_H
+#ifndef TPUNKT_AUTHENTICATOR_H
+#define TPUNKT_AUTHENTICATOR_H
 
 #include <string>
 
@@ -9,4 +9,6 @@ struct Authenticator final
 };
 
 
-#endif //AUTHENTICATOR_H
+Authenticator& GetAuthenticator();
+
+#endif //TPUNKT_AUTHENTICATOR_H

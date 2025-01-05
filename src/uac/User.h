@@ -1,14 +1,14 @@
 #ifndef TPUNKT_USER_H
 #define TPUNKT_USER_H
 
-#include "uac/Permissions.h"
+#include "uac/UserPermission.h"
 
 namespace tpunkt
 {
     struct User final
     {
         const char* name;
-        UserPermission perms;
+        UserPermissions perms;
     };
 
 } // namespace tpunkt

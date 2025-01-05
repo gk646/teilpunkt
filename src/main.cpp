@@ -5,7 +5,9 @@
 #include <spdlog/sinks/basic_file_sink.h>    // For file logging
 #include <spdlog/sinks/stdout_color_sinks.h> // For console logging
 
-#include "User.h"
+#include "server/WebServer.h"
+#include "memory/Memory.h"
+
 
 void initialize_logger(bool logToFile = false)
 {
@@ -35,38 +37,44 @@ void initialize_logger(bool logToFile = false)
     spdlog::debug("spdlog initialized");
 }
 
-bool authenticate(const std::string& password) {
+bool authenticate(const std::string& password)
+{
     const std::string valid_password = "securepassword";
     return password == valid_password;
 }
 
-void serve_static(httplib::Server& svr, const std::string& folder) {
-    svr.set_mount_point("/", folder);
-}
+void serve_static(httplib::Server& svr, const std::string& folder) { svr.set_mount_point("/", folder); }
 
-void handle_file_upload(const httplib::Request& req, httplib::Response& res) {
+void handle_file_upload(const httplib::Request& req, httplib::Response& res)
+{
     auto password = req.get_file_value("password").content;
-    if (!authenticate(password)) {
+    if (!authenticate(password))
+    {
         res.status = 401; // Unauthorized
         res.set_content("Invalid password!", "text/plain");
         return;
     }
 
-    if (req.has_file("file")) {
+    if (req.has_file("file"))
+    {
         const auto& file = req.get_file_value("file");
         std::ofstream ofs("./uploads/" + file.filename, std::ios::binary);
         ofs.write(file.content.c_str(), file.content.size());
         ofs.close();
         res.set_content("File uploaded successfully!", "text/plain");
-    } else {
+    }
+    else
+    {
         res.status = 400; // Bad httplib::Request
         res.set_content("No file uploaded!", "text/plain");
     }
 }
 
-void handle_file_download(const httplib::Request& req,httplib:: Response& res) {
+void handle_file_download(const httplib::Request& req, httplib::Response& res)
+{
     auto password = req.get_param_value("password");
-    if (!authenticate(password)) {
+    if (!authenticate(password))
+    {
         res.status = 401; // Unauthorized
         res.set_content("Invalid password!", "text/plain");
         return;
@@ -74,11 +82,14 @@ void handle_file_download(const httplib::Request& req,httplib:: Response& res) {
 
     auto filename = req.get_param_value("filename");
     std::ifstream ifs("./uploads/" + filename, std::ios::binary);
-    if (ifs) {
+    if (ifs)
+    {
         std::string file_content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
         res.set_content(file_content, "application/octet-stream");
         res.set_header("Content-Disposition", "attachment; filename=" + filename);
-    } else {
+    }
+    else
+    {
         res.status = 404; // Not Found
         res.set_content("File not found!", "text/plain");
     }
@@ -86,6 +97,8 @@ void handle_file_download(const httplib::Request& req,httplib:: Response& res) {
 
 int main()
 {
+
+    tpunkt::WebServer* server = new tpunkt::WebServer();
     initialize_logger(true);
 
     httplib::Server svr;

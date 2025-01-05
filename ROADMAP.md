@@ -154,3 +154,129 @@ Month 3:
     Refine UI and add metadata management.
     Add notifications for file access.
     Test and document the project.
+
+
+# Files
+
+1. Files (Core Entity)
+
+   Name: The file name.
+   Size: The file size.
+   Content: The actual file data (encrypted).
+   Version: Support versioning for files (e.g., "v1", "v2").
+   Type: MIME type (e.g., application/pdf, image/jpeg).
+
+2. Folders and Hierarchies
+
+   Add support for folders or directory structures:
+   Folder Name: The name of the folder.
+   Folder Path: Path to the folder within the hierarchy (e.g., /projects/2025).
+   Child Files: Files contained in the folder.
+   Parent Folder: Reference to the parent folder.
+
+Why?
+
+    Provides users with an organized way to group and manage files.
+
+3. File Metadata
+
+Extend metadata for files:
+
+    Creation Date: When the file was uploaded.
+    Last Modified Date: When the file was last updated.
+    Owner: User who uploaded the file.
+    Tags: Keywords or labels for easier searching.
+    Description: Optional user-provided description of the file.
+    Checksum: File hash (e.g., SHA-256) for integrity verification.
+
+4. Access Control Information
+
+   Permissions:
+   Who can read/write/delete the file.
+   Can include granular roles (e.g., viewer, editor, owner).
+   Shared With:
+   List of users/groups who have access to the file.
+   Audit Log:
+   Track actions on the file (e.g., "downloaded by user X at time Y").
+
+5. Users and Groups
+
+   Users:
+   Username, email, authentication credentials.
+   Roles: e.g., admin, regular user.
+   Groups:
+   Collections of users for simplified access control.
+   Example: "Project A Team" with access to all files in a folder.
+
+6. Links and Sharing
+
+   Shared Links:
+   Generate temporary or permanent URLs for file sharing.
+   Configure link permissions (e.g., view-only, edit, expiration date).
+   Public/Private Settings:
+   Mark files or folders as public or private.
+
+7. Data Types Beyond Files
+
+Your application might manage additional types of data:
+
+    Notes:
+        Short text-based notes linked to a file or project.
+    Projects:
+        Group related files and folders into a "project."
+    Tasks/To-Dos:
+        Associate tasks with files (e.g., "Review this document").
+    Links:
+        Store URLs or references to external resources.
+
+8. File Previews
+
+   Store and manage file previews or thumbnails for easier identification:
+   Images: Generate resized versions for previews.
+   Documents: Extract text or first page preview (e.g., for PDFs).
+
+9. Retention Policies
+
+   Manage file lifecycle:
+   Expiration Date: Automatically delete files after a set period.
+   Archiving: Move old files to an archive location.
+   Add support for compliance or organizational rules.
+
+10. Collaborative Features
+
+    Comments:
+    Allow users to add comments to files or folders.
+    Version History:
+    Store previous versions of files for rollback.
+    Activity Feed:
+    Show recent actions on a file (e.g., "User X edited file Y").
+
+11. Global Settings
+
+    Application-wide settings:
+    Storage Quota: Maximum storage allowed per user or group.
+    Encryption Settings: Default encryption algorithms or user-specific keys.
+    User Policies: Rules for password strength, 2FA, etc.
+
+12. Monitoring and Analytics
+
+    Track usage and provide insights:
+    File Statistics:
+    Number of downloads or views.
+    User Statistics:
+    Most active users.
+    Storage Metrics:
+    Total storage used by a user or group.
+
+Summary Table of Entities
+Entity	Attributes
+File	Name, size, content, type, creation date, checksum, version, metadata.
+Folder	Name, path, parent folder, child files, permissions.
+User	Username, email, roles, authentication method, quota.
+Group	Name, members, permissions, associated files/folders.
+Metadata	Tags, description, custom fields, audit log.
+Sharing	Links, expiration dates, access levels (view/edit).
+Notes	Short text annotations or reminders.
+Projects	Collection of files, folders, and associated metadata.
+Retention	Expiration dates, archiving rules.
+Collaboration	Comments, activity feed, version history.

@@ -9,7 +9,7 @@ namespace tpunkt
     {
         READ,
         WRITE,
-        CREATE,
+        CREATE_AND_DELETE,
     };
 
     // Store permissions in a hashed way in memory with a random salt

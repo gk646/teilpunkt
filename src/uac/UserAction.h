@@ -6,9 +6,9 @@
 namespace tpunkt
 {
 
-  struct UserAction final {
-
-  };
+    struct UserAction final
+    {
+    };
 
 } // namespace tpunkt
 

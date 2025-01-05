@@ -8,10 +8,11 @@ namespace tpunkt
 {
     struct UserAccessControl final
     {
-        bool hasPermission(const User& user, const UserAction& action) const;
+        [[nodiscard]] bool hasPermission(const User& user, const UserAction& action) const;
     };
 
     UserAccessControl& getUserAccessControl();
+
 } // namespace tpunkt
 
 

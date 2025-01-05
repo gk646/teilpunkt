@@ -2,6 +2,7 @@
 #define TPUNK_STORAGE_H
 
 #include <cstdint>
+#include "storage/File.h"
 
 namespace tpunkt
 {
@@ -14,9 +15,12 @@ namespace tpunkt
         ERR_ACTION_DENIED,
     };
 
+
     struct Storage final
     {
+
     };
+
 } // namespace tpunkt
 
 #endif //TPUNK_STORAGE_H
