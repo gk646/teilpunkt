@@ -10,8 +10,8 @@
 
 // Storage
 
-#define TPUNKT_FILE_NAME_LEN 50
-
+// Maximum name length for any file or storage endpoint
+#define TPUNKT_STORAGE_NAME_LEN 56
 
 // Monitoring
 
@@ -21,6 +21,11 @@
 template <typename T>
 struct SensitiveContainer;
 
+// Logging
 
+
+#define LOG_INFO(msg, ...) spdlog::info(msg, #__VAR_ARGS__);
+#define LOG_WARNING(msg, ...) spdlog::warn(msg, #__VAR_ARGS__);
+#define LOG_ERROR(msg, ...) spdlog::error(msg, #__VAR_ARGS__);
 
 #endif //TPUNKT_CONFIG_H

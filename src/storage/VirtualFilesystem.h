@@ -1,15 +1,33 @@
-#ifndef VIRTUALFILESYSTEM_H
-#define VIRTUALFILESYSTEM_H
+#ifndef TPUNKT_VIRTUALFILESYSTEM_H
+#define TPUNKT_VIRTUALFILESYSTEM_H
 
-struct Directory final{};
+#include <vector>
+#include "datastructures/FixedString.h"
+#include "storage/Storage.h"
 
-struct FileEntry final{};
+namespace tpunkt
+{
+    using PersistFunc = StorageStatus();
 
-struct VirtualFilesystem {
+    struct VirtualFile final
+    {
+        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
+        uint64_t encryptedSize{};
+    };
 
-    VirtualFilesystem(const char* path);
-};
+    struct VirtualDirectory final
+    {
+        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
+        std::vector<VirtualFile> files;
+        std::vector<VirtualDirectory> subdirectories;
+    };
+
+    struct VirtualFilesystem
+    {
+        VirtualDirectory root;
+        VirtualFilesystem();
+    };
+} // namespace tpunkt
 
 
-
-#endif //VIRTUALFILESYSTEM_H
+#endif //TPUNKT_VIRTUALFILESYSTEM_H

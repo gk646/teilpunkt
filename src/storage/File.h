@@ -1,8 +1,6 @@
 #ifndef TPUNKT_FILE_H
 #define TPUNKT_FILE_H
 
-// For simplicity resources are just called Files (as any managed thing
-
 #include "config.h"
 
 enum class FileType : uint8_t
@@ -14,13 +12,12 @@ enum class FileType : uint8_t
 
 
 // File index stored separately from the data
-// Encrypted with the admin key (except user-mode files)
-struct FileIndex final
+// Encrypted with the admin secret (except user-mode files)
+struct FileDisplayInfo final
 {
     char Name[TPUNKT_FILE_NAME_LEN]{}; // Display Name
     uint64_t size{};                   // encrypted size
 };
-
 
 // Backend File structure as decrypted from persistent storage
 struct FileData final
@@ -30,5 +27,9 @@ struct FileData final
     uint64_t fileSize{};
     FileType type{};
 };
+
+
+
+
 
 #endif //TPUNKT_FILE_H

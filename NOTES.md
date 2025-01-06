@@ -77,15 +77,24 @@
 - Memory:
     - Abstract Allocation
         - Allows any backend
-        - Reduce fragmentation
+        - Reduce fragmentation (or do it on purpose against memory dump attacks?)
         - Random layout
 
 - File Storage
     - Virtual Filesystem
+      - Server does not create local filesystem according to the uploaded folders
+      - Each filesystem is stored in 2 encrypted files: index and filedata 
+      - Immediate mode storage
+        - Files are immediately added to virtual file system index
+        - Files are immediately persisted to endpoint
+      - Uploading files happens via transactions
+        - Either upload and encryption and storage succeed or is refused
+        - Transaction happens fully in memory and is deleted after either outcome
     - Multiple storage endpoints
-    - Allow adding at runtime
+      - Each has a virtual file system at its base
+    - Can be added at runtime
     - Everything is stored encrypted
-        - The server has no knowledge of plain files
+        - The endpoint has no knowledge of plain files
 
 ### Deployment
 
@@ -109,9 +118,14 @@ Manage Files:
 4. Rename existing file
 
 Server Story:
-
+1. Startup
+    - Prompt for admin key
+2. Decrypt indices of virtual filesystems
+    - Load them from disk
+    - Check the file hashes for integrity
 1. Listening for requests
 2. Authenticate via any credentials (or with valid session cookie)
+    - Keep user secret in memory until session expires (or logs off)
 
 Upload:
 
