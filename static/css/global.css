@@ -67,8 +67,8 @@ body {
 
 #theme-toggle {
     position: fixed;
-    top: 10px;
-    right: 10px;
+    top: 5px;
+    right: 5px;
     background: var(--primary); /* Use foreground for background */
     color: var(--text); /* Use normal text color */
     border: 2px solid var(--primary); /* Highlight border */
@@ -77,6 +77,7 @@ body {
     padding: 10px; /* Spacing around the icon */
     box-shadow: 0 4px 6px var(--shadow-dark); /* Add shadow */
     transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    z-index: 2000;
 }
 
 #theme-toggle:hover {
@@ -167,52 +168,44 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* File Input Wrapper */
-.file-input-wrapper {
+.header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    position: relative;
-    margin-bottom: 1rem;
-}
-
-/* Hide Default File Input */
-.custom-file-input {
-    opacity: 0;
+    padding: 10px 20px;
+    background: none;
     position: absolute;
-    width: 0;
-    height: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
-/* Custom File Label */
-.custom-file-label {
-    background: var(--primary);
-    color: var(--text-active);
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+.logo {
+    font-family: 'CustomFont', sans-serif;
+    font-size: 1.8rem;
     font-weight: bold;
-    transition: background 0.3s ease;
+    text-decoration: none;
+    background: linear-gradient(45deg, #4c6ef5, #b48ead);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
+    cursor: pointer;
 }
 
-.custom-file-label:hover {
-    background: var(--secondary);
+.logo:hover {
+    transform: scale(1.01);
+    text-shadow: 0 4px 10px rgba(76, 110, 245, 0.5);
 }
 
-/* File Name Display */
-#file-name {
-    font-size: 0.9rem;
-    color: var(--text-passive);
-    font-family: var(--font-family);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-/* Responsive Styling */
-.file-input-wrapper input:focus + .custom-file-label {
-    outline: 2px solid var(--primary);
+/* Header Positioning */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 20px;
+    background-color: var(--foreground);
+    box-shadow: 0 2px 10px var(--shadow-dark);
 }
 
 /* Animations */

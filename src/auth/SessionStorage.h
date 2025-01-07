@@ -8,6 +8,8 @@ namespace tpunkt
     struct SessionStorage final
     {
 
+
+
     };
 
 } // namespace tpunkt

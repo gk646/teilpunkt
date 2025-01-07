@@ -3,26 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/theme-switcher.js" defer></script>
+    <link rel="stylesheet" href="css/global.css" type="text/css">
+    <link rel="stylesheet" href="css/login.css" type="text/css">
     <title>Signup</title>
+    <script type="module" src="js/theme-switcher.js" defer></script>
+    <script type="module" src="js/signup.js" defer></script>
 </head>
 <body>
+
+<!-- Logo Section -->
+<header class="header">
+    <a href="/" class="logo">teilpunkt</a>
+</header>
+
 <button id="theme-toggle" title="Toggle Theme">🌞</button>
-<div class="form-container modern-signup">
-    <form action="/signup" method="post" class="form signup-form">
-        <h2>Create an Account</h2>
+
+<div class="login-container">
+    <form class="login-form">
+        <h1>Join</h1>
+
+        <!-- Username -->
         <div class="form-group">
-            <input type="text" name="username" placeholder="Enter username" required>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
         </div>
-        <div class="form-group">
-            <input type="password" name="password" placeholder="Enter password" required>
+
+        <div class="divider"> and </div>
+
+        <!-- Password Signup -->
+        <div id="password-section">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+            </div>
+            <button type="submit" class="signup-btn">Sign Up with Password</button>
         </div>
-        <div class="form-group">
-            <input type="password" name="confirm-password" placeholder="Confirm password" required>
-        </div>
-        <button type="submit">Sign Up</button>
+
+        <!-- Divider -->
+        <div class="divider">or</div>
+
+        <!-- Passkey Signup -->
+        <button type="button" id="passkey-signup-btn" class="auth-btn passkey-btn">Sign Up with Passkey</button>
+
+        <div class="divider">or</div>
+
+        <!-- Login Link -->
+        <p class="signup-link">Already have an account? <a href="login.html">Log In</a></p>
     </form>
 </div>
 </body>

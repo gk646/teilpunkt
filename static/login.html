@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/global.css" type="text/css">
+    <link rel="stylesheet" href="css/login.css" type="text/css">
     <title>Login</title>
     <script type="module" src="js/theme-switcher.js" defer></script>
 </head>
 <body>
+<!-- Logo Section -->
+<header class="header">
+    <a href="/" class="logo">teilpunkt</a>
+</header>
+
 <button id="theme-toggle" title="Toggle Theme">🌞</button>
 <div class="login-container">
     <form class="login-form">
@@ -31,16 +36,8 @@
         <!-- Passkey (FIDO2/WebAuthn) -->
         <button type="button" class="auth-btn passkey-btn">Use Passkey</button>
 
-        <div class="divider">or</div>
-
-        <!-- OAuth Buttons -->
-        <div class="oauth-container">
-            <button type="button" class="auth-btn oauth-btn github-btn">Continue with GitHub</button>
-            <button type="button" class="auth-btn oauth-btn apple-btn">Continue with Apple</button>
-        </div>
-
         <!-- Signup Link -->
-        <p class="signup-link">Don't have an account? <a href="#">Sign Up</a></p>
+        <p class="signup-link">Don't have an account? <a href="signup.html">Sign Up</a></p>
     </form>
 </div>
 </body>

@@ -11,7 +11,9 @@ namespace tpunkt
     {
         bool authPassword(std::string& user, std::string& password);
 
-        bool authCookie();
+        bool authCookie(std::string& sessionID);
+
+
     };
 
     Authenticator& GetAuthenticator();

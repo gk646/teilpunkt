@@ -7,7 +7,6 @@ namespace httplib
     struct Response;
 } // namespace httplib
 
-
 struct LoginEndpoint final
 {
     static void handle(const httplib::Request&, httplib::Response&);

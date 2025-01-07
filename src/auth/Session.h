@@ -6,6 +6,7 @@
 #include "datastructures/FixedString.h"
 #include "config.h"
 
+
 struct Session final
 {
     tpunkt::FixedString<TPUNKT_SESSION_ID_BYTES> sessionID;

@@ -1,14 +1,19 @@
 #include <spdlog/spdlog.h>
 #include "server/WebServer.h"
+#include "server/Endpoints.h"
 
 namespace tpunkt
 {
 
     static constexpr const char* STATIC_FILES_FOLDER = "../static";
-    static constexpr int  SERVER_PORT = 8080;
+    static constexpr int SERVER_PORT = 8080;
+
+    static void handle_shutdown_signal(int sig) { tpunkt::GetWebServer().stop(); }
 
     WebServer::WebServer()
     {
+        signal(SIGINT, handle_shutdown_signal);
+        signal(SIGTERM, handle_shutdown_signal);
         server.set_mount_point("/", STATIC_FILES_FOLDER);
         // server.set_pre_routing_handler();
         server.set_logger(
@@ -32,7 +37,7 @@ namespace tpunkt
                 [&req]() {                             // Headers as a string
                     std::string headers;
                     for (const auto &[key, value] : req.headers) {
-                        headers += key + ": " + value + ", ";
+                        headers += key + ": " + value + "\n\t";
                     }
                     return headers.empty() ? "None" : headers;
                 }(),
@@ -41,11 +46,14 @@ namespace tpunkt
             );
                 }
             });
+
+        server.Post("/api/signup",SignupEndpoint::handle);
+        server.Post("/api/login",SignupEndpoint::handle);
     }
 
     void WebServer::run()
     {
-        spdlog::info("Server running at http://localhost:{}",SERVER_PORT);
+        spdlog::info("Server running at http://localhost:{}", SERVER_PORT);
         server.listen("0.0.0.0", SERVER_PORT);
     }
 
