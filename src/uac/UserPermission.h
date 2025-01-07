@@ -12,10 +12,13 @@ namespace tpunkt
         CREATE_AND_DELETE,
     };
 
+
     // Store permissions in a hashed way in memory with a random salt
     struct UserPermissions final
     {
+        bool isAdmin{};
 
+        bool getIsAdmin();
     };
 
 } // namespace tpunkt

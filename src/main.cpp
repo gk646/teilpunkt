@@ -7,7 +7,9 @@
 
 #include "server/WebServer.h"
 #include "memory/Memory.h"
+#include <sodium.h>
 
+#include <csignal>
 
 void initialize_logger(bool logToFile = false)
 {
@@ -42,8 +44,6 @@ bool authenticate(const std::string& password)
     const std::string valid_password = "securepassword";
     return password == valid_password;
 }
-
-void serve_static(httplib::Server& svr, const std::string& folder) { svr.set_mount_point("/", folder); }
 
 void handle_file_upload(const httplib::Request& req, httplib::Response& res)
 {
@@ -84,7 +84,7 @@ void handle_file_download(const httplib::Request& req, httplib::Response& res)
     std::ifstream ifs("./uploads/" + filename, std::ios::binary);
     if (ifs)
     {
-        std::string file_content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+        std::string file_content((std::istreambuf_iterator(ifs)), std::istreambuf_iterator<char>());
         res.set_content(file_content, "application/octet-stream");
         res.set_header("Content-Disposition", "attachment; filename=" + filename);
     }
@@ -95,26 +95,15 @@ void handle_file_download(const httplib::Request& req, httplib::Response& res)
     }
 }
 
+void handle_shutdown_signal(int sig) { tpunkt::GetWebServer().stop(); }
+
 int main()
 {
-
-    tpunkt::WebServer* server = new tpunkt::WebServer();
+    signal(SIGINT, handle_shutdown_signal);
+    signal(SIGTERM, handle_shutdown_signal);
     initialize_logger(true);
-
-    httplib::Server svr;
-    svr.set_logger([](const httplib::Request& req, const httplib::Response& res)
-                   { spdlog::info("Request:{}\nResponse:{}", req.body.c_str(), res.body.c_str()); });
-
-    // Serve static files
-    serve_static(svr, "../static");
-
-    // Endpoints
-    svr.Post("/upload", handle_file_upload);
-    svr.Get("/download", handle_file_download);
-
-    // Start server
-    std::cout << "Server running at http://localhost:8080\n";
-    svr.listen("0.0.0.0", 8080);
+    sodium_init();
+    tpunkt::GetWebServer().run();
     spdlog::shutdown();
     return 0;
 }

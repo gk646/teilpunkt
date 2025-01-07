@@ -1,7 +1,7 @@
 #ifndef TPUNKT_UAC_H
 #define TPUNKT_UAC_H
 
-#include "uac/User.h"
+#include "common/User.h"
 #include "uac/UserAction.h"
 
 namespace tpunkt

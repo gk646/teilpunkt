@@ -3,10 +3,13 @@
 
 #include "auth/Session.h"
 
-struct SessionStorage final
+namespace tpunkt
 {
+    struct SessionStorage final
+    {
 
-};
+    };
 
+} // namespace tpunkt
 
 #endif //TPUNKT_SESSIONSTORAGE_H

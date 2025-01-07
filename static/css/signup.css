@@ -1,0 +1,64 @@
+
+/* Modern Signup Styles (Shared with Login) */
+.form-container.modern-signup {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: var(--foreground);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px var(--shadow-dark);
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-container h2 {
+    margin-bottom: 20px;
+    color: var(--primary);
+    text-align: center;
+}
+
+.form-container .form-group {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--text-passive);
+    border-radius: 5px;
+    background: var(--background);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border 0.2s ease, background 0.2s ease;
+}
+
+.form-container input:focus {
+    border-color: var(--primary);
+    outline: none;
+    background: var(--background-selected);
+}
+
+.form-container button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: var(--primary);
+    color: var(--foreground);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.form-container button:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.form-container button:active {
+    transform: translateY(0);
+}

@@ -2,12 +2,11 @@
 #define TPUNKT_VIRTUALFILESYSTEM_H
 
 #include <vector>
+
 #include "datastructures/FixedString.h"
-#include "storage/Storage.h"
 
 namespace tpunkt
 {
-    using PersistFunc = StorageStatus();
 
     struct VirtualFile final
     {
@@ -25,6 +24,7 @@ namespace tpunkt
     struct VirtualFilesystem
     {
         VirtualDirectory root;
+
         VirtualFilesystem();
     };
 } // namespace tpunkt

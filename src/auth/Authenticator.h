@@ -3,12 +3,18 @@
 
 #include <string>
 
-struct Authenticator final
+#include "auth/SessionStorage.h"
+
+namespace tpunkt
 {
-    bool authPassword(std::string& user, std::string& password);
-};
+    struct Authenticator final
+    {
+        bool authPassword(std::string& user, std::string& password);
 
+        bool authCookie();
+    };
 
-Authenticator& GetAuthenticator();
+    Authenticator& GetAuthenticator();
+} // namespace tpunkt
 
 #endif //TPUNKT_AUTHENTICATOR_H

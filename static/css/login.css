@@ -1,0 +1,152 @@
+/* Login Page Container */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--text);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Login Form Styling */
+.login-form {
+    background: var(--foreground);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px var(--shadow-dark);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-form h1 {
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-passive);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--background-selected);
+    border-radius: 5px;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--background);
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    background: var(--primary);
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.login-btn:hover {
+    background: var(--secondary);
+    transform: scale(1.05);
+}
+
+/* Auth Buttons (Passkeys & OAuth) */
+.auth-btn {
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.auth-btn:hover {
+    transform: scale(1.05);
+}
+
+.passkey-btn {
+    background: var(--background-selected);
+    color: var(--text);
+}
+
+.oauth-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.apple-btn {
+    background: #db4437;
+    color: #ffffff;
+}
+
+.github-btn {
+    background: #333333;
+    color: #ffffff;
+}
+
+
+/* Divider Styling */
+.divider {
+    margin: 20px 0;
+    font-size: 0.9rem;
+    color: var(--text-passive);
+    position: relative;
+    text-align: center;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--background-selected);
+    transform: translateY(-50%);
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+/* Signup Link */
+.signup-link {
+    margin-top: 15px;
+    color: var(--text-passive);
+}
+
+.signup-link a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}

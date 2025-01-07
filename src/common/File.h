@@ -1,6 +1,7 @@
 #ifndef TPUNKT_FILE_H
 #define TPUNKT_FILE_H
 
+#include <cstdint>
 #include "config.h"
 
 enum class FileType : uint8_t
