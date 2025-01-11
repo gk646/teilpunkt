@@ -1,5 +1,4 @@
-#include <httplib/httplib.h>
-
+/*#include <httplib/httplib.h>
 #include "server/Endpoints.h"
 
 void UploadEndpoint::handle(const httplib::Request& req, httplib::Response& res)
@@ -26,3 +25,5 @@ void UploadEndpoint::handle(const httplib::Request& req, httplib::Response& res)
         res.set_content("No file uploaded!", "text/plain");
     }
 }
+
+*/

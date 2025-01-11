@@ -1,18 +1,16 @@
-#include <sodium.h>
-#include <spdlog/spdlog.h>
-
+#include <sodium/core.h>
 #include "server/WebServer.h"
-#include "logging/Logger.h"
+#include "util/Logger.h"
 
 int main()
 {
     tpunkt::GetLogger().init();
     if (sodium_init() != 0)
     {
-        spdlog::error("Failed to initialize sodium");
+        LOG_ERROR("Failed to initialize sodium");
         return 1;
     }
     tpunkt::GetWebServer().run();
-    spdlog::shutdown();
+    tpunkt::GetLogger().shutdown();
     return 0;
 }

@@ -2,7 +2,7 @@
 #define TPUNKT_VIRTUALFILESYSTEM_H
 
 #include <vector>
-
+#include <cstdint>
 #include "datastructures/FixedString.h"
 
 namespace tpunkt

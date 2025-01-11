@@ -1,12 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const passwordInput = document.getElementById('password')
+    
     const form = document.querySelector('.login-form');
-    const passwordSection = document.getElementById('password-section');
     const passkeyButton = document.getElementById('passkey-signup-btn');
 
-    // Handle Password Signup
+    const hashLength = 32;
+
+    // Initialize libsodium once
+    let sodiumReady = (async () => {
+        await window.sodium.ready;
+        return window.sodium;
+    })();
+
+    const uint8ArrayToBase64 = (array) => window.sodium.to_base64(array);
+
+    const fetchWithErrorHandling = async (url, options) => {
+        try {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(error);
+            }
+            return response;
+        } catch (error) {
+            console.error(`Error with fetch to ${url}:`, error);
+            alert(`An error occurred: ${error.message}`);
+            throw error;
+        }
+    };
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
@@ -21,82 +45,80 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Passwords do not match.');
             return;
         }
-        const body = `username=${username}\npassword=${password}`;
+
+        const sodium = await sodiumReady;
+
+        const hashedPassword = sodium.crypto_generichash(hashLength, sodium.from_string(password));
+        const hashedPasswordBase64 = uint8ArrayToBase64(hashedPassword);
+        
+        const body = `username=${username}\npassword=${hashedPasswordBase64}`;
 
         try {
-            const response = await fetch('/api/signup', {
+            const response = await fetchWithErrorHandling('/api/signup', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/plain-text'},
-                body: body
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+                body : body
             });
 
-            if (response.ok) {
-                alert('Signup successful! Redirecting to home...');
-                window.location.href = '/home';
-            } else {
-                const error = await response.text();
-                alert(`Signup failed: ${error}`);
-            }
+            alert('Signup successful! Redirecting to home...');
+            window.location.href = '/home';
         } catch (error) {
             console.error('Error during signup:', error);
-            alert('An error occurred. Please try again.');
         }
     });
 
     // Handle Passkey Signup
     passkeyButton.addEventListener('click', async () => {
         const username = document.getElementById('username').value.trim();
+
         if (!username) {
             alert('Please enter a username before signing up with a passkey.');
             return;
         }
 
         try {
+            const sodium = await sodiumReady;
+
             // Step 1: Request passkey challenge from the backend
-            const challengeResponse = await fetch('/api/signup', {
+            const challengeResponse = await fetchWithErrorHandling('/api/signup', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username}),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username }),
             });
 
-            if (!challengeResponse.ok) {
-                alert('Failed to initiate passkey signup.');
-                return;
-            }
-
-            const {challenge} = await challengeResponse.json();
+            const { challenge } = await challengeResponse.json();
 
             // Step 2: Use WebAuthn API to generate passkey credentials
             const publicKey = {
-                challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
-                rp: {name: 'teilpunkt'},
+                challenge: Uint8Array.from(challenge, (c) => c.charCodeAt(0)),
+                rp: { name: 'teilpunkt' },
                 user: {
-                    id: Uint8Array.from(username, c => c.charCodeAt(0)),
+                    id: Uint8Array.from(username, (c) => c.charCodeAt(0)),
                     name: username,
                     displayName: username,
                 },
-                pubKeyCredParams: [{type: 'public-key', alg: -7}],
+                pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
             };
 
-            const credential = await navigator.credentials.create({publicKey});
+            const credential = await navigator.credentials.create({ publicKey });
 
             // Step 3: Send the credential back to the backend
-            const verificationResponse = await fetch('/api/signup/passkey/verify', {
+            const verificationResponse = await fetchWithErrorHandling('/api/signup/passkey/verify', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(credential),
             });
 
-            if (verificationResponse.ok) {
-                alert('Passkey signup successful! Redirecting to dashboard...');
-                window.location.href = '/dashboard';
-            } else {
-                alert('Passkey signup failed.');
-            }
+            alert('Passkey signup successful! Redirecting to dashboard...');
+            window.location.href = '/dashboard';
         } catch (error) {
             console.error('Error during passkey signup:', error);
-            alert('An error occurred. Please try again.');
         }
     });
-
 });

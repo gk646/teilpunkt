@@ -1,31 +1,48 @@
 #ifndef TPUNKT_ENDPOINTS_H
 #define TPUNKT_ENDPOINTS_H
 
-namespace httplib
+
+namespace uWS
 {
-    struct Request;
-    struct Response;
-} // namespace httplib
+    struct HttpRequest;
+    template<bool T>
+    struct HttpResponse;
+}
 
-struct LoginEndpoint final
+
+namespace tpunkt
 {
-    static void handle(const httplib::Request&, httplib::Response&);
-};
+    struct ServerEndpoint
+    {
+        static bool isClientAuthenticated(uWS::HttpRequest* req);
+        static void rejectRequest(uWS::HttpResponse<true>* res, int status);
+    };
 
-struct UploadEndpoint final
-{
-    static void handle(const httplib::Request&, httplib::Response&);
-};
+    struct LoginEndpoint final : ServerEndpoint
+    {
+        static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    };
 
-struct DownloadEndpoint final
-{
-    static void handle(const httplib::Request&, httplib::Response&);
-};
+    struct UploadEndpoint final : ServerEndpoint
+    {
+        static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    };
 
-struct SignupEndpoint final
-{
-    static void handle(const httplib::Request&, httplib::Response&);
-};
+    struct DownloadEndpoint final : ServerEndpoint
+    {
+        static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    };
 
+    struct SignupEndpoint final : ServerEndpoint
+    {
+        static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    };
 
+    struct StaticEndpoint final : ServerEndpoint
+    {
+        static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    };
+}
+
+// namespace tpunkt
 #endif //TPUNKT_ENDPOINTS_H

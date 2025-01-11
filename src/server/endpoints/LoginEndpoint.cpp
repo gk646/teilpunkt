@@ -1,6 +1,7 @@
 #include "server/Endpoints.h"
 
-void LoginEndpoint::handle(const httplib::Request& req, httplib::Response& res)
+namespace tpunkt
 {
+    void LoginEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req) {}
 
-}
+} // namespace tpunkt

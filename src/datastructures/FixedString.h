@@ -3,7 +3,8 @@
 
 // Fixed string for names/keys that handles overflow and truncation
 
-#include <spdlog/spdlog.h>
+//#include <spdlog/spdlog.h>
+#include <cstring>
 #include "config.h"
 
 namespace tpunkt
@@ -20,19 +21,37 @@ namespace tpunkt
         {
             if (assignString == nullptr)
             {
-                LOG_ERROR("Null string passed");
+                // LOG_ERROR("Null string passed");
             }
 
             auto assignLen = strlen(assignString);
             if (assignLen + 1 > size)
             {
-                LOG_WARNING("String is too long and will be truncated");
+                //LOG_WARNING("String is too long and will be truncated");
                 assignLen = size - 1;
             }
 
             memcpy(data, assignString, assignLen);
             data[assignLen + 1] = '\0';
         }
+
+        void assign(const char* assignString, int assignLen)
+        {
+            if (assignString == nullptr)
+            {
+                // LOG_ERROR("Null string passed");
+            }
+            if (assignLen + 1 > size)
+            {
+                //LOG_WARNING("String is too long and will be truncated");
+                assignLen = size - 1;
+            }
+
+            memcpy(data, assignString, assignLen);
+            data[assignLen + 1] = '\0';
+        }
+
+        const char* get() const { return data; }
     };
 
 } // namespace tpunkt

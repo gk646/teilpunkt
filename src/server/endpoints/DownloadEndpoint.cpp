@@ -1,3 +1,4 @@
+/*
 #include <httplib/httplib.h>
 
 #include "server/Endpoints.h"
@@ -26,3 +27,4 @@ void DownloadEndpoint::handle(const httplib::Request& req, httplib::Response& re
         res.set_content("File not found!", "text/plain");
     }
 }
+*/

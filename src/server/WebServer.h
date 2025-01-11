@@ -1,15 +1,16 @@
 #ifndef TPUNKT_WEBSERVER_H
 #define TPUNKT_WEBSERVER_H
 
-#include <httplib/httplib.h>
+#include <uWebSocket/src/App.h>
+#include "server/StaticFileStorage.h"
 
 namespace tpunkt
 {
-    using HTTPHandlerFunc = std::function<void(const httplib::Request&, httplib::Response&)>;
 
     struct WebServer final
     {
-        httplib::Server server;
+        uWS::SSLApp server;
+        StaticFileStorage staticFiles{TPUNKT_SERVER_STATIC_FILES_DIR};
 
         WebServer();
 

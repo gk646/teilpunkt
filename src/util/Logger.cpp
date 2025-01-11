@@ -1,8 +1,8 @@
-#include <memory>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include "logging/Logger.h"
+#include <cstdio>
+#include <cstdarg>
+
+#include "util/Logger.h"
+
 
 namespace tpunkt
 {
@@ -10,6 +10,7 @@ namespace tpunkt
 
     void Logger::init()
     {
+        /*
         try
         {
             auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -30,7 +31,19 @@ namespace tpunkt
             fprintf(stderr, "Log initialization failed:%s", ex.what());
         }
         spdlog::debug("spdlog initialized");
+        */
     }
+
+    void Logger::log(LogLevel level, const char* msg, ...)
+    {
+        va_list va_args;
+        va_start(va_args, msg);
+        vfprintf(stdout, msg, va_args);
+        va_end(va_args);
+        fflush(stdout);
+    }
+
+    void Logger::shutdown() {}
 
     Logger& GetLogger() { return LOGGER; }
 } // namespace tpunkt

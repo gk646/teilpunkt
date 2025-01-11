@@ -3,7 +3,7 @@
 
 // Crypto
 
-#define TPUNKT_SESSION_ID_BYTES 32
+#define TPUNKT_CRYPTO_SESSION_LEN 32
 
 // Authentication
 
@@ -13,20 +13,22 @@
 // Maximum name length for any file or storage endpoint
 #define TPUNKT_STORAGE_NAME_LEN 56
 
+// Sever
+
+// Size of static file buffer
+#define TPUNKT_SERVER_STATIC_FILES_LEN 25
+
+// Directory that contains all static files to preload
+#define TPUNKT_SERVER_STATIC_FILES_DIR "../static"
+
+// Server Port - HTTPS port
+#define TPUNKT_SERVER_PORT 8080
+
 // Monitoring
 
-
-#define TPUNKT_REQUESTS_PER_MIN 50
+#define TPUNKT_MONITOR_REQ_PER_MIN 50
 
 template <typename T>
 struct SensitiveContainer;
-
-// Logging
-
-
-#define LOG_INFO(msg, ...) spdlog::info(msg, ##__VA_ARGS__)
-#define LOG_WARNING(msg, ...) spdlog::warn(msg, ##__VA_ARGS__)
-#define LOG_ERROR(msg, ...) spdlog::error(msg, ##__VA_ARGS__)
-
 
 #endif //TPUNKT_CONFIG_H
