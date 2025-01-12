@@ -1,14 +1,12 @@
 #ifndef TPUNKT_ENDPOINTS_H
 #define TPUNKT_ENDPOINTS_H
 
-
 namespace uWS
 {
     struct HttpRequest;
     template<bool T>
     struct HttpResponse;
 }
-
 
 namespace tpunkt
 {

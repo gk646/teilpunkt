@@ -1,19 +1,22 @@
 #ifndef TPUNKT_AUTHENTICATOR_H
 #define TPUNKT_AUTHENTICATOR_H
 
-#include <string>
-
-#include "auth/SessionStorage.h"
+#include "fwd.h"
+#include "datastructures/SecureContainer.h"
 
 namespace tpunkt
 {
     struct Authenticator final
     {
-        bool authPassword(std::string& user, std::string& password);
+        AuthToken loginUser(const UserName& name, const Credentials& credentials);
+        AuthToken authCookie(const SessionID& sessionId);
 
-        bool authCookie(std::string& sessionID);
+        bool isValid(const AuthToken& token);
 
+    private:
 
+        SecureContainer<SessionStorage> sessionStore;
+        UserStorage* userStore;
     };
 
     Authenticator& GetAuthenticator();

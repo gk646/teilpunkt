@@ -40,4 +40,4 @@ target_link_libraries(teilpunkt PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/external/uWebSocket/uSockets/uSockets.a)
 
 
-target_compile_definitions(teilpunkt PRIVATE UWS_HTTPRESPONSE_NO_WRITEMARK)
+target_compile_definitions(teilpunkt PRIVATE UWS_HTTPRESPONSE_NO_WRITEMARK LIBUS_USE_QUIC)

@@ -1,11 +1,10 @@
-#ifndef TPUNKT_FIXEDSTRING_H
-#define TPUNKT_FIXEDSTRING_H
+#ifndef TPUNKT_FIXED_STRING_H
+#define TPUNKT_FIXED_STRING_H
 
 // Fixed string for names/keys that handles overflow and truncation
 
-//#include <spdlog/spdlog.h>
 #include <cstring>
-#include "config.h"
+#include "util/Logger.h"
 
 namespace tpunkt
 {
@@ -15,19 +14,19 @@ namespace tpunkt
         char data[size]{};
 
         FixedString() = default;
-        FixedString(const char* string) { assign(string); }
+        explicit FixedString(const char* string) { assign(string); }
 
         void assign(const char* assignString)
         {
             if (assignString == nullptr)
             {
-                // LOG_ERROR("Null string passed");
+                LOG_ERROR("Null string passed");
             }
 
             auto assignLen = strlen(assignString);
             if (assignLen + 1 > size)
             {
-                //LOG_WARNING("String is too long and will be truncated");
+                LOG_WARNING("String is too long and will be truncated");
                 assignLen = size - 1;
             }
 
@@ -39,11 +38,11 @@ namespace tpunkt
         {
             if (assignString == nullptr)
             {
-                // LOG_ERROR("Null string passed");
+                LOG_ERROR("Null string passed");
             }
             if (assignLen + 1 > size)
             {
-                //LOG_WARNING("String is too long and will be truncated");
+                LOG_WARNING("String is too long and will be truncated");
                 assignLen = size - 1;
             }
 
@@ -57,4 +56,4 @@ namespace tpunkt
 } // namespace tpunkt
 
 
-#endif //TPUNKT_FIXEDSTRING_H
+#endif //TPUNKT_FIXED_STRING_H

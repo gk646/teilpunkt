@@ -3,7 +3,7 @@
 
 // Crypto
 
-#define TPUNKT_CRYPTO_SESSION_LEN 32
+#define TPUNKT_CRYPTO_SESSION_ID_LEN 32
 
 // Authentication
 
@@ -12,6 +12,10 @@
 
 // Maximum name length for any file or storage endpoint
 #define TPUNKT_STORAGE_NAME_LEN 56
+
+// Maximum length for usernames
+#define TPUNKT_STORAGE_USER_LEN 16
+
 
 // Sever
 
@@ -27,6 +31,7 @@
 // Monitoring
 
 #define TPUNKT_MONITOR_REQ_PER_MIN 50
+
 
 template <typename T>
 struct SensitiveContainer;

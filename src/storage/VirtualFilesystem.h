@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include "datastructures/FixedString.h"
+#include "config.h"
 
 namespace tpunkt
 {

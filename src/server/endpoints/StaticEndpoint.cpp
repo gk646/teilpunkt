@@ -4,7 +4,6 @@
 
 namespace tpunkt
 {
-
     void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     {
         for (auto [key, value] : *req)
@@ -12,7 +11,6 @@ namespace tpunkt
             std::cout << key << ":" << value << std::endl;
             //LOG_INFO("Header:%s | Key:%s", key.data(), value.data());
         }
-
         const auto& server = GetWebServer();
 
         auto* request = const_cast<char*>(req->getUrl().data());
@@ -27,6 +25,7 @@ namespace tpunkt
         request[req->getUrl().size()] = '\r';
         if (file != nullptr)
         {
+            res->writeHeader("Content-Type",file->type);
             res->end(file->content);
         }
         else
@@ -35,4 +34,5 @@ namespace tpunkt
             res->end("404 File not found");
         }
     }
+
 } // namespace tpunkt

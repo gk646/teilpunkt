@@ -1,1 +1,7 @@
-#include "Authenticator.h"
+#include "auth/Authenticator.h"
+
+
+namespace tpunkt
+{
+
+}

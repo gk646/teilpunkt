@@ -9,6 +9,33 @@
 
 namespace tpunkt
 {
+    static const char* getMimeType(const char* path)
+    {
+        constexpr struct
+        {
+            const char* extension;
+            const char* mimeType;
+        } mimeTypes[] = {{".html", "text/html"}, {".css", "text/css"},      {".js", "application/javascript"},
+                         {".png", "image/png"},  {".jpg", "image/jpeg"},    {".jpeg", "image/jpeg"},
+                         {".gif", "image/gif"},  {".svg", "image/svg+xml"}, {".json", "application/json"},
+                         {".txt", "text/plain"}, {".ico", "image/x-icon"},  {nullptr, "text/plain"}};
+
+        const char* dot = strrchr(path, '.');
+        if (!dot)
+        {
+            return mimeTypes[11].mimeType;
+        }
+
+        for (int i = 0; mimeTypes[i].extension != nullptr; ++i)
+        {
+            if (strcmp(dot, mimeTypes[i].extension) == 0)
+            {
+                return mimeTypes[i].mimeType;
+            }
+        }
+        return mimeTypes[11].mimeType;
+    }
+
     static void iterateDirectory(const char* dir, int& index, StaticFile* staticFiles)
     {
         if (index == TPUNKT_SERVER_STATIC_FILES_LEN)
@@ -47,7 +74,7 @@ namespace tpunkt
             {
                 if (S_ISDIR(statbuf.st_mode))
                 {
-                    iterateDirectory(path, index, staticFiles); // Recursive call
+                    iterateDirectory(path, index, staticFiles);
                 }
                 else
                 {
@@ -67,9 +94,10 @@ namespace tpunkt
                     content[statbuf.st_size] = '\0';
 
                     auto& staticFile = staticFiles[index];
-                    staticFile.size = statbuf.st_size;
+                    staticFile.size = static_cast<int>(statbuf.st_size);
                     staticFile.name = name;
                     staticFile.content = content;
+                    staticFile.type = getMimeType(staticFile.name);
                     index++;
                 }
             }
