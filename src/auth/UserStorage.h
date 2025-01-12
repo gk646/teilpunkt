@@ -4,20 +4,23 @@
 #include <vector>
 #include "auth/Credentials.h"
 #include "common/User.h"
+#include "util/Macros.h"
 
 namespace tpunkt
 {
     enum class UserStorageStatus : uint8_t
     {
         USER_NAME_EXISTS,
-
+        INVALID_CREDENTIALS,
     };
 
     struct UserStorage final
     {
         std::vector<User> users;
 
-        bool addUser(const char* name, const char* secret, CredentialsType type);
+        bool addUser(const UserName& name, const char* secret, CredentialsType type);
+
+        TPUNKT_MACROS_STRUCT(UserStorage);
     };
 
 } // namespace tpunkt

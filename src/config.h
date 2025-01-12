@@ -17,7 +17,7 @@
 #define TPUNKT_STORAGE_USER_LEN 16
 
 
-// Sever
+// Server
 
 // Size of static file buffer
 #define TPUNKT_SERVER_STATIC_FILES_LEN 25
@@ -28,12 +28,10 @@
 // Server Port - HTTPS port
 #define TPUNKT_SERVER_PORT 8080
 
+
 // Monitoring
 
 #define TPUNKT_MONITOR_REQ_PER_MIN 50
 
-
-template <typename T>
-struct SensitiveContainer;
 
 #endif //TPUNKT_CONFIG_H

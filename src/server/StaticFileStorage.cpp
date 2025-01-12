@@ -6,6 +6,7 @@
 
 #include "server/StaticFileStorage.h"
 #include "util/Logger.h"
+#include "util/Memory.h"
 
 namespace tpunkt
 {
@@ -85,11 +86,11 @@ namespace tpunkt
                     }
 
                     // Name
-                    auto name = (char*)malloc(strlen(path) - 8);
+                    char* name = TPUNKT_ALLOC(name, strlen(path) - 8);
                     strncpy(name, path + 9, strlen(path) - 8);
 
                     // Content
-                    auto content = (char*)malloc(statbuf.st_size + 1);
+                    char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);
                     fread(content, statbuf.st_size, 1, file);
                     content[statbuf.st_size] = '\0';
 
@@ -117,8 +118,8 @@ namespace tpunkt
         {
             if (!file.name)
                 break;
-            free((void*)file.content);
-            free((void*)file.name);
+            TPUNKT_FREE(file.content);
+            TPUNKT_FREE(file.name);
         }
     }
 

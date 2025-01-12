@@ -3,10 +3,9 @@
 
 #include "util/Logger.h"
 
-
 namespace tpunkt
 {
-    static Logger LOGGER;
+    static Logger LOGGER{};
 
     void Logger::init()
     {
@@ -34,13 +33,36 @@ namespace tpunkt
         */
     }
 
-    void Logger::log(LogLevel level, const char* msg, ...)
+    static const char* GetLevelString(const LogLevel level)
     {
+        switch (level)
+        {
+        case LogLevel::INFO:
+            return "\033[1;37m[INF]\033[0m";
+        case LogLevel::WARNING:
+            return "\033[1;33m[WARN]\033[0m";
+        case LogLevel::ERROR:
+            return "\033[1;31m[ERR]\033[0m";
+        case LogLevel::FATAL:
+            return "\033[1;31m[FATAL]\033[0m";
+        }
+        return "";
+    }
+
+    void Logger::log(const LogLevel level, const char* msg, ...)
+    {
+        FILE* output = (level >= LogLevel::ERROR) ? stderr : stdout;
+
+        fprintf(output, "%s ", GetLevelString(level));
+
         va_list va_args;
         va_start(va_args, msg);
-        vfprintf(stdout, msg, va_args);
+        vfprintf(output, msg, va_args);
         va_end(va_args);
-        fflush(stdout);
+
+        fprintf(output, "\n");
+
+        fflush(output);
     }
 
     void Logger::shutdown() {}

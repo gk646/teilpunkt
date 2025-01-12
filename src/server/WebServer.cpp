@@ -6,12 +6,10 @@
 namespace tpunkt
 {
 
-    static void handle_shutdown_signal(int sig) { tpunkt::GetWebServer().stop(); }
 
     WebServer::WebServer() : server({"../key/key.pem", "../key/cert.pem", "1234"})
     {
-        signal(SIGINT, handle_shutdown_signal);
-        signal(SIGTERM, handle_shutdown_signal);
+
         server.get("/*", StaticEndpoint::handle);
         server.post("/api/signup", SignupEndpoint::handle);
         server.post("/api/login", LoginEndpoint::handle);

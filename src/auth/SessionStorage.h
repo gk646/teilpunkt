@@ -3,13 +3,10 @@
 
 #include <vector>
 #include "fwd.h"
-#include "config.h"
 #include "datastructures/FixedString.h"
 
 namespace tpunkt
 {
-
-    using SessionID = tpunkt::FixedString<TPUNKT_CRYPTO_SESSION_ID_LEN>;
 
     // A session saves the authentication so the user does not have to authenticate on each request
     // A session is terminated if ONE of the following is true:

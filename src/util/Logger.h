@@ -2,6 +2,7 @@
 #define TPUNKT_LOGGER_H
 
 #include <cstdint>
+#include "util/Macros.h"
 
 namespace tpunkt
 {
@@ -16,9 +17,14 @@ namespace tpunkt
 
     struct Logger
     {
+        Logger() = default;
         void init();
         void log(LogLevel level, const char* msg, ...);
         void shutdown();
+
+    private:
+        LogLevel minimalLevel = LogLevel::INFO;
+        TPUNKT_MACROS_STRUCT(Logger);
     };
 
     Logger& GetLogger();
