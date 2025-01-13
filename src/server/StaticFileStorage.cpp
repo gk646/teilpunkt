@@ -93,6 +93,7 @@ namespace tpunkt
                     char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);
                     fread(content, statbuf.st_size, 1, file);
                     content[statbuf.st_size] = '\0';
+                    fclose(file);
 
                     auto& staticFile = staticFiles[index];
                     staticFile.size = static_cast<int>(statbuf.st_size);
@@ -110,6 +111,7 @@ namespace tpunkt
     {
         int index = 0;
         iterateDirectory(directory, index, staticFiles);
+        LOG_INFO("Loaded %d static files", index);
     }
 
     StaticFileStorage::~StaticFileStorage()

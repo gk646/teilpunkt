@@ -12,6 +12,7 @@ namespace tpunkt
         char* content = nullptr;
         const char* type = nullptr;
         int size = 0;
+
         StaticFile() = default;
         TPUNKT_MACROS_STRUCT(StaticFile);
     };

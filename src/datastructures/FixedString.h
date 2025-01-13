@@ -8,10 +8,10 @@
 
 namespace tpunkt
 {
-    template <int size>
+    template <size_t size>
     struct FixedString final
     {
-        char data[size]{};
+        char data[size + 1]{};
 
         FixedString() = default;
         explicit FixedString(const char* string) { assign(string); }
@@ -50,7 +50,9 @@ namespace tpunkt
             data[assignLen + 1] = '\0';
         }
 
-        const char* get() const { return data; }
+        [[nodiscard]] const char* get() const { return data; }
+
+        TPUNKT_MACROS_STRUCT(FixedString);
     };
 
 } // namespace tpunkt

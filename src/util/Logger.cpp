@@ -1,42 +1,18 @@
 #include <cstdio>
 #include <cstdarg>
-
+#include <cstdlib>
 #include "util/Logger.h"
 
 namespace tpunkt
 {
-    static Logger LOGGER{};
-
-    void Logger::init()
-    {
-        /*
-        try
-        {
-            auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-            console_sink->set_level(spdlog::level::debug);
-
-            std::vector<spdlog::sink_ptr> sinks = {console_sink};
-            auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("teilpunkt.log", true);
-            file_sink->set_level(spdlog::level::debug);
-            sinks.push_back(file_sink);
-
-            auto logger = std::make_shared<spdlog::logger>("", sinks.begin(), sinks.end());
-            spdlog::set_default_logger(logger);
-            spdlog::set_level(spdlog::level::info);
-            spdlog::flush_on(spdlog::level::info);
-        }
-        catch (const spdlog::spdlog_ex& ex)
-        {
-            fprintf(stderr, "Log initialization failed:%s", ex.what());
-        }
-        spdlog::debug("spdlog initialized");
-        */
-    }
+    static Logger* LOGGER;
 
     static const char* GetLevelString(const LogLevel level)
     {
         switch (level)
         {
+        case LogLevel::DEBUG:
+            return "\033[1;37m[DBG]\033[0m";
         case LogLevel::INFO:
             return "\033[1;37m[INF]\033[0m";
         case LogLevel::WARNING:
@@ -49,8 +25,11 @@ namespace tpunkt
         return "";
     }
 
-    void Logger::log(const LogLevel level, const char* msg, ...)
+    void Logger::log(const LogLevel level, const char* msg, ...) const
     {
+        if (level < minimalLevel)
+            return;
+
         FILE* output = (level >= LogLevel::ERROR) ? stderr : stdout;
 
         fprintf(output, "%s ", GetLevelString(level));
@@ -63,9 +42,29 @@ namespace tpunkt
         fprintf(output, "\n");
 
         fflush(output);
+        if (level == LogLevel::FATAL)
+            exit(0);
     }
 
-    void Logger::shutdown() {}
+    Logger::Logger()
+    {
+        TPUNKT_MACROS_GLOBAL_ASSIGN(LOGGER);
+        LOG_DEBUG("Logger initialized");
+    }
 
-    Logger& GetLogger() { return LOGGER; }
+    Logger::~Logger()
+    {
+        LOG_DEBUG("Logger stopped");
+        TPUNKT_MACROS_GLOBAL_RESET(LOGGER);
+    }
+    void Logger::setLogLevel(const LogLevel level) { minimalLevel = level; }
+
+    Logger& GetLogger()
+    {
+        // Special case - logger can get itself
+        if (LOGGER != nullptr)
+            return *LOGGER;
+        fprintf(stderr, "No logger");
+        exit(1);
+    }
 } // namespace tpunkt

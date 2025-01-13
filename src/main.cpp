@@ -1,21 +1,29 @@
 #include <csignal>
 #include <sodium/core.h>
-#include "server/WebServer.h"
 #include "util/Logger.h"
+#include "server/WebServer.h"
+#include "auth/Authenticator.h"
 
 static void handle_shutdown_signal(int /**/) { tpunkt::GetWebServer().stop(); }
 
 int main()
 {
-    signal(SIGINT, handle_shutdown_signal);
-    signal(SIGTERM, handle_shutdown_signal);
-    tpunkt::GetLogger().init();
     if (sodium_init() != 0)
     {
-        LOG_ERROR("Failed to initialize sodium");
+        fputs("Failed to initialize sodium", stderr);
         return 1;
     }
-    tpunkt::GetWebServer().run();
-    tpunkt::GetLogger().shutdown();
+    signal(SIGINT, handle_shutdown_signal);
+    signal(SIGTERM, handle_shutdown_signal);
+
+    // All variables are declared on the stack and cleaned up in a fixed scope
+    {
+        tpunkt::Logger logger{};
+        {
+            tpunkt::Authenticator auth{};
+            tpunkt::WebServer server{};
+            server.run();
+        }
+    }
     return 0;
 }

@@ -23,8 +23,11 @@ namespace tpunkt
 
     struct SessionStorage final
     {
-        std::vector<Session> sessions;
         SessionID addSession(const User& user);
+
+    private:
+        std::vector<Session> sessions;
+        TPUNKT_MACROS_STRUCT(SessionStorage);
     };
 
 } // namespace tpunkt

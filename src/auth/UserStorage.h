@@ -16,10 +16,10 @@ namespace tpunkt
 
     struct UserStorage final
     {
-        std::vector<User> users;
-
         bool addUser(const UserName& name, const char* secret, CredentialsType type);
 
+    private:
+        std::vector<User> users;
         TPUNKT_MACROS_STRUCT(UserStorage);
     };
 

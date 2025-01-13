@@ -17,15 +17,17 @@ namespace tpunkt
         // Returns true if the given auth token is valid
         bool isValid(const AuthToken& token);
 
-    private:
         Authenticator();
         ~Authenticator();
+
+    private:
         SecureList<SessionStorage>* sessionStore{};
         SecureList<UserStorage>* userStore{};
         TPUNKT_MACROS_STRUCT(Authenticator);
     };
 
     Authenticator& GetAuthenticator();
+
 } // namespace tpunkt
 
 #endif //TPUNKT_AUTHENTICATOR_H

@@ -2,7 +2,6 @@
 #define TPUNKT_SECURE_LIST_H
 
 #include <sodium/utils.h>
-#include "fwd.h"
 #include "util/Macros.h"
 
 namespace tpunkt
@@ -11,7 +10,7 @@ namespace tpunkt
     template <typename T>
     struct SecureList final
     {
-        TPUNKT_MACROS_DEL_CTORS(SecureList);
+        TPUNKT_MACROS_STRUCT(SecureList);
 
         T* val = nullptr;
         int size = 0;
@@ -25,14 +24,13 @@ namespace tpunkt
             explicit ListReader(SecureList& box) : list(box) {}
             ~ListReader() {}
 
-            TPUNKT_MACROS_DEL_CTORS(ListReader);
+            TPUNKT_MACROS_STRUCT(ListReader);
         };
 
-
-        SecureList(int capacity = 10)
+        explicit SecureList(const int initialCapacity = 10)
         {
-            val = TPUNKT_SECUREALLOC(val, sizeof(T) * capacity);
-            sodium_mlock(val, sizeof(T) * capacity);
+            val = TPUNKT_SECUREALLOC(val, sizeof(T) * initialCapacity);
+            sodium_mlock(val, sizeof(T) * initialCapacity);
             sodium_mprotect_noaccess(val);
         }
 

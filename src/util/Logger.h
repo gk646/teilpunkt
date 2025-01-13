@@ -8,7 +8,7 @@ namespace tpunkt
 {
     enum class LogLevel : uint8_t
     {
-
+        DEBUG,
         INFO,
         WARNING,
         ERROR,
@@ -17,13 +17,14 @@ namespace tpunkt
 
     struct Logger
     {
-        Logger() = default;
-        void init();
-        void log(LogLevel level, const char* msg, ...);
-        void shutdown();
+        Logger();
+        ~Logger();
+
+        void setLogLevel(LogLevel level);
+        void log(LogLevel level, const char* msg, ...) const;
 
     private:
-        LogLevel minimalLevel = LogLevel::INFO;
+        LogLevel minimalLevel = LogLevel::DEBUG;
         TPUNKT_MACROS_STRUCT(Logger);
     };
 
@@ -31,6 +32,7 @@ namespace tpunkt
 
 } // namespace tpunkt
 
+#define LOG_DEBUG(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::DEBUG, msg, ##__VA_ARGS__)
 #define LOG_INFO(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::INFO, msg, ##__VA_ARGS__)
 #define LOG_WARNING(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::WARNING, msg, ##__VA_ARGS__)
 #define LOG_ERROR(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::ERROR, msg, ##__VA_ARGS__)

@@ -10,12 +10,15 @@ namespace tpunkt
     struct WebServer final
     {
         uWS::SSLApp server;
-        StaticFileStorage staticFiles{TPUNKT_SERVER_STATIC_FILES_DIR};
+        StaticFileStorage staticFiles;
 
         WebServer();
+        ~WebServer();
 
         void run();
         void stop();
+
+    private:
     };
 
     WebServer& GetWebServer();

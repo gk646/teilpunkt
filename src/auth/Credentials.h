@@ -27,8 +27,12 @@ namespace tpunkt
             struct
             {
                 FixedString<crypto_pwhash_STRBYTES> hashedPassword;
-            } password;
+            } password{};
         };
+
+        Credentials() = default;
+
+        TPUNKT_MACROS_STRUCT(Credentials);
     };
 
 } // namespace tpunkt
