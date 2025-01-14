@@ -16,7 +16,7 @@ namespace tpunkt
     struct SecureBox;
     template <typename T>
     struct SecureList;
-
+    struct InstanceConfig;
     // Fixed string typedefs
     template <size_t len>
     struct FixedString;
@@ -25,4 +25,4 @@ namespace tpunkt
 
 } // namespace tpunkt
 
-#endif //TPUNKT_FWD_H
+#endif // TPUNKT_FWD_H

@@ -18,4 +18,4 @@ namespace tpunkt
 
 } // namespace tpunkt
 
-#endif //TPUNKT_STORAGE_H
+#endif // TPUNKT_STORAGE_H

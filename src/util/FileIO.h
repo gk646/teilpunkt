@@ -12,45 +12,43 @@ namespace tpunkt
 
     struct FixedSection final : FileSection
     {
-        int
     };
 
     struct FileSchema final
     {
-    private:
+      private:
         static constexpr int MAX_SCHEMAS = 5;
-        FileSection schemas[MAX_SCHEMAS];
-        TPUNKT_MACROS_STRUCT(FileSchema);
+        FileSection schemas[ MAX_SCHEMAS ];
+        TPUNKT_MACROS_STRUCT( FileSchema );
     };
 
 
     struct FileHeader final
     {
-
-        TPUNKT_MACROS_STRUCT(FileHeader);
+        TPUNKT_MACROS_STRUCT( FileHeader );
     };
 
     struct FileReader final
     {
-        FileReader(const char* path);
+        FileReader( const char* path );
 
 
-    private:
+      private:
         const char* path;
-        TPUNKT_MACROS_STRUCT(FileReader);
+        TPUNKT_MACROS_STRUCT( FileReader );
     };
 
 
     struct FileWriter final
     {
-        FileWriter(const char* path);
 
-    private:
+
+      private:
         const char* path;
-        TPUNKT_MACROS_STRUCT(FileWriter);
+        TPUNKT_MACROS_STRUCT( FileWriter );
     };
 
 
 } // namespace tpunkt
 
-#endif //TPUNKT_FILEIO_H
+#endif // TPUNKT_FILEIO_H

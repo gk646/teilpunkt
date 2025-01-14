@@ -4,45 +4,50 @@
 
 namespace tpunkt
 {
-    static WebServer* SERVER;
-
-    WebServer::WebServer() :
-        server({"../key/key.pem", "../key/cert.pem", "1234"}), staticFiles(TPUNKT_SERVER_STATIC_FILES_DIR)
+    namespace global
     {
-        TPUNKT_MACROS_GLOBAL_ASSIGN(SERVER);
-        server.get("/*", StaticEndpoint::handle);
-        server.post("/api/signup", SignupEndpoint::handle);
-        server.post("/api/login", LoginEndpoint::handle);
+        static WebServer* Server;
+    }
+
+    WebServer::WebServer()
+        : server( { "../key/key.pem", "../key/cert.pem", "1234" } ), staticFiles( TPUNKT_SERVER_STATIC_FILES_DIR )
+    {
+        server.get( "/*", StaticEndpoint::handle );
+        server.post( "/api/signup", SignupEndpoint::handle );
+        server.post( "/api/login", LoginEndpoint::handle );
+        TPUNKT_MACROS_GLOBAL_ASSIGN( Server );
     }
 
     WebServer::~WebServer()
     {
-        TPUNKT_MACROS_GLOBAL_RESET(SERVER);
-        LOG_INFO("Server stopped");
+        TPUNKT_MACROS_GLOBAL_RESET( Server );
     }
 
-    WebServer& GetWebServer() { TPUNKT_MACROS_GLOBAL_GET(SERVER); }
+    WebServer& GetWebServer()
+    {
+        TPUNKT_MACROS_GLOBAL_GET( Server );
+    }
 
     void WebServer::run()
     {
-        server.listen(TPUNKT_SERVER_PORT,
-                      [](us_listen_socket_t* socket)
-                      {
-                          if (socket)
-                          {
-                              LOG_INFO("Server running at https://localhost:%d", TPUNKT_SERVER_PORT);
-                          }
-                          else
-                          {
-                              LOG_ERROR("Server failed to list");
-                          }
-                      });
+        server.listen( TPUNKT_SERVER_PORT,
+                       []( us_listen_socket_t* socket )
+                       {
+                           if( socket )
+                           {
+                               LOG_INFO( "Server running at https://localhost:%d", TPUNKT_SERVER_PORT );
+                           }
+                           else
+                           {
+                               LOG_ERROR( "Server failed to list" );
+                           }
+                       } );
         server.run();
     }
 
     void WebServer::stop()
     {
-        LOG_INFO("Server stop requested");
+        LOG_INFO( "Server stop requested" );
         server.close();
     }
 

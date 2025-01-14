@@ -11,51 +11,57 @@ namespace tpunkt
     template <size_t size>
     struct FixedString final
     {
-        char data[size + 1]{};
+        char data[ size + 1 ]{};
 
         FixedString() = default;
-        explicit FixedString(const char* string) { assign(string); }
-
-        void assign(const char* assignString)
+        explicit FixedString( const char* string )
         {
-            if (assignString == nullptr)
+            assign( string );
+        }
+
+        void assign( const char* assignString )
+        {
+            if( assignString == nullptr )
             {
-                LOG_ERROR("Null string passed");
+                LOG_ERROR( "Null string passed" );
             }
 
-            auto assignLen = strlen(assignString);
-            if (assignLen + 1 > size)
+            auto assignLen = strlen( assignString );
+            if( assignLen + 1 > size )
             {
-                LOG_WARNING("String is too long and will be truncated");
+                LOG_WARNING( "String is too long and will be truncated" );
                 assignLen = size - 1;
             }
 
-            memcpy(data, assignString, assignLen);
-            data[assignLen + 1] = '\0';
+            memcpy( data, assignString, assignLen );
+            data[ assignLen + 1 ] = '\0';
         }
 
-        void assign(const char* assignString, int assignLen)
+        void assign( const char* assignString, int assignLen )
         {
-            if (assignString == nullptr)
+            if( assignString == nullptr )
             {
-                LOG_ERROR("Null string passed");
+                LOG_ERROR( "Null string passed" );
             }
-            if (assignLen + 1 > size)
+            if( assignLen + 1 > size )
             {
-                LOG_WARNING("String is too long and will be truncated");
+                LOG_WARNING( "String is too long and will be truncated" );
                 assignLen = size - 1;
             }
 
-            memcpy(data, assignString, assignLen);
-            data[assignLen + 1] = '\0';
+            memcpy( data, assignString, assignLen );
+            data[ assignLen + 1 ] = '\0';
         }
 
-        [[nodiscard]] const char* get() const { return data; }
+        [[nodiscard]] const char* get() const
+        {
+            return data;
+        }
 
-        TPUNKT_MACROS_STRUCT(FixedString);
+        TPUNKT_MACROS_STRUCT( FixedString );
     };
 
 } // namespace tpunkt
 
 
-#endif //TPUNKT_FIXED_STRING_H
+#endif // TPUNKT_FIXED_STRING_H

@@ -36,8 +36,9 @@ target_compile_options(teilpunkt PRIVATE
 
 # Strip binary to minimize information (use for security-sensitive applications)
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-strip-all" CACHE STRING "Release linker flags")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -fno-plt -s -DNDEBUG -flto" CACHE STRING "Release flags")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-Wl,-strip-all -flto=auto")
+    set(CMAKE_CXX_FLAGS "-O2 -fno-plt -s -DNDEBUG -flto=auto -ffunction-sections -fdata-sections")
+    set(CMAKE_C_FLAGS "-O2 -fno-plt -s -DNDEBUG -flto=auto -ffunction-sections -fdata-sections")
 endif ()
 
 # ------------------------------
@@ -97,6 +98,7 @@ target_link_libraries(teilpunkt PRIVATE
 target_compile_definitions(teilpunkt PRIVATE
         UWS_HTTPRESPONSE_NO_WRITEMARK
         LIBUS_USE_QUIC
+        TPUNKT_VERSION="${PROJECT_VERSION}"
 )
 
 # ------------------------------

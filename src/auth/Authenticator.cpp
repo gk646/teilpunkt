@@ -9,43 +9,44 @@
 
 namespace tpunkt
 {
-    static Authenticator* AUTH;
+    namespace global
+    {
+        static Authenticator* Authenticator;
+    }
 
     Authenticator::Authenticator()
     {
-        TPUNKT_MACROS_GLOBAL_ASSIGN(AUTH);
-        sessionStore = TPUNKT_ALLOC(sessionStore, sizeof(int*));
-        userStore = TPUNKT_ALLOC(userStore, sizeof(int*));
-        LOG_DEBUG("Authenticator initialized");
+        sessionStore = TPUNKT_ALLOC( sessionStore, sizeof( int* ) );
+        userStore = TPUNKT_ALLOC( userStore, sizeof( int* ) );
+        TPUNKT_MACROS_GLOBAL_ASSIGN( Authenticator );
     }
 
     Authenticator::~Authenticator()
     {
-        TPUNKT_FREE(sessionStore);
-        TPUNKT_FREE(userStore);
-        TPUNKT_MACROS_GLOBAL_RESET(AUTH);
-        LOG_DEBUG("Authenticator exited");
+        TPUNKT_FREE( sessionStore );
+        TPUNKT_FREE( userStore );
+        TPUNKT_MACROS_GLOBAL_RESET( Authenticator );
     }
 
     Authenticator& GetAuthenticator()
     {
-        TPUNKT_MACROS_GLOBAL_GET(AUTH);
+        TPUNKT_MACROS_GLOBAL_GET( Authenticator );
     }
 
 
-
-    AuthToken Authenticator::loginUser(const UserName& name, const Credentials& credentials)
+    AuthToken Authenticator::loginUser( const UserName& name, const Credentials& credentials )
     {
         User user{};
-        return AuthToken{ user, randombytes_random()};
+        return AuthToken{ user, randombytes_random() };
     }
 
-    AuthToken Authenticator::authCookie(const SessionID& sessionId)
+    AuthToken Authenticator::authCookie( const SessionID& sessionId )
     {
-
     }
 
-    bool Authenticator::isValid(const AuthToken& token) {}
+    bool Authenticator::isValid( const AuthToken& token )
+    {
+    }
 
 
 } // namespace tpunkt

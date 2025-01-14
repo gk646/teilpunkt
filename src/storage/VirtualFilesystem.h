@@ -1,5 +1,5 @@
-#ifndef TPUNKT_VIRTUALFILESYSTEM_H
-#define TPUNKT_VIRTUALFILESYSTEM_H
+#ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
+#define TPUNKT_VIRTUAL_FILESYSTEM_H
 
 #include <vector>
 #include <cstdint>
@@ -8,7 +8,6 @@
 
 namespace tpunkt
 {
-
     struct VirtualFile final
     {
         FixedString<TPUNKT_STORAGE_NAME_LEN> name;
@@ -28,7 +27,8 @@ namespace tpunkt
 
         VirtualFilesystem();
     };
+
 } // namespace tpunkt
 
 
-#endif //TPUNKT_VIRTUALFILESYSTEM_H
+#endif //TPUNKT_VIRTUAL_FILESYSTEM_H

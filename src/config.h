@@ -33,5 +33,9 @@
 
 #define TPUNKT_MONITOR_REQ_PER_MIN 50
 
+// Instance
 
-#endif //TPUNKT_CONFIG_H
+#define TPUNKT_INSTANCE_CONFIG_STRING_LEN 24
+
+
+#endif // TPUNKT_CONFIG_H

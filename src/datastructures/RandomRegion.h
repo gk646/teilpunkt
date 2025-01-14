@@ -1,4 +1,0 @@
-#ifndef RANDOMREGION_H
-#define RANDOMREGION_H
-
-#endif //RANDOMREGION_H

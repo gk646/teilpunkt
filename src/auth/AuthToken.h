@@ -11,7 +11,7 @@ namespace tpunkt
         [[nodiscard]] const User& getUser() const;
 
     private:
-        AuthToken(const User& user, const uint32_t random) : user(user), random(random) {}
+        AuthToken(const User& usr, const uint32_t rand) : user(usr), random(rand) {}
         const User& user;
         const uint32_t random; // Random number to make this token non forgeable
         TPUNKT_MACROS_STRUCT(AuthToken);
