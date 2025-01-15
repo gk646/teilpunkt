@@ -3,11 +3,8 @@
 namespace tpunkt
 {
 
-    SessionID SessionStorage::addSession(const User& user)
+    SessionID SessionStorage::addSession( const User& user )
     {
-
-
-
     }
 
 } // namespace tpunkt

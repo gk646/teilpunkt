@@ -3,26 +3,56 @@
 
 #include "fwd.h"
 #include "util/Macros.h"
+#include "auth/SessionStorage.h"
+#include "auth/UserStorage.h"
 
 namespace tpunkt
 {
+
+    enum class AuthenticatorStatus : uint8_t
+    {
+        INVALID,
+        OK,
+        // Generic error
+        ERR_UNSUCCESSFUL,
+        // userAdd
+        ERR_USER_NAME_EXISTS,
+    };
+
     struct Authenticator final
     {
+
+        //===== User Management =====//
+
         // Tries to log in the user creating a new session if successful
-        AuthToken loginUser(const UserName& name, const Credentials& credentials);
+        AuthenticatorStatus userLogin(const UserName& name, const Credentials& credentials, AuthToken& out);
+
+        // Deletes the currently used session
+        AuthenticatorStatus userLogout(const AuthToken& token);
+
+        // Adds a new user if the username is unique
+        AuthenticatorStatus userAdd(const UserName& name, Credentials& credentials);
+
+        AuthenticatorStatus removeUser(const AuthToken& token);
+
+        AuthenticatorStatus userChangeCredentials(const AuthToken& token, const Credentials& newCredentials);
+
+        //===== Session Management =====//
+
+        AuthenticatorStatus sessionRemove(const AuthToken& token);
 
         // Tries to authenticate the user via the session id
-        AuthToken authCookie(const SessionID& sessionId);
+        AuthenticatorStatus sessionAuth(const SessionID& sessionId, AuthToken& out);
 
         // Returns true if the given auth token is valid
-        bool isValid(const AuthToken& token);
+        AuthenticatorStatus isValid(const AuthToken& token);
 
         Authenticator();
         ~Authenticator();
 
-    private:
-        SecureList<SessionStorage>* sessionStore{};
-        SecureList<UserStorage>* userStore{};
+      private:
+        SessionStorage sessionStore;
+        UserStorage userStore;
         TPUNKT_MACROS_STRUCT(Authenticator);
     };
 
@@ -30,4 +60,4 @@ namespace tpunkt
 
 } // namespace tpunkt
 
-#endif //TPUNKT_AUTHENTICATOR_H
+#endif // TPUNKT_AUTHENTICATOR_H

@@ -11,9 +11,9 @@ namespace tpunkt
     {
         UserName name;
         Credentials credentials;
-        bool loggedIn = false;
+        bool loggedIn;
     };
 
 } // namespace tpunkt
 
-#endif //TPUNKT_USER_H
+#endif // TPUNKT_USER_H

@@ -10,23 +10,24 @@ namespace tpunkt
 
     InstanceConfig::InstanceConfig()
     {
-        TPUNKT_MACROS_GLOBAL_ASSIGN( InstanceConfig );
+        TPUNKT_MACROS_GLOBAL_ASSIGN(InstanceConfig);
     }
+
     InstanceConfig::~InstanceConfig()
     {
-        TPUNKT_MACROS_GLOBAL_RESET( InstanceConfig );
+        TPUNKT_MACROS_GLOBAL_RESET(InstanceConfig);
     }
 
     InstanceConfig& GetInstanceConfig()
     {
-        TPUNKT_MACROS_GLOBAL_GET( InstanceConfig );
+        TPUNKT_MACROS_GLOBAL_GET(InstanceConfig);
     }
 
     const char* ConfigParam::getString() const
     {
-        if( type != ConfigParamType::STRING )
+        if(type != ConfigParamType::STRING)
         {
-            LOG_FATAL( "Accessing wrong type" );
+            LOG_FATAL("Accessing wrong type");
             return nullptr;
         }
         return string.get();
@@ -34,9 +35,9 @@ namespace tpunkt
 
     bool ConfigParam::getBool() const
     {
-        if( type != ConfigParamType::BOOL )
+        if(type != ConfigParamType::BOOL)
         {
-            LOG_FATAL( "Accessing wrong type" );
+            LOG_FATAL("Accessing wrong type");
             return false;
         }
         return boolean;
@@ -44,9 +45,9 @@ namespace tpunkt
 
     int64_t ConfigParam::getInteger() const
     {
-        if( type != ConfigParamType::NUMBER )
+        if(type != ConfigParamType::NUMBER)
         {
-            LOG_FATAL( "Accessing wrong type" );
+            LOG_FATAL("Accessing wrong type");
             return 0;
         }
         return integer;

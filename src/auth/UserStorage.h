@@ -1,29 +1,27 @@
 #ifndef TPUNKT_USER_STORAGE_H
 #define TPUNKT_USER_STORAGE_H
 
-#include <vector>
 #include "auth/Credentials.h"
 #include "common/User.h"
-#include "util/Macros.h"
+#include "datastructures/SecureList.h"
 
 namespace tpunkt
 {
-    enum class UserStorageStatus : uint8_t
-    {
-        USER_NAME_EXISTS,
-        INVALID_CREDENTIALS,
-    };
 
     struct UserStorage final
     {
-        bool addUser(const UserName& name, const char* secret, CredentialsType type);
+        bool addUser(const UserName& name, const Credentials& credentials);
+        bool loginUser(const UserName& name, const Credentials& credentials, User&);
+        bool contains(const UserName& name);
 
-    private:
-        std::vector<User> users;
+        UserStorage() = default;
+
+      private:
+        SecureList<User> users;
         TPUNKT_MACROS_STRUCT(UserStorage);
     };
 
 } // namespace tpunkt
 
 
-#endif //TPUNKT_USER_STORAGE_H
+#endif // TPUNKT_USER_STORAGE_H

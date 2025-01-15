@@ -11,45 +11,39 @@ namespace tpunkt
     template <size_t size>
     struct FixedString final
     {
-        char data[ size + 1 ]{};
-
         FixedString() = default;
-        explicit FixedString( const char* string )
-        {
-            assign( string );
-        }
 
-        void assign( const char* assignString )
+        void assign(const char* assignString)
         {
-            if( assignString == nullptr )
+            if(assignString == nullptr)
             {
-                LOG_ERROR( "Null string passed" );
+                LOG_ERROR("Null string passed");
             }
 
-            auto assignLen = strlen( assignString );
-            if( assignLen + 1 > size )
+            auto assignLen = strlen(assignString);
+            if(assignLen + 1 > size)
             {
-                LOG_WARNING( "String is too long and will be truncated" );
+                LOG_WARNING("String is too long and will be truncated");
                 assignLen = size - 1;
             }
 
-            memcpy( data, assignString, assignLen );
+            memcpy(data, assignString, assignLen);
             data[ assignLen + 1 ] = '\0';
         }
 
-        void assign( const char* assignString, int assignLen )
+        void assign(const char* assignString, int assignLen)
         {
-            if( assignString == nullptr )
+            if(assignString == nullptr)
             {
-                LOG_ERROR( "Null string passed" );
+                LOG_ERROR("Null string passed");
             }
-            if( assignLen + 1 > size )
+            if(assignLen + 1 > size)
             {
-                LOG_WARNING( "String is too long and will be truncated" );
+                LOG_WARNING("String is too long and will be truncated");
                 assignLen = size - 1;
             }
 
-            memcpy( data, assignString, assignLen );
+            memcpy(data, assignString, assignLen);
             data[ assignLen + 1 ] = '\0';
         }
 
@@ -58,7 +52,9 @@ namespace tpunkt
             return data;
         }
 
-        TPUNKT_MACROS_STRUCT( FixedString );
+      private:
+        char data[ size + 1 ];
+        TPUNKT_MACROS_STRUCT(FixedString);
     };
 
 } // namespace tpunkt

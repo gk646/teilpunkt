@@ -22,65 +22,65 @@ namespace tpunkt
                          {".txt", "text/plain"}, {".ico", "image/x-icon"},  {nullptr, "text/plain"}};
 
         const char* dot = strrchr(path, '.');
-        if (!dot)
+        if(!dot)
         {
-            return mimeTypes[11].mimeType;
+            return mimeTypes[ 11 ].mimeType;
         }
 
-        for (int i = 0; mimeTypes[i].extension != nullptr; ++i)
+        for(int i = 0; mimeTypes[ i ].extension != nullptr; ++i)
         {
-            if (strcmp(dot, mimeTypes[i].extension) == 0)
+            if(strcmp(dot, mimeTypes[ i ].extension) == 0)
             {
-                return mimeTypes[i].mimeType;
+                return mimeTypes[ i ].mimeType;
             }
         }
-        return mimeTypes[11].mimeType;
+        return mimeTypes[ 11 ].mimeType;
     }
 
     static void iterateDirectory(const char* dir, int& index, StaticFile* staticFiles)
     {
-        if (index == TPUNKT_SERVER_STATIC_FILES_LEN)
+        if(index == TPUNKT_SERVER_STATIC_FILES_LEN)
         {
-            LOG_FATAL("Too many static files");
+            LOG_CRITICAL("Too many static files");
             return;
         }
 
         dirent* entry;
         DIR* dp = opendir(dir);
 
-        if (dp == nullptr)
+        if(dp == nullptr)
         {
             LOG_ERROR("Failed to open dir: %s", dir);
             return;
         }
 
-        while ((entry = readdir(dp)) != nullptr)
+        while((entry = readdir(dp)) != nullptr)
         {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             {
                 continue;
             }
 
-            char path[512]{};
+            char path[ 512 ]{};
             snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
 
-            if (strlen(path) > 512)
+            if(strlen(path) > 512)
             {
-                LOG_FATAL("Error iterating files");
+                LOG_CRITICAL("Static filepath too long");
                 return;
             }
 
             struct stat statbuf{};
-            if (stat(path, &statbuf) == 0)
+            if(stat(path, &statbuf) == 0)
             {
-                if (S_ISDIR(statbuf.st_mode))
+                if(S_ISDIR(statbuf.st_mode))
                 {
                     iterateDirectory(path, index, staticFiles);
                 }
                 else
                 {
                     FILE* file = fopen(path, "rx");
-                    if (!file)
+                    if(!file)
                     {
                         LOG_ERROR("Failed to load static file: %s", path);
                     }
@@ -92,10 +92,10 @@ namespace tpunkt
                     // Content
                     char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);
                     fread(content, statbuf.st_size, 1, file);
-                    content[statbuf.st_size] = '\0';
+                    content[ statbuf.st_size ] = '\0';
                     fclose(file);
 
-                    auto& staticFile = staticFiles[index];
+                    auto& staticFile = staticFiles[ index ];
                     staticFile.size = static_cast<int>(statbuf.st_size);
                     staticFile.name = name;
                     staticFile.content = content;
@@ -116,9 +116,9 @@ namespace tpunkt
 
     StaticFileStorage::~StaticFileStorage()
     {
-        for (auto& file : staticFiles)
+        for(auto& file : staticFiles)
         {
-            if (!file.name)
+            if(!file.name)
                 break;
             TPUNKT_FREE(file.content);
             TPUNKT_FREE(file.name);
@@ -127,11 +127,11 @@ namespace tpunkt
 
     const StaticFile* StaticFileStorage::getFile(const char* filePath) const
     {
-        for (const auto& file : staticFiles)
+        for(const auto& file : staticFiles)
         {
-            if (file.name == nullptr)
+            if(file.name == nullptr)
                 return nullptr;
-            if (strcmp(file.name, filePath) == 0)
+            if(strcmp(file.name, filePath) == 0)
             {
                 return &file;
             }

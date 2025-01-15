@@ -1,11 +1,7 @@
 #include <cstdlib>
-#include <sodium.h>
+#include <sodium/randombytes.h>
 #include "auth/Authenticator.h"
-#include "auth/SessionStorage.h"
 #include "auth/AuthToken.h"
-#include "util/Memory.h"
-#include "datastructures/SecureList.h"
-#include "common/User.h"
 
 namespace tpunkt
 {
@@ -16,35 +12,56 @@ namespace tpunkt
 
     Authenticator::Authenticator()
     {
-        sessionStore = TPUNKT_ALLOC( sessionStore, sizeof( int* ) );
-        userStore = TPUNKT_ALLOC( userStore, sizeof( int* ) );
-        TPUNKT_MACROS_GLOBAL_ASSIGN( Authenticator );
+        TPUNKT_MACROS_GLOBAL_ASSIGN(Authenticator);
     }
 
     Authenticator::~Authenticator()
     {
-        TPUNKT_FREE( sessionStore );
-        TPUNKT_FREE( userStore );
-        TPUNKT_MACROS_GLOBAL_RESET( Authenticator );
+        TPUNKT_MACROS_GLOBAL_RESET(Authenticator);
     }
 
     Authenticator& GetAuthenticator()
     {
-        TPUNKT_MACROS_GLOBAL_GET( Authenticator );
+        TPUNKT_MACROS_GLOBAL_GET(Authenticator);
     }
 
-
-    AuthToken Authenticator::loginUser( const UserName& name, const Credentials& credentials )
+    AuthenticatorStatus Authenticator::userLogin(const UserName& name, const Credentials& credentials, AuthToken& token)
     {
         User user{};
-        return AuthToken{ user, randombytes_random() };
+        if(userStore.loginUser(name, credentials, user) == false)
+        {
+            LOG_INFO("Login user failed : Invalid authentication");
+            return AuthenticatorStatus::ERR_UNSUCCESSFUL;
+        }
+        LOG_INFO("Login user success");
+        return AuthenticatorStatus::OK;
     }
 
-    AuthToken Authenticator::authCookie( const SessionID& sessionId )
+    AuthenticatorStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
+    {
+        if(userStore.contains(name))
+        {
+            sodium_memzero(&credentials, sizeof(Credentials));
+            LOG_INFO("Adding user failed : Name exists");
+            return AuthenticatorStatus::ERR_USER_NAME_EXISTS;
+        }
+
+        if(userStore.addUser(name, credentials) == false)
+        {
+            sodium_memzero(&credentials, sizeof(Credentials));
+            LOG_INFO("Adding user failed : Unknown");
+            return AuthenticatorStatus::ERR_UNSUCCESSFUL;
+        }
+        sodium_memzero(&credentials, sizeof(Credentials));
+        LOG_INFO("Added new user");
+        return AuthenticatorStatus::OK;
+    }
+
+    AuthenticatorStatus Authenticator::sessionAuth(const SessionID& sessionId, AuthToken& token)
     {
     }
 
-    bool Authenticator::isValid( const AuthToken& token )
+    AuthenticatorStatus Authenticator::isValid(const AuthToken& token)
     {
     }
 

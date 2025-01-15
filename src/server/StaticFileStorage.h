@@ -24,11 +24,11 @@ namespace tpunkt
 
         const StaticFile* getFile(const char* filePath) const;
 
-    private:
-        StaticFile staticFiles[TPUNKT_SERVER_STATIC_FILES_LEN]{};
+      private:
+        StaticFile staticFiles[ TPUNKT_SERVER_STATIC_FILES_LEN ]{};
         TPUNKT_MACROS_STRUCT(StaticFileStorage);
     };
 
 } // namespace tpunkt
 
-#endif //TPUNKT_STATIC_FILESTORAGE_H
+#endif // TPUNKT_STATIC_FILESTORAGE_H

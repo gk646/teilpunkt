@@ -6,11 +6,6 @@ namespace tpunkt
 {
     void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     {
-        for (auto [key, value] : *req)
-        {
-            std::cout << key << ":" << value << std::endl;
-            //LOG_INFO("Header:%s | Key:%s", key.data(), value.data());
-        }
         const auto& server = GetWebServer();
 
         auto* request = const_cast<char*>(req->getUrl().data());

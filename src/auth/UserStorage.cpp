@@ -3,8 +3,16 @@
 
 namespace tpunkt
 {
-    bool UserStorage::addUser(const UserName& name, const char* secret, CredentialsType type)
+    bool UserStorage::addUser(const UserName& name, const Credentials& credentials)
     {
-
+        return true;
+    }
+    bool UserStorage::loginUser(const UserName& name, const Credentials& credentials, User&)
+    {
+        return true;
+    }
+    bool UserStorage::contains(const UserName& name)
+    {
+        return false;
     }
 } // namespace tpunkt
