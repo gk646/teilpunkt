@@ -52,18 +52,7 @@ body, h1, h2, p, input, button, form {
     box-sizing: border-box;
 }
 
-/* Body Styling */
-body {
-    font-family: var(--font-family);
-    background: var(--background);
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-    transition: background 0.3s ease, color 0.3s ease;
-}
+
 
 #theme-toggle {
     position: fixed;
@@ -84,18 +73,6 @@ body {
     background: var(--primary); /* Highlight background on hover */
     color: var(--foreground); /* Contrast text color on hover */
     transform: scale(1.1); /* Slight zoom */
-}
-
-
-/* Container Styling */
-.container {
-    text-align: center;
-    max-width: 600px;
-    background: var(--foreground);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px var(--shadow-dark);
-    animation: fadeIn 1.5s ease-in-out;
 }
 
 /* Heading Styling */

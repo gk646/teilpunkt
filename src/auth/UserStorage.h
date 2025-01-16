@@ -12,9 +12,10 @@ namespace tpunkt
     {
         bool addUser(const UserName& name, const Credentials& credentials);
         bool loginUser(const UserName& name, const Credentials& credentials, User&);
-        bool contains(const UserName& name);
+        bool containsUser(const UserName& name);
 
-        UserStorage() = default;
+        UserStorage();
+        ~UserStorage();
 
       private:
         SecureList<User> users;

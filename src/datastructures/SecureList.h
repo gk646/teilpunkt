@@ -5,7 +5,6 @@
 #include <type_traits>
 #include "util/Memory.h"
 
-
 namespace tpunkt
 {
 
@@ -42,7 +41,8 @@ namespace tpunkt
                 {
                     grow(list.capacity > 0 ? list.capacity * 2 : 10);
                 }
-                list.val[ list.size++ ] = value;
+                memcpy(list.val + list.size, &value, sizeof(T));
+                ++list.size;
             }
 
             // Erases the first occurrence of the given value
@@ -54,7 +54,7 @@ namespace tpunkt
                     if(list.val[ i ] == value)
                     {
                         if(i != list.size - 1) // Not at last place - copy last place to the matching one
-                            memcpy(list.val + i * sizeof(T), list.val + (list.size - 1) * sizeof(T), sizeof(T));
+                            memcpy(list.val + i, list.val + (list.size - 1), sizeof(T));
                         --list.size;
                         return true;
                     }
@@ -73,6 +73,61 @@ namespace tpunkt
                     }
                 }
                 return false;
+            }
+
+            struct Iterator final
+            {
+                explicit Iterator(T* ptr) : ptr(ptr)
+                {
+                }
+
+                T& operator*()
+                {
+                    return *ptr;
+                }
+
+                Iterator& operator++()
+                {
+                    ++ptr;
+                    return *this;
+                }
+
+                Iterator operator++(int)
+                {
+                    Iterator temp = *this;
+                    ++(*this);
+                    return temp;
+                }
+
+                bool operator==(const Iterator& other) const
+                {
+                    return ptr == other.ptr;
+                }
+
+                bool operator!=(const Iterator& other) const
+                {
+                    return ptr != other.ptr;
+                }
+
+              private:
+                T* ptr;
+            };
+
+            Iterator begin() const
+            {
+                return Iterator{list.val};
+            }
+            Iterator end() const
+            {
+                return Iterator{list.val + list.size};
+            }
+            Iterator begin()
+            {
+                return Iterator{list.val};
+            }
+            Iterator end()
+            {
+                return Iterator{list.val + list.size};
             }
 
           private:

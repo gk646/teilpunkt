@@ -39,21 +39,21 @@ namespace tpunkt
 
     AuthenticatorStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
     {
-        if(userStore.contains(name))
+        if(userStore.containsUser(name))
         {
             sodium_memzero(&credentials, sizeof(Credentials));
-            LOG_INFO("Adding user failed : Name exists");
+            LOG_INFO("Adding new user failed : Name already exists");
             return AuthenticatorStatus::ERR_USER_NAME_EXISTS;
         }
 
         if(userStore.addUser(name, credentials) == false)
         {
             sodium_memzero(&credentials, sizeof(Credentials));
-            LOG_INFO("Adding user failed : Unknown");
+            LOG_INFO("Adding new user failed : Unknown");
             return AuthenticatorStatus::ERR_UNSUCCESSFUL;
         }
         sodium_memzero(&credentials, sizeof(Credentials));
-        LOG_INFO("Added new user");
+        LOG_INFO("Adding new user successful");
         return AuthenticatorStatus::OK;
     }
 
@@ -64,6 +64,5 @@ namespace tpunkt
     AuthenticatorStatus Authenticator::isValid(const AuthToken& token)
     {
     }
-
 
 } // namespace tpunkt

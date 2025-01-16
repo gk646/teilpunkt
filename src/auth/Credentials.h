@@ -20,8 +20,7 @@ namespace tpunkt
         CredentialsType type;
         union
         {
-            char buff[ crypto_pwhash_STRBYTES ];
-            FixedString<crypto_pwhash_STRBYTES> passkey;
+            FixedString<10> passkey;
             FixedString<crypto_pwhash_STRBYTES> password;
         };
 

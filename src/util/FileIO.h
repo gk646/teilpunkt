@@ -12,6 +12,7 @@ namespace tpunkt
 
     struct FixedSection final : FileSection
     {
+        FixedSection() = default;
     };
 
     struct FileSchema final

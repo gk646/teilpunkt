@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="css/global.css" type="text/css">
     <link rel="stylesheet" href="css/index.css" type="text/css">
     <script type="module" src="js/theme-switcher.js" integrity="sha384-QU3RZ2hxS6iWvP5hlOHCDETZ5Wm48EjIu1NLJevlBjECPSxdV1z3/bRerA4lU9JV" defer referrerpolicy="no-referrer"></script>
-    <title>Teilpunkt</title>
+    <title>index</title>
 </head>
 <body>
 <!-- Logo Section -->
@@ -15,12 +15,9 @@
 </header>
 
 <script>
-    // Simulating a logged-in check
     const userLoggedIn = localStorage.getItem('loggedIn') === 'true';
-
     if (userLoggedIn) {
-        // Redirect to the dashboard
-        window.location.href = '/home.html';
+        window.location.href = '/dashboard.html';
     }
 </script>
 

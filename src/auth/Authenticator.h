@@ -21,7 +21,6 @@ namespace tpunkt
 
     struct Authenticator final
     {
-
         //===== User Management =====//
 
         // Tries to log in the user creating a new session if successful

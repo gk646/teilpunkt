@@ -8,27 +8,34 @@
 
 namespace tpunkt
 {
-    template <size_t size>
+    template <size_t length>
     struct FixedString final
     {
+        //
         FixedString() = default;
+
+        explicit FixedString(const char* string)
+        {
+            assign(string);
+        }
 
         void assign(const char* assignString)
         {
             if(assignString == nullptr)
             {
                 LOG_ERROR("Null string passed");
+                arr[ 0 ] = '\0';
+                return;
             }
 
             auto assignLen = strlen(assignString);
-            if(assignLen + 1 > size)
+            if(assignLen > length)
             {
                 LOG_WARNING("String is too long and will be truncated");
-                assignLen = size - 1;
+                assignLen = length;
             }
 
-            memcpy(data, assignString, assignLen);
-            data[ assignLen + 1 ] = '\0';
+            strncpy(arr, assignString, assignLen);
         }
 
         void assign(const char* assignString, int assignLen)
@@ -36,25 +43,83 @@ namespace tpunkt
             if(assignString == nullptr)
             {
                 LOG_ERROR("Null string passed");
+                arr[ 0 ] = '\0';
             }
-            if(assignLen + 1 > size)
+
+            if(assignLen < 0)
+            {
+                LOG_ERROR("Negative length passed");
+                arr[ 0 ] = '\0';
+                return;
+            }
+
+            if(assignLen > length)
             {
                 LOG_WARNING("String is too long and will be truncated");
-                assignLen = size - 1;
+                assignLen = length;
             }
-
-            memcpy(data, assignString, assignLen);
-            data[ assignLen + 1 ] = '\0';
+            strncpy(arr, assignString, assignLen);
         }
 
-        [[nodiscard]] const char* get() const
+        [[nodiscard]] const char* c_str() const
         {
-            return data;
+            return arr;
+        }
+
+        char* data()
+        {
+            return arr;
+        }
+
+        size_t size() const
+        {
+            // Protected against missing 0 terminator
+            for(size_t i = 0; i < length; ++i)
+            {
+                if(arr[ i ] == '\0')
+                    return i;
+            }
+            return length;
+        }
+
+        template <size_t oLength>
+        bool operator==(const FixedString<oLength>& other) const
+        {
+            // Protected against missing 0 terminator
+            for(size_t i = 0; i < length; ++i)
+            {
+                if(i < oLength)
+                {
+                    const auto myChar = arr[ i ];
+                    const auto oChar = other.c_str()[ i ];
+                    if(myChar != oChar) [[likely]]
+                    {
+                        return false;
+                    }
+
+                    if(myChar == oChar && myChar == '\0')
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return arr[ i ] == '\0'; // Our data is longer - other data must be terminated here and so must we
+                }
+            }
+            return arr[ length ] == other.c_str()[ length ] && arr[ length ] == '\0'; // Same length
+        }
+
+        template <size_t oLength>
+        FixedString& operator=(const FixedString<oLength>& other)
+        {
+            assign(other.c_str(), oLength);
+            return *this;
         }
 
       private:
-        char data[ size + 1 ];
-        TPUNKT_MACROS_STRUCT(FixedString);
+        char arr[ length + 1 ]; // Not initialized as it needs to be trivially constructible
+        static_assert(length > 0, "Cannot be empty");
     };
 
 } // namespace tpunkt

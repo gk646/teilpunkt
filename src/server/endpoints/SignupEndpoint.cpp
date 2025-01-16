@@ -7,6 +7,7 @@ namespace tpunkt
 {
     void SignupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     {
+        
         res->onData(
             [ res, req ](std::string_view data, bool last)
             {

@@ -30,7 +30,7 @@ namespace tpunkt
             LOG_FATAL("Accessing wrong type");
             return nullptr;
         }
-        return string.get();
+        return string.c_str();
     }
 
     bool ConfigParam::getBool() const

@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const passwordInput = document.getElementById('password')
-    
     const form = document.querySelector('.login-form');
     const passkeyButton = document.getElementById('passkey-signup-btn');
 
@@ -24,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return response;
         } catch (error) {
             console.error(`Error with fetch to ${url}:`, error);
-            alert(`An error occurred: ${error.message}`);
             throw error;
         }
     };
@@ -50,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const hashedPassword = sodium.crypto_generichash(hashLength, sodium.from_string(password));
         const hashedPasswordBase64 = uint8ArrayToBase64(hashedPassword);
-        
+
         const body = `username=${username}\npassword=${hashedPasswordBase64}`;
 
         try {
@@ -58,8 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',
+                    'Auth-Method': 'password',
                 },
-                body : body
+                body: body
             });
             window.location.href = '/';
         } catch (error) {
@@ -85,24 +83,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username }),
+                body: JSON.stringify({username}),
             });
 
-            const { challenge } = await challengeResponse.json();
+            const {challenge} = await challengeResponse.json();
 
             // Step 2: Use WebAuthn API to generate passkey credentials
             const publicKey = {
                 challenge: Uint8Array.from(challenge, (c) => c.charCodeAt(0)),
-                rp: { name: 'teilpunkt' },
+                rp: {name: 'teilpunkt'},
                 user: {
                     id: Uint8Array.from(username, (c) => c.charCodeAt(0)),
                     name: username,
                     displayName: username,
                 },
-                pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+                pubKeyCredParams: [{type: 'public-key', alg: -7}],
             };
 
-            const credential = await navigator.credentials.create({ publicKey });
+            const credential = await navigator.credentials.create({publicKey});
 
             // Step 3: Send the credential back to the backend
             const verificationResponse = await fetchWithErrorHandling('/api/signup/passkey/verify', {
