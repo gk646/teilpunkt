@@ -6,13 +6,14 @@ namespace tpunkt
     UserStorage::UserStorage()
     {
     }
+
     UserStorage::~UserStorage()
     {
     }
 
     bool UserStorage::addUser(const UserName& name, const Credentials& credentials)
     {
-        User newUser;
+        User newUser{};
         newUser.name = name;
 
         switch(credentials.type)

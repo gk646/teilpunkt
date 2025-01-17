@@ -14,24 +14,24 @@ add_executable(teilpunkt ${SOURCE_FILES})
 
 target_compile_options(teilpunkt PRIVATE
         -Wall               # Enable most warnings
-        -Wextra             # Enable extra warnings
-        -Wpedantic          # Enforce strict ISO compliance
-        -Wshadow            # Warn if a variable shadows another
-        -Wconversion        # Warn on implicit conversions that may lose data
-        -Wsign-conversion   # Warn on implicit signed/unsigned conversions
-        -Wunused            # Warn on unused variables, parameters, functions, etc.
-        -Wuninitialized     # Warn on use of uninitialized variables
-        -Wold-style-cast    # Warn on C-style casts
-        -Wnon-virtual-dtor  # Warn when a class with virtual methods has a non-virtual destructor
-        -Woverloaded-virtual # Warn when a function is hidden by a virtual function of a base
-        -Wduplicated-cond   # Warn on duplicated conditions in `if`/`else if` chains
-        -Wduplicated-branches # Warn on duplicated branches in `if`/`else if` chains
-        -Wnull-dereference  # Warn if a null pointer is dereferenced
+       # -Wextra             # Enable extra warnings
+      #  -Wpedantic          # Enforce strict ISO compliance
+      #  -Wshadow            # Warn if a variable shadows another
+     #   -Wconversion        # Warn on implicit conversions that may lose data
+      #  -Wsign-conversion   # Warn on implicit signed/unsigned conversions
+     #   -Wunused            # Warn on unused variables, parameters, functions, etc.
+     #   -Wuninitialized     # Warn on use of uninitialized variables
+     #   -Wold-style-cast    # Warn on C-style casts
+     #   -Wnon-virtual-dtor  # Warn when a class with virtual methods has a non-virtual destructor
+    #    -Woverloaded-virtual # Warn when a function is hidden by a virtual function of a base
+    #    -Wduplicated-cond   # Warn on duplicated conditions in `if`/`else if` chains
+    #    -Wduplicated-branches # Warn on duplicated branches in `if`/`else if` chains
+    #    -Wnull-dereference  # Warn if a null pointer is dereferenced
         -Wformat=2          # Enable stricter format string checking
-        -Wimplicit-fallthrough # Warn on implicit fallthrough in switch statements
-        -Wcast-align         # Warn on potential performance issues with casted pointer alignment
-        -Wzero-as-null-pointer-constant # Warn when `0` is used as a null pointer constant
-        -Wmissing-include-dirs # Warn if include directories are missing
+   #     -Wimplicit-fallthrough # Warn on implicit fallthrough in switch statements
+   #     -Wcast-align         # Warn on potential performance issues with casted pointer alignment
+    #    -Wzero-as-null-pointer-constant # Warn when `0` is used as a null pointer constant
+   #     -Wmissing-include-dirs # Warn if include directories are missing
 )
 
 # Strip binary to minimize information (use for security-sensitive applications)

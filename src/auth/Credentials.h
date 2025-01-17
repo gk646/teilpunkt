@@ -17,14 +17,14 @@ namespace tpunkt
     struct Credentials final
     {
         Credentials() = default;
+
         CredentialsType type;
         union
         {
-            FixedString<10> passkey;
+            FixedString<crypto_pwhash_STRBYTES> passkey;
             FixedString<crypto_pwhash_STRBYTES> password;
         };
 
-        TPUNKT_MACROS_STRUCT(Credentials);
     };
 
 } // namespace tpunkt

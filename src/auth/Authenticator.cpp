@@ -37,6 +37,10 @@ namespace tpunkt
         return AuthenticatorStatus::OK;
     }
 
+    AuthenticatorStatus Authenticator::userLogout(const AuthToken& token)
+    {
+    }
+
     AuthenticatorStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
     {
         if(userStore.containsUser(name))

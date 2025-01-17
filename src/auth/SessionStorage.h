@@ -19,6 +19,8 @@ namespace tpunkt
         FixedString<TPUNKT_STORAGE_NAME_LEN> userAgent;
         FixedString<20> remoteAddress;
         uint64_t expiration;
+
+        Session& operator=(const Session&) = default;
     };
 
     struct SessionStorage final

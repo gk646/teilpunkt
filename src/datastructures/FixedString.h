@@ -6,12 +6,13 @@
 #include <cstring>
 #include "util/Logger.h"
 
+#include <type_traits>
+
 namespace tpunkt
 {
     template <size_t length>
     struct FixedString final
     {
-        //
         FixedString() = default;
 
         explicit FixedString(const char* string)
@@ -38,29 +39,6 @@ namespace tpunkt
             strncpy(arr, assignString, assignLen);
         }
 
-        void assign(const char* assignString, int assignLen)
-        {
-            if(assignString == nullptr)
-            {
-                LOG_ERROR("Null string passed");
-                arr[ 0 ] = '\0';
-            }
-
-            if(assignLen < 0)
-            {
-                LOG_ERROR("Negative length passed");
-                arr[ 0 ] = '\0';
-                return;
-            }
-
-            if(assignLen > length)
-            {
-                LOG_WARNING("String is too long and will be truncated");
-                assignLen = length;
-            }
-            strncpy(arr, assignString, assignLen);
-        }
-
         [[nodiscard]] const char* c_str() const
         {
             return arr;
@@ -71,7 +49,7 @@ namespace tpunkt
             return arr;
         }
 
-        size_t size() const
+        [[nodiscard]] size_t size() const
         {
             // Protected against missing 0 terminator
             for(size_t i = 0; i < length; ++i)
@@ -113,8 +91,7 @@ namespace tpunkt
         template <size_t oLength>
         FixedString& operator=(const FixedString<oLength>& other)
         {
-            assign(other.c_str(), oLength);
-            return *this;
+            assign(other.c_str());
         }
 
       private:

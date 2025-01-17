@@ -41,7 +41,7 @@ namespace tpunkt
                 {
                     grow(list.capacity > 0 ? list.capacity * 2 : 10);
                 }
-                memcpy(list.val + list.size, &value, sizeof(T));
+                *(list.val + list.size) = value;
                 ++list.size;
             }
 
@@ -131,7 +131,7 @@ namespace tpunkt
             }
 
           private:
-            void grow(size_t newCapacity)
+            void grow(size_t newCapacity) const
             {
                 if(newCapacity <= list.capacity)
                 {
