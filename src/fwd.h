@@ -17,11 +17,14 @@ namespace tpunkt
     template <typename T>
     struct SecureList;
     struct InstanceConfig;
+
     // Fixed string typedefs
     template <size_t len>
     struct FixedString;
     using SessionID = FixedString<TPUNKT_CRYPTO_SESSION_ID_LEN>;
     using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
+    using UserAgentString = FixedString<50>;
+
 
 } // namespace tpunkt
 

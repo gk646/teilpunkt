@@ -97,7 +97,7 @@ target_link_libraries(teilpunkt PRIVATE
 
 target_compile_definitions(teilpunkt PRIVATE
         UWS_HTTPRESPONSE_NO_WRITEMARK
-        LIBUS_USE_QUIC
+       # LIBUS_USE_QUIC
         TPUNKT_VERSION="${PROJECT_VERSION}"
 )
 

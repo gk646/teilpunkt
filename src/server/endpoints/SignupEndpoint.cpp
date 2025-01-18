@@ -1,6 +1,5 @@
 #include <uWebSocket/src/App.h>
 #include "server/Endpoints.h"
-#include "datastructures/STFTable.h"
 #include "auth/Authenticator.h"
 
 namespace tpunkt
@@ -11,8 +10,8 @@ namespace tpunkt
         res->onData(
             [ res, req ](std::string_view data, bool last)
             {
-                TextParser<{"username", 16}, {"password", 32}> stfTable;
-                if(!stfTable.parse("username=Hey\npassword=123\n"))
+                //TextParser<{"username", 16}, {"password", 32}> stfTable;
+                if(false)
                 {
                     res->writeHeader("Content-Type", "text/plain");
                     res->writeStatus("400");

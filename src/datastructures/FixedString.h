@@ -6,8 +6,6 @@
 #include <cstring>
 #include "util/Logger.h"
 
-#include <type_traits>
-
 namespace tpunkt
 {
     template <size_t length>
@@ -92,10 +90,11 @@ namespace tpunkt
         FixedString& operator=(const FixedString<oLength>& other)
         {
             assign(other.c_str());
+            return *this;
         }
 
       private:
-        char arr[ length + 1 ]; // Not initialized as it needs to be trivially constructible
+        char arr[ length + 1 ]{};
         static_assert(length > 0, "Cannot be empty");
     };
 

@@ -24,7 +24,7 @@ namespace tpunkt
         //===== User Management =====//
 
         // Tries to log in the user creating a new session if successful
-        AuthenticatorStatus userLogin(const UserName& name, const Credentials& credentials, AuthToken& out);
+        AuthenticatorStatus userLogin(const UserName& name, Credentials& credentials, AuthToken& out);
 
         // Deletes the currently used session
         AuthenticatorStatus userLogout(const AuthToken& token);
@@ -32,9 +32,11 @@ namespace tpunkt
         // Adds a new user if the username is unique
         AuthenticatorStatus userAdd(const UserName& name, Credentials& credentials);
 
+        // Removes the user and all their sessions
         AuthenticatorStatus removeUser(const AuthToken& token);
 
-        AuthenticatorStatus userChangeCredentials(const AuthToken& token, const Credentials& newCredentials);
+        // Changes the users credentials
+        AuthenticatorStatus userChangeCredentials(const AuthToken& token, Credentials& newCredentials);
 
         //===== Session Management =====//
 

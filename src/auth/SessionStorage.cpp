@@ -2,9 +2,11 @@
 
 namespace tpunkt
 {
-
-    SessionID SessionStorage::addSession( const User& user )
+    SessionID SessionStorage::add(const SecureBox<User>* user)
     {
     }
 
+    SessionID SessionStorage::remove(const SecureBox<User>* user)
+    {
+    }
 } // namespace tpunkt

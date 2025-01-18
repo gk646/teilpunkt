@@ -4,7 +4,9 @@
 > Until version 1.0.0 this is not production ready. Use at your own risk (see License).
 
 
-`teilpunkt`™ _(ger. sharepoint)_ is a C++ 20 secure file sharing server.
+`teilpunkt`™ _(ger. sharepoint)_ is a C++ 20 secure file sharing server. 
+
+Note: This made to compile with GCC and for a Linux kernel as open source is essential for security.
 
 ## Authentication
 

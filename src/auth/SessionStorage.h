@@ -1,6 +1,7 @@
 #ifndef TPUNKT_SESSION_STORAGE_H
 #define TPUNKT_SESSION_STORAGE_H
 
+#include <vector>
 #include "fwd.h"
 #include "datastructures/FixedString.h"
 #include "datastructures/SecureList.h"
@@ -15,22 +16,29 @@ namespace tpunkt
     //      - the user agent string differs from the saved one
     struct Session final
     {
+        Session() = default;
         SessionID sessionID;
-        FixedString<TPUNKT_STORAGE_NAME_LEN> userAgent;
+        UserAgentString userAgent;
         FixedString<20> remoteAddress;
         uint64_t expiration;
+    };
 
-        Session& operator=(const Session&) = default;
+    struct UserSessions final
+    {
+        const SecureBox<User>* userBox = nullptr; // Who these sessions belong to
+        SecureList<Session> sessions;             // Session list
     };
 
     struct SessionStorage final
     {
-        SessionID addSession(const User& user);
-
         SessionStorage() = default;
 
+        SessionID add(const SecureBox<User>* user);
+        SessionID remove(const SecureBox<User>* user);
+
       private:
-        SecureList<Session> sessions;
+        std::vector<UserSessions> sessions;
+        std::vector<uint32_t> tokens;
         TPUNKT_MACROS_STRUCT(SessionStorage);
     };
 

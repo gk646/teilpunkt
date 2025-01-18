@@ -40,4 +40,6 @@ namespace tpunkt
 #define LOG_CRITICAL(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::CRITICAL, msg, ##__VA_ARGS__)
 #define LOG_FATAL(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::FATAL, msg, ##__VA_ARGS__)
 
+#define LOG_EVENT(type, event, status) LOG_INFO(type event status)
+
 #endif // TPUNKT_LOGGER_H

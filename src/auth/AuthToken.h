@@ -8,14 +8,18 @@ namespace tpunkt
     struct AuthToken final
     {
         // Returns the identity this token authenticates
-        [[nodiscard]] const User& getUser() const;
+        [[nodiscard]] const SecureBox<User>& getUserBox() const
+        {
+            return userBox;
+        }
 
       private:
-        AuthToken(const User& usr, const uint32_t rand) : user(usr), random(rand)
+        AuthToken(const SecureBox<User>&& usrBox, const uint32_t rand) : userBox(usrBox), random(rand)
         {
         }
-        const User& user;
-        const uint32_t random; // Random number to make this token non forgeable
+
+        const SecureBox<User>& userBox; // User this token authenticates
+        const uint32_t random;          // Random number to make this token non forgeable
         TPUNKT_MACROS_STRUCT(AuthToken);
         friend Authenticator;
     };

@@ -18,13 +18,13 @@ namespace tpunkt
     {
         Credentials() = default;
 
-        CredentialsType type;
+        CredentialsType type{};
         union
         {
+            char buf [crypto_pwhash_STRBYTES]{};
             FixedString<crypto_pwhash_STRBYTES> passkey;
             FixedString<crypto_pwhash_STRBYTES> password;
         };
-
     };
 
 } // namespace tpunkt

@@ -3,15 +3,20 @@
 
 #include "fwd.h"
 #include "datastructures/FixedString.h"
+#include "datastructures/SecureList.h"
 #include "auth/Credentials.h"
+#include "crypto/WrappedKey.h"
 
 namespace tpunkt
 {
     struct User final
     {
-        UserName name;
-        Credentials credentials;
-        bool loggedIn;
+        UserName name{};
+        Credentials credentials{};
+        SecureList<WrappedKey> keys{};
+
+      private:
+        TPUNKT_MACROS_STRUCT(User);
     };
 
 } // namespace tpunkt
