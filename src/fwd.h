@@ -10,6 +10,7 @@ namespace tpunkt
     struct File;
     struct Credentials;
     struct AuthToken;
+    struct Authenticator;
     struct UserStorage;
     struct SessionStorage;
     template <typename T>
@@ -24,6 +25,7 @@ namespace tpunkt
     using SessionID = FixedString<TPUNKT_CRYPTO_SESSION_ID_LEN>;
     using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
     using UserAgentString = FixedString<50>;
+    using HashedIP = FixedString<16>;
 
 
 } // namespace tpunkt

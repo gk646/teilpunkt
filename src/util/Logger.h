@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "util/Macros.h"
+#include "monitoring/EventMonitor.h"
 
 namespace tpunkt
 {
@@ -40,6 +41,21 @@ namespace tpunkt
 #define LOG_CRITICAL(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::CRITICAL, msg, ##__VA_ARGS__)
 #define LOG_FATAL(msg, ...) tpunkt::GetLogger().log(tpunkt::LogLevel::FATAL, msg, ##__VA_ARGS__)
 
-#define LOG_EVENT(type, event, status) LOG_INFO(type event status)
+#define STRINGIFY(x) #x
+
+#define LOG_EVENT(type, action, status)                                                                                \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if constexpr(tpunkt::IsWarnEvent(tpunkt::EventStatus::status))                                                 \
+        {                                                                                                              \
+            LOG_WARNING(#type " : " #action " : " #status);                                                            \
+        }                                                                                                              \
+        else                                                                                                           \
+        {                                                                                                              \
+            LOG_INFO(#type " : " #action " : " #status);                                                               \
+        }                                                                                                              \
+        tpunkt::GetEventMonitor().log(tpunkt::EventType::type, tpunkt::EventAction::action,                            \
+                                      tpunkt::EventStatus::status);                                                    \
+    } while(0)
 
 #endif // TPUNKT_LOGGER_H

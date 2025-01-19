@@ -19,7 +19,7 @@ namespace tpunkt
         Session() = default;
         SessionID sessionID;
         UserAgentString userAgent;
-        FixedString<20> remoteAddress;
+        HashedIP remoteAddress;
         uint64_t expiration;
     };
 
@@ -27,6 +27,7 @@ namespace tpunkt
     {
         const SecureBox<User>* userBox = nullptr; // Who these sessions belong to
         SecureList<Session> sessions;             // Session list
+        std::vector<uint32_t> tokens;             // Tokens per user
     };
 
     struct SessionStorage final
@@ -34,11 +35,11 @@ namespace tpunkt
         SessionStorage() = default;
 
         SessionID add(const SecureBox<User>* user);
-        SessionID remove(const SecureBox<User>* user);
+        bool removeByIP(const SecureBox<User>* user, HashedIP& address);
+        bool removeByID(const SecureBox<User>* user, SessionID& address);
 
       private:
         std::vector<UserSessions> sessions;
-        std::vector<uint32_t> tokens;
         TPUNKT_MACROS_STRUCT(SessionStorage);
     };
 

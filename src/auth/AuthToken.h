@@ -8,15 +8,12 @@ namespace tpunkt
     struct AuthToken final
     {
         // Returns the identity this token authenticates
-        [[nodiscard]] const SecureBox<User>& getUserBox() const
-        {
-            return userBox;
-        }
+        [[nodiscard]] const SecureBox<User>& getUserBox() const;
+
+        ~AuthToken();
 
       private:
-        AuthToken(const SecureBox<User>&& usrBox, const uint32_t rand) : userBox(usrBox), random(rand)
-        {
-        }
+        AuthToken(const SecureBox<User>& usrBox, uint32_t rand);
 
         const SecureBox<User>& userBox; // User this token authenticates
         const uint32_t random;          // Random number to make this token non forgeable

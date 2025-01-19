@@ -26,6 +26,9 @@ int main()
     // All variables are declared on the stack and cleaned up in a fixed scope
     {
         tpunkt::Logger logger{};
+        LOG_EVENT(UserAction, UserLogin, Invalid_Authentication);
+        LOG_EVENT(UserAction, UserLogin, Successful);
+        return 0;
         {
             tpunkt::InstanceConfig config{};
             tpunkt::Authenticator auth{};

@@ -36,6 +36,7 @@ namespace tpunkt
             return AuthenticatorStatus::ERR_UNSUCCESSFUL;
         }
 
+
         sessionStore.add(userBox);
 
         LOG_INFO("UserAction : LoginUser : Success");
@@ -44,6 +45,7 @@ namespace tpunkt
 
     AuthenticatorStatus Authenticator::userLogout(const AuthToken& token)
     {
+
     }
 
     AuthenticatorStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
@@ -79,7 +81,10 @@ namespace tpunkt
     {
     }
 
-    AuthenticatorStatus Authenticator::isValid(const AuthToken& token)
+    bool Authenticator::tokenValid(const AuthToken& token)
+    {
+    }
+    AuthenticatorStatus Authenticator::tokenInvalidate(AuthToken& token)
     {
     }
 

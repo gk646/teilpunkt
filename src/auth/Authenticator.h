@@ -45,8 +45,14 @@ namespace tpunkt
         // Tries to authenticate the user via the session id
         AuthenticatorStatus sessionAuth(const SessionID& sessionId, AuthToken& out);
 
+        AuthenticatorStatus sessionGet();
+
+        //===== Token Management =====//
+
         // Returns true if the given auth token is valid
-        AuthenticatorStatus isValid(const AuthToken& token);
+        bool tokenValid(const AuthToken& token);
+
+        AuthenticatorStatus tokenInvalidate(AuthToken& token);
 
         Authenticator();
         ~Authenticator();
