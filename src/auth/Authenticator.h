@@ -5,13 +5,13 @@
 #include "util/Macros.h"
 #include "auth/SessionStorage.h"
 #include "auth/UserStorage.h"
+#include "datastructures/SecureWrapper.h"
 
 namespace tpunkt
 {
-
-    enum class AuthenticatorStatus : uint8_t
+    enum class AuthStatus : uint8_t
     {
-        INVALID,
+        INVALID, // Prevent default initialized values
         OK,
         // Generic error
         ERR_UNSUCCESSFUL,
@@ -23,36 +23,39 @@ namespace tpunkt
     {
         //===== User Management =====//
 
-        // Tries to log in the user creating a new session if successful
-        AuthenticatorStatus userLogin(const UserName& name, Credentials& credentials, AuthToken& out);
+        // Logs the user in and assigns token on success
+        AuthStatus userLogin(const UserName& name, Credentials& consumed, AuthToken& out);
 
-        // Deletes the currently used session
-        AuthenticatorStatus userLogout(const AuthToken& token);
-
-        // Adds a new user if the username is unique
-        AuthenticatorStatus userAdd(const UserName& name, Credentials& credentials);
+        // Adds a new user - username must be unique
+        AuthStatus userAdd(const UserName& name, Credentials& consumed);
 
         // Removes the user and all their sessions
-        AuthenticatorStatus removeUser(const AuthToken& token);
+        AuthStatus userRemove(const AuthToken& token);
 
         // Changes the users credentials
-        AuthenticatorStatus userChangeCredentials(const AuthToken& token, Credentials& newCredentials);
+        AuthStatus userChangeCredentials(const AuthToken& token, const UserName& newName, Credentials& consumed);
 
         //===== Session Management =====//
 
-        AuthenticatorStatus sessionRemove(const AuthToken& token);
+        // Adds a session and returns the session id
+        AuthStatus sessionAdd(const AuthToken& token, const SessionData& data, SecureWrapper<SessionID>& out);
+
+        // Remove the session associated with the token
+        AuthStatus sessionRemove(const AuthToken& token);
 
         // Tries to authenticate the user via the session id
-        AuthenticatorStatus sessionAuth(const SessionID& sessionId, AuthToken& out);
+        AuthStatus sessionAuth(const SessionID& sessionId, const SessionData& data, AuthToken& out);
 
-        AuthenticatorStatus sessionGet();
+        // Get all session for the user associated with the token
+        AuthStatus sessionGet(const AuthToken& token);
 
         //===== Token Management =====//
 
         // Returns true if the given auth token is valid
         bool tokenValid(const AuthToken& token);
 
-        AuthenticatorStatus tokenInvalidate(AuthToken& token);
+        // Invalidates the given token - zeroes it and deletes it internally
+        AuthStatus tokenInvalidate(AuthToken& token);
 
         Authenticator();
         ~Authenticator();

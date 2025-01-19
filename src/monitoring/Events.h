@@ -1,9 +1,10 @@
 #ifndef TPUNKT_EVENTS_H
 #define TPUNKT_EVENTS_H
 
+#include <cstdint>
+
 namespace tpunkt
 {
-
     enum class EventType : uint8_t
     {
         INVALID,

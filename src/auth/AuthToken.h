@@ -2,6 +2,8 @@
 #define TPUNKT_AUTH_TOKEN_H
 
 #include "fwd.h"
+#include "datastructures/SecureWrapper.h"
+#include "datastructures/FixedString.h"
 
 namespace tpunkt
 {
@@ -10,13 +12,12 @@ namespace tpunkt
         // Returns the identity this token authenticates
         [[nodiscard]] const SecureBox<User>& getUserBox() const;
 
+        AuthToken() = default;
         ~AuthToken();
 
       private:
-        AuthToken(const SecureBox<User>& usrBox, uint32_t rand);
-
-        const SecureBox<User>& userBox; // User this token authenticates
-        const uint32_t random;          // Random number to make this token non forgeable
+        const SecureBox<User>* userBox = nullptr; // User this token authenticates
+        const uint32_t random = 0;                // Random number to make this token non forgeable
         TPUNKT_MACROS_STRUCT(AuthToken);
         friend Authenticator;
     };

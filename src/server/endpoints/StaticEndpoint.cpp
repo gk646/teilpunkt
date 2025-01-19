@@ -1,5 +1,5 @@
 #include "server/Endpoints.h"
-#include "util/Logger.h"
+#include "util/Logging.h"
 #include "server/WebServer.h"
 
 namespace tpunkt

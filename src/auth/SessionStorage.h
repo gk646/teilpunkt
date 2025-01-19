@@ -5,24 +5,10 @@
 #include "fwd.h"
 #include "datastructures/FixedString.h"
 #include "datastructures/SecureList.h"
+#include "auth/Session.h"
 
 namespace tpunkt
 {
-
-    // A session saves the authentication so the user does not have to authenticate on each request
-    // A session is terminated if ONE of the following is true:
-    //      - the current time is greater than the expiration stamp
-    //      - the remote address with the cookie differs from the saved one
-    //      - the user agent string differs from the saved one
-    struct Session final
-    {
-        Session() = default;
-        SessionID sessionID;
-        UserAgentString userAgent;
-        HashedIP remoteAddress;
-        uint64_t expiration;
-    };
-
     struct UserSessions final
     {
         const SecureBox<User>* userBox = nullptr; // Who these sessions belong to

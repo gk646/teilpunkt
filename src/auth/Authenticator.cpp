@@ -26,65 +26,64 @@ namespace tpunkt
         TPUNKT_MACROS_GLOBAL_GET(Authenticator);
     }
 
-    AuthenticatorStatus Authenticator::userLogin(const UserName& name, Credentials& credentials, AuthToken& token)
+    AuthStatus Authenticator::userLogin(const UserName& name, Credentials& credentials, AuthToken& token)
     {
         SecureEraser eraser{credentials};
         const SecureBox<User>* userBox = nullptr;
         if(userStore.login(name, credentials, userBox) == false || userBox == nullptr)
         {
             LOG_INFO("UserAction : LoginUser : Invalid authentication");
-            return AuthenticatorStatus::ERR_UNSUCCESSFUL;
+            return AuthStatus::ERR_UNSUCCESSFUL;
         }
-
 
         sessionStore.add(userBox);
 
         LOG_INFO("UserAction : LoginUser : Success");
-        return AuthenticatorStatus::OK;
+        return AuthStatus::OK;
     }
 
-    AuthenticatorStatus Authenticator::userLogout(const AuthToken& token)
-    {
-
-    }
-
-    AuthenticatorStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
+    AuthStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
     {
         SecureEraser eraser{credentials};
         if(userStore.nameExists(name))
         {
             LOG_INFO("UserAction : AddUser : Name already exists");
-            return AuthenticatorStatus::ERR_USER_NAME_EXISTS;
+            return AuthStatus::ERR_USER_NAME_EXISTS;
         }
         if(userStore.add(name, credentials) == false)
         {
             LOG_INFO("UserAction : AddUser : Crypto error");
-            return AuthenticatorStatus::ERR_UNSUCCESSFUL;
+            return AuthStatus::ERR_UNSUCCESSFUL;
         }
         LOG_INFO("UserAction : AddUser : successful");
-        return AuthenticatorStatus::OK;
+        return AuthStatus::OK;
     }
 
-    AuthenticatorStatus Authenticator::removeUser(const AuthToken& token)
+    AuthStatus Authenticator::userRemove(const AuthToken& token)
     {
     }
 
-    AuthenticatorStatus Authenticator::userChangeCredentials(const AuthToken& token, Credentials& newCredentials)
+    AuthStatus Authenticator::userChangeCredentials(const AuthToken& token, const UserName& newName,
+                                                    Credentials& newCredentials)
     {
     }
 
-    AuthenticatorStatus Authenticator::sessionRemove(const AuthToken& token)
+    AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionData& data, SecureWrapper<SessionID>& out)
+    {
+    }
+    AuthStatus Authenticator::sessionRemove(const AuthToken& token)
     {
     }
 
-    AuthenticatorStatus Authenticator::sessionAuth(const SessionID& sessionId, AuthToken& token)
+    AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionData& data, AuthToken& out)
     {
     }
 
     bool Authenticator::tokenValid(const AuthToken& token)
     {
     }
-    AuthenticatorStatus Authenticator::tokenInvalidate(AuthToken& token)
+
+    AuthStatus Authenticator::tokenInvalidate(AuthToken& token)
     {
     }
 

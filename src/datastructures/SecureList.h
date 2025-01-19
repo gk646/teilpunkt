@@ -4,10 +4,12 @@
 #include <sodium/utils.h>
 #include <type_traits>
 #include "util/Memory.h"
+#include "util/Macros.h"
+#include "util/Logging.h"
+#include "crypto/CryptoManager.h"
 
 namespace tpunkt
 {
-
     // Secure wrapper for a list of objects - always accessed as a whole list if at all
     template <typename T>
     struct SecureList final
@@ -18,18 +20,30 @@ namespace tpunkt
         {
             explicit ListAccess(SecureList& originalList) : list(originalList)
             {
-                sodium_mprotect_readwrite(list.arr);
+                if(list.arr) [[likely]]
+                {
+                    sodium_mprotect_readwrite(list.arr);
+                    GetCryptoManager().decrypt(list.arr, list.elements * sizeof(T));
+                }
             }
 
             ~ListAccess()
             {
-                sodium_mprotect_noaccess(list.arr);
+                if(list.arr) [[likely]]
+                {
+                    GetCryptoManager().encrypt(list.arr, list.elements * sizeof(T));
+                    sodium_mprotect_noaccess(list.arr);
+                }
             }
 
+            [[nodiscard]] size_t size() const
+            {
+                return list.elements;
+            }
 
             T& operator[](const int idx)
             {
-                if(idx >= list.size)
+                if(idx >= list.elements)
                 {
                     LOG_FATAL("InternalCode : SecureList : Out of bounds access");
                 }
@@ -38,7 +52,7 @@ namespace tpunkt
 
             const T& operator[](const int idx) const
             {
-                if(idx >= list.size)
+                if(idx >= list.elements)
                 {
                     LOG_FATAL("InternalCode : SecureList : Out of bounds access");
                 }
@@ -48,37 +62,37 @@ namespace tpunkt
             // Adds a new element at the end
             void push_back(const T& value)
             {
-                if(list.size == list.capacity)
+                if(list.elements == list.capacity)
                 {
                     grow(list.capacity > 0 ? list.capacity * 2 : 10);
                 }
-                ::new(&list.arr[ list.size ]) T();
-                list.arr[ list.size ] = value;
-                ++list.size;
+                ::new(&list.arr[ list.elements ]) T();
+                list.arr[ list.elements ] = value;
+                ++list.elements;
             }
 
             // Adds a new default element at the end and returns it
             T& emplace_back()
             {
-                if(list.size == list.capacity)
+                if(list.elements == list.capacity)
                 {
                     grow(list.capacity > 0 ? list.capacity * 2 : 10);
                 }
-                ::new(&list.arr[ list.size ]) T();
-                return list.arr[ list.size++ ];
+                ::new(&list.arr[ list.elements ]) T();
+                return list.arr[ list.elements++ ];
             }
 
             // Erases the first occurrence of the given value
             // DOES NOT KEEP ORDER
             bool erase(const T& value)
             {
-                for(size_t i = 0; i < list.size; ++i)
+                for(size_t i = 0; i < list.elements; ++i)
                 {
                     if(list.arr[ i ] == value)
                     {
-                        if(i != list.size - 1) // Not at last place - copy last place to the matching one
-                            memcpy(list.arr + i, list.arr + (list.size - 1), sizeof(T));
-                        --list.size;
+                        if(i != list.elements - 1) // Not at last place - copy last place to the matching one
+                            memcpy(list.arr + i, list.arr + (list.elements - 1), sizeof(T));
+                        --list.elements;
                         return true;
                     }
                 }
@@ -88,20 +102,20 @@ namespace tpunkt
             // Checks if the list contains the given value
             bool contains(const T& value) const
             {
-                return findIndex(value) < list.size;
+                return findIndex(value) < list.elements;
             }
 
             // Returns the position of the value or "size" if not found
             size_t findIndex(const T& value) const
             {
-                for(size_t i = 0; i < list.size; ++i)
+                for(size_t i = 0; i < list.elements; ++i)
                 {
                     if(list.arr[ i ] == value)
                     {
                         return i;
                     }
                 }
-                return list.size;
+                return list.elements;
             }
 
             struct Iterator final
@@ -148,7 +162,7 @@ namespace tpunkt
             }
             Iterator end() const
             {
-                return Iterator{list.arr + list.size};
+                return Iterator{list.arr + list.elements};
             }
             Iterator begin()
             {
@@ -156,7 +170,7 @@ namespace tpunkt
             }
             Iterator end()
             {
-                return Iterator{list.arr + list.size};
+                return Iterator{list.arr + list.elements};
             }
 
           private:
@@ -176,7 +190,7 @@ namespace tpunkt
                 // Make old writeable
                 sodium_mprotect_readwrite(list.arr);
                 // Copy from old
-                memcpy(newVal, list.arr, sizeof(T) * list.size);
+                memcpy(newVal, list.arr, sizeof(T) * list.elements);
                 // Delete old
                 TPUNKT_SECUREFREE(list.arr);
                 // Assign new to old - will be protected in dtor
@@ -205,11 +219,11 @@ namespace tpunkt
         SecureList(SecureList&& other) noexcept
         {
             arr = other.arr;
-            size = other.size;
+            elements = other.elements;
             capacity = other.capacity;
             other.arr = nullptr;
             other.capacity = 0;
-            other.size = 0;
+            other.elements = 0;
         }
 
         SecureList& operator=(SecureList&& other) noexcept
@@ -219,11 +233,11 @@ namespace tpunkt
                 return *this;
             }
             arr = other.arr;
-            size = other.size;
+            elements = other.elements;
             capacity = other.capacity;
             other.arr = nullptr;
             other.capacity = 0;
-            other.size = 0;
+            other.elements = 0;
             return *this;
         }
 
@@ -232,16 +246,20 @@ namespace tpunkt
 
         ~SecureList()
         {
-            sodium_mprotect_readwrite(arr);
+            if(arr)
+            {
+                sodium_mprotect_readwrite(arr);
+            }
             TPUNKT_SECUREFREE(arr);
         }
 
       private:
         T* arr = nullptr;
-        size_t size = 0;
+        size_t elements = 0;
         size_t capacity = 0;
         static_assert(std::is_trivially_destructible_v<T>, "Detors are not called");
         static_assert(std::is_trivially_copyable_v<T>, "Uses memcpy to copy values");
+        static_assert(std::is_default_constructible_v<T>, "No params supported");
     };
 
 

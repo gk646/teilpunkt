@@ -2,9 +2,8 @@
 #define TPUNKT_FIXED_STRING_H
 
 // Fixed string for names/keys that handles overflow and truncation
-
-#include <cstring>
-#include "util/Logger.h"
+#include <cstddef>
+#include "util/Logging.h"
 
 namespace tpunkt
 {
@@ -15,26 +14,7 @@ namespace tpunkt
 
         explicit FixedString(const char* string)
         {
-            assign(string);
-        }
-
-        void assign(const char* assignString)
-        {
-            if(assignString == nullptr)
-            {
-                LOG_ERROR("Null string passed");
-                arr[ 0 ] = '\0';
-                return;
-            }
-
-            auto assignLen = strlen(assignString);
-            if(assignLen > length)
-            {
-                LOG_WARNING("String is too long and will be truncated");
-                assignLen = length;
-            }
-
-            strncpy(arr, assignString, assignLen);
+            assign(string, 0);
         }
 
         [[nodiscard]] const char* c_str() const
@@ -50,12 +30,46 @@ namespace tpunkt
         [[nodiscard]] size_t size() const
         {
             // Protected against missing 0 terminator
-            for(size_t i = 0; i < length; ++i)
+            for(size_t i = 0; i < length + 1; ++i)
             {
                 if(arr[ i ] == '\0')
                     return i;
             }
+            LOG_CRITICAL("Missing string terminator");
             return length;
+        }
+
+
+        template <size_t oLength>
+        FixedString& operator=(const FixedString<oLength>& other)
+        {
+            assign(other.c_str(), oLength);
+            return *this;
+        }
+
+        FixedString& operator=(const char* assignString)
+        {
+            assign(assignString, 0);
+            return *this;
+        }
+
+        bool operator==(const char* str)
+        {
+            for(size_t i = 0; i < length; ++i)
+            {
+                const auto c = str[ i ];
+
+                if(c == '\0')
+                {
+                    return arr[ i ] == c;
+                }
+
+                if(arr[ i ] != c)
+                {
+                    return false;
+                }
+            }
+            return false; // Other string is longer
         }
 
         template <size_t oLength>
@@ -86,14 +100,44 @@ namespace tpunkt
             return arr[ length ] == other.c_str()[ length ] && arr[ length ] == '\0'; // Same length
         }
 
-        template <size_t oLength>
-        FixedString& operator=(const FixedString<oLength>& other)
+      private:
+        static size_t strlen_limited(const char* str, const size_t limit)
         {
-            assign(other.c_str());
-            return *this;
+            size_t len = 0;
+            if(limit > 0)
+            {
+                while(len < limit && str[ len ] != '\0')
+                {
+                    ++len;
+                }
+            }
+            else
+            {
+                while(str[ len ] != '\0')
+                {
+                    ++len;
+                }
+            }
+            return len;
         }
 
-      private:
+        void assign(const char* assignString, size_t maxLen)
+        {
+            if(assignString == nullptr)
+            {
+                LOG_ERROR("Null string passed");
+                return;
+            }
+
+            auto assignLen = strlen_limited(assignString, maxLen);
+            if(assignLen > length) [[unlikely]]
+            {
+                assignLen = length;
+            }
+
+            strncpy(arr, assignString, assignLen);
+        }
+
         char arr[ length + 1 ]{};
         static_assert(length > 0, "Cannot be empty");
     };

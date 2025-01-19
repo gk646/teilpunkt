@@ -7,19 +7,27 @@ namespace tpunkt
     template <typename T>
     struct SecureBox final
     {
-        template<bool isConst>
+        template <bool isConst>
         struct BoxReader final
         {
             using BoxType = std::conditional_t<isConst, const SecureBox, SecureBox>;
 
             explicit BoxReader(BoxType& originalBox) : box(originalBox)
             {
-                sodium_mprotect_readwrite(box.val);
+                if(box.val)
+                {
+                    sodium_mprotect_readwrite(box.val);
+                    GetCryptoManager().decrypt(box.val, sizeof(T));
+                }
             }
 
             ~BoxReader()
             {
-                sodium_mprotect_noaccess(box.val);
+                if(box.val)
+                {
+                    GetCryptoManager().encrypt(box.val, sizeof(T));
+                    sodium_mprotect_noaccess(box.val);
+                }
             }
 
             T& get()
@@ -47,6 +55,7 @@ namespace tpunkt
             val = other.val;
             other.val = nullptr;
         }
+
         SecureBox& operator=(SecureBox&& other) noexcept
         {
             if(this == &other)
@@ -57,12 +66,14 @@ namespace tpunkt
             other.val = nullptr;
             return *this;
         }
+
         SecureBox(const SecureBox& other) = delete;
         SecureBox& operator=(const SecureBox& other) = delete;
 
         ~SecureBox()
         {
             TPUNKT_SECUREFREE(val);
+            val = nullptr;
         }
 
         BoxReader<false> get()

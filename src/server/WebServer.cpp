@@ -1,6 +1,6 @@
 #include "server/WebServer.h"
 #include "server/Endpoints.h"
-#include "util/Logger.h"
+#include "util/Logging.h"
 
 namespace tpunkt
 {

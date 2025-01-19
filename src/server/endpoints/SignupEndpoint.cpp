@@ -21,10 +21,10 @@ namespace tpunkt
                 {
                     Credentials credentials{};
                     credentials.type = CredentialsType::PASSWORD;
-                    credentials.password.assign("123");
+                    credentials.password = "123";
 
                     UserName name{};
-                    name.assign("Hey");
+                    name = "hey";
 
                     GetAuthenticator().userAdd(name, credentials);
                     res->end();

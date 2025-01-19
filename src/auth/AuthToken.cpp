@@ -8,12 +8,11 @@ namespace tpunkt
 {
     const SecureBox<User>& AuthToken::getUserBox() const
     {
-        return userBox;
-    }
-
-    AuthToken::AuthToken(const SecureBox<User>& usrBox, const uint32_t rand)
-        : userBox(usrBox), random(rand)
-    {
+        if(userBox != nullptr) [[likely]]
+        {
+            return *userBox;
+        }
+        LOG_FATAL("No box present");
     }
 
     AuthToken::~AuthToken()

@@ -31,8 +31,7 @@
 #define TPUNKT_MACROS_GLOBAL_GET( var )                                                                                \
     if( global::var != nullptr )                                                                                       \
         return *global::var;                                                                                           \
-    LOG_FATAL( "%-15s is not assigned", #var );                                                                        \
-    exit( 1 ); // Against compiler warning
+    LOG_FATAL( "%-15s is not assigned", #var );
 
 
 #define TPUNKT_MACROS_STARTUP_PRINT()                                                                                  \

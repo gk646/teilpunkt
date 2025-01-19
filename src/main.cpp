@@ -1,13 +1,14 @@
 #include <csignal>
 #include <sodium/core.h>
-#include "util/Logger.h"
+#include "util/Logging.h"
 #include "server/WebServer.h"
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
 
-static void handle_shutdown_signal(int /**/)
+static void handle_shutdown_signal(int signal)
 {
-    tpunkt::GetWebServer().stop();
+    if(signal != SIGTRAP)
+        tpunkt::GetWebServer().stop();
 }
 
 int main()
@@ -15,23 +16,24 @@ int main()
     {
         TPUNKT_MACROS_STARTUP_PRINT();
     }
+
+    signal(SIGINT, handle_shutdown_signal);
+    signal(SIGTERM, handle_shutdown_signal);
+    signal(SIGTRAP, handle_shutdown_signal);
+
     if(sodium_init() != 0)
     {
         fputs("Failed to initialize libsodium", stderr);
         return 1;
     }
-    signal(SIGINT, handle_shutdown_signal);
-    signal(SIGTERM, handle_shutdown_signal);
-
     // All variables are declared on the stack and cleaned up in a fixed scope
     {
         tpunkt::Logger logger{};
-        LOG_EVENT(UserAction, UserLogin, Invalid_Authentication);
-        LOG_EVENT(UserAction, UserLogin, Successful);
-        return 0;
         {
             tpunkt::InstanceConfig config{};
             tpunkt::Authenticator auth{};
+            tpunkt::CryptoManager crypto{};
+            tpunkt::EventMonitor monitor{};
             tpunkt::WebServer server{};
             server.run();
         }

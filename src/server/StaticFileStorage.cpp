@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 #include "server/StaticFileStorage.h"
-#include "util/Logger.h"
+#include "util/Logging.h"
 #include "util/Memory.h"
 
 namespace tpunkt
