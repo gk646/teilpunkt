@@ -30,15 +30,21 @@ namespace tpunkt
         [[nodiscard]] size_t size() const
         {
             // Protected against missing 0 terminator
-            for(size_t i = 0; i < length + 1; ++i)
+            for(size_t i = 0U; i < length + 1U; ++i)
             {
                 if(arr[ i ] == '\0')
+                {
                     return i;
+                }
             }
             LOG_CRITICAL("Missing string terminator");
             return length;
         }
 
+        [[nodiscard]] constexpr size_t capacity() const
+        {
+            return length;
+        }
 
         template <size_t oLength>
         FixedString& operator=(const FixedString<oLength>& other)
@@ -55,7 +61,7 @@ namespace tpunkt
 
         bool operator==(const char* str)
         {
-            for(size_t i = 0; i < length; ++i)
+            for(size_t i = 0U; i < length; ++i)
             {
                 const auto c = str[ i ];
 
@@ -76,7 +82,7 @@ namespace tpunkt
         bool operator==(const FixedString<oLength>& other) const
         {
             // Protected against missing 0 terminator
-            for(size_t i = 0; i < length; ++i)
+            for(size_t i = 0U; i < length; ++i)
             {
                 if(i < oLength)
                 {
@@ -103,8 +109,8 @@ namespace tpunkt
       private:
         static size_t strlen_limited(const char* str, const size_t limit)
         {
-            size_t len = 0;
-            if(limit > 0)
+            size_t len = 0U;
+            if(limit > 0U)
             {
                 while(len < limit && str[ len ] != '\0')
                 {
@@ -121,7 +127,7 @@ namespace tpunkt
             return len;
         }
 
-        void assign(const char* assignString, size_t maxLen)
+        void assign(const char* assignString, const size_t maxLen)
         {
             if(assignString == nullptr)
             {
@@ -138,8 +144,8 @@ namespace tpunkt
             strncpy(arr, assignString, assignLen);
         }
 
-        char arr[ length + 1 ]{};
-        static_assert(length > 0, "Cannot be empty");
+        char arr[ length + 1U ]{};
+        static_assert(length > 0U, "Cannot be empty");
     };
 
 } // namespace tpunkt

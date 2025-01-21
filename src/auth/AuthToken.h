@@ -19,7 +19,7 @@ namespace tpunkt
         const SecureBox<User>* userBox = nullptr; // User this token authenticates
         const uint32_t random = 0;                // Random number to make this token non forgeable
         TPUNKT_MACROS_STRUCT(AuthToken);
-        friend Authenticator;
+        friend SessionStorage;
     };
 
 } // namespace tpunkt

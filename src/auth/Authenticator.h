@@ -38,13 +38,13 @@ namespace tpunkt
         //===== Session Management =====//
 
         // Adds a session and returns the session id
-        AuthStatus sessionAdd(const AuthToken& token, const SessionData& data, SecureWrapper<SessionID>& out);
+        AuthStatus sessionAdd(const AuthToken& token, const SessionMetaData& data, SecureWrapper<SessionID>& out);
 
         // Remove the session associated with the token
         AuthStatus sessionRemove(const AuthToken& token);
 
         // Tries to authenticate the user via the session id
-        AuthStatus sessionAuth(const SessionID& sessionId, const SessionData& data, AuthToken& out);
+        AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out);
 
         // Get all session for the user associated with the token
         AuthStatus sessionGet(const AuthToken& token);

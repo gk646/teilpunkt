@@ -1,37 +1,41 @@
 #ifndef TPUNKT_MACROS_H
 #define TPUNKT_MACROS_H
 
-#define TPUNKT_MACROS_DEL_CTORS( type )                                                                                \
-    type( type&& ) = delete;                                                                                           \
-    type( const type& ) = delete;                                                                                      \
-    type& operator=( const type& ) = delete;                                                                           \
-    type& operator=( const type&& ) = delete;
+#define TPUNKT_MACROS_DEL_CTORS(type)                                                                                  \
+    type(type&&) = delete;                                                                                             \
+    type(const type&) = delete;                                                                                        \
+    type& operator=(const type&) = delete;                                                                             \
+    type& operator=(const type&&) = delete
 
-#define TPUNKT_MACROS_STRUCT( type ) TPUNKT_MACROS_DEL_CTORS( type )
+#define TPUNKT_MACROS_STRUCT(type) TPUNKT_MACROS_DEL_CTORS(type)
 
 
-#define TPUNKT_MACROS_GLOBAL_ASSIGN( var )                                                                             \
-    if( global::var == nullptr )                                                                                       \
+#define TPUNKT_MACROS_GLOBAL_ASSIGN(var)                                                                               \
+    if(global::var == nullptr)                                                                                         \
     {                                                                                                                  \
         global::var = this;                                                                                            \
-        LOG_DEBUG( "%-15s initialized", #var );                                                                        \
+        LOG_DEBUG("%-15s initialized", #var);                                                                          \
     }                                                                                                                  \
     else                                                                                                               \
-        LOG_CRITICAL( "%-15s is already assigned", #var );
-
-#define TPUNKT_MACROS_GLOBAL_RESET( var )                                                                              \
-    if( global::var != nullptr )                                                                                       \
     {                                                                                                                  \
-        LOG_DEBUG( "%-15s stopped", #var );                                                                            \
+        LOG_CRITICAL("%-15s is not assigned", #var);                                                                   \
+    }
+
+#define TPUNKT_MACROS_GLOBAL_RESET(var)                                                                                \
+    if(global::var != nullptr)                                                                                         \
+    {                                                                                                                  \
+        LOG_DEBUG("%-15s stopped", #var);                                                                              \
         global::var = nullptr;                                                                                         \
     }                                                                                                                  \
     else                                                                                                               \
-        LOG_CRITICAL( "%-15s is not assigned", #var );
+    {                                                                                                                  \
+        LOG_CRITICAL("%-15s is not assigned", #var);                                                                   \
+    }
 
-#define TPUNKT_MACROS_GLOBAL_GET( var )                                                                                \
-    if( global::var != nullptr )                                                                                       \
+#define TPUNKT_MACROS_GLOBAL_GET(var)                                                                                  \
+    if(global::var != nullptr)                                                                                         \
         return *global::var;                                                                                           \
-    LOG_FATAL( "%-15s is not assigned", #var );
+    LOG_FATAL("%-15s is not assigned", #var);
 
 
 #define TPUNKT_MACROS_STARTUP_PRINT()                                                                                  \
@@ -50,9 +54,9 @@ Copyright (C) 2025 gk646 and contributors
 This is free software; see the license for copying conditions. There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-)";\
-constexpr auto BUILD_TIMESTAMP = __DATE__ " " __TIME__;\
-fprintf( stdout, STARTUP_MSG, TPUNKT_VERSION, BUILD_TIMESTAMP)
+)";                                                                                                                    \
+    constexpr auto BUILD_TIMESTAMP = __DATE__ " " __TIME__;                                                            \
+    fprintf(stdout, STARTUP_MSG, TPUNKT_VERSION, BUILD_TIMESTAMP)
 
 
 #endif // TPUNKT_MACROS_H

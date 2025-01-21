@@ -13,6 +13,7 @@ target_include_directories(teilpunkt-tests PRIVATE
         ../external
         ../external/uWebSocket/uSockets/src
         catch2
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_compile_definitions(teilpunkt-tests PRIVATE

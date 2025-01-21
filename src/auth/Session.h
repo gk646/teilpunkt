@@ -1,13 +1,18 @@
 #ifndef TPUNKT_SESSION_H
 #define TPUNKT_SESSION_H
 
+#include "datastructures/FixedString.h"
+#include "datastructures/Timestamp.h"
+
 namespace tpunkt
 {
-
-    struct SessionData final
+    struct SessionMetaData final
     {
+
+      private:
         UserAgentString userAgent;
         HashedIP remoteAddress;
+        friend SessionStorage;
     };
 
     // A session saves the authentication so the user does not have to authenticate on each request
@@ -18,10 +23,14 @@ namespace tpunkt
     struct Session final
     {
         Session() = default;
+        Session(const Session&) = default;
+
+      private:
         SessionID sessionID;
-        SessionData data;
-        uint64_t creation; // Unix timestamps
-        uint64_t expiration;
+        SessionMetaData data;
+        const Timestamp creation{};
+        Timestamp expiration{};
+        friend SessionStorage;
     };
 
 } // namespace tpunkt

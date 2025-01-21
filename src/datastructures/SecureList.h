@@ -3,6 +3,7 @@
 
 #include <sodium/utils.h>
 #include <type_traits>
+#include <cstring>
 #include "util/Memory.h"
 #include "util/Macros.h"
 #include "util/Logging.h"
@@ -41,7 +42,7 @@ namespace tpunkt
                 return list.elements;
             }
 
-            T& operator[](const int idx)
+            T& operator[](const size_t idx)
             {
                 if(idx >= list.elements)
                 {
@@ -50,7 +51,7 @@ namespace tpunkt
                 return list.arr[ idx ];
             }
 
-            const T& operator[](const int idx) const
+            const T& operator[](const size_t idx) const
             {
                 if(idx >= list.elements)
                 {
@@ -64,10 +65,10 @@ namespace tpunkt
             {
                 if(list.elements == list.capacity)
                 {
-                    grow(list.capacity > 0 ? list.capacity * 2 : 10);
+                    grow(list.capacity > 0U ? list.capacity * 2U : 10U);
                 }
                 ::new(&list.arr[ list.elements ]) T();
-                list.arr[ list.elements ] = value;
+                memcpy(list.arr + list.elements, &value, sizeof(T));
                 ++list.elements;
             }
 
@@ -76,7 +77,7 @@ namespace tpunkt
             {
                 if(list.elements == list.capacity)
                 {
-                    grow(list.capacity > 0 ? list.capacity * 2 : 10);
+                    grow(list.capacity > 0U ? list.capacity * 2U : 10U);
                 }
                 ::new(&list.arr[ list.elements ]) T();
                 return list.arr[ list.elements++ ];
@@ -86,17 +87,38 @@ namespace tpunkt
             // DOES NOT KEEP ORDER
             bool erase(const T& value)
             {
-                for(size_t i = 0; i < list.elements; ++i)
+                for(size_t i = 0U; i < list.elements; ++i)
                 {
                     if(list.arr[ i ] == value)
                     {
-                        if(i != list.elements - 1) // Not at last place - copy last place to the matching one
-                            memcpy(list.arr + i, list.arr + (list.elements - 1), sizeof(T));
+                        // Not at last place - copy last place to the matching one
+                        if(i != list.elements - 1U) [[likely]]
+                        {
+                            memcpy(list.arr + i, list.arr + (list.elements - 1U), sizeof(T));
+                        }
                         --list.elements;
                         return true;
                     }
                 }
                 return false;
+            }
+
+            // Erases the element at the given index
+            // DOES NOT KEEP ORDER
+            bool eraseIndex(const size_t idx)
+            {
+                if(idx >= list.elements)
+                {
+                    LOG_CRITICAL("Out of bounds erase");
+                    return false;
+                }
+
+                if(idx != list.elements - 1U) [[likely]]
+                {
+                    memcpy(list.arr + idx, list.arr + (list.elements - 1U), sizeof(T));
+                }
+                --list.elements;
+                return true;
             }
 
             // Checks if the list contains the given value
@@ -108,7 +130,7 @@ namespace tpunkt
             // Returns the position of the value or "size" if not found
             size_t findIndex(const T& value) const
             {
-                for(size_t i = 0; i < list.elements; ++i)
+                for(size_t i = 0U; i < list.elements; ++i)
                 {
                     if(list.arr[ i ] == value)
                     {
@@ -182,7 +204,7 @@ namespace tpunkt
                 }
                 T* newVal = TPUNKT_SECUREALLOC(newVal, sizeof(T) * newCapacity);
 
-                for(size_t i = 0; i < newCapacity; ++i)
+                for(size_t i = 0U; i < newCapacity; ++i)
                 {
                     ::new(&newVal[ i ]) T();
                 }
@@ -209,7 +231,7 @@ namespace tpunkt
         explicit SecureList(const size_t initialCapacity = 10) : capacity(initialCapacity)
         {
             arr = TPUNKT_SECUREALLOC(arr, sizeof(T) * initialCapacity);
-            for(size_t i = 0; i < capacity; ++i)
+            for(size_t i = 0U; i < capacity; ++i)
             {
                 ::new(&arr[ i ]) T();
             }
@@ -222,8 +244,8 @@ namespace tpunkt
             elements = other.elements;
             capacity = other.capacity;
             other.arr = nullptr;
-            other.capacity = 0;
-            other.elements = 0;
+            other.capacity = 0U;
+            other.elements = 0U;
         }
 
         SecureList& operator=(SecureList&& other) noexcept
@@ -236,8 +258,8 @@ namespace tpunkt
             elements = other.elements;
             capacity = other.capacity;
             other.arr = nullptr;
-            other.capacity = 0;
-            other.elements = 0;
+            other.capacity = 0U;
+            other.elements = 0U;
             return *this;
         }
 
@@ -255,8 +277,8 @@ namespace tpunkt
 
       private:
         T* arr = nullptr;
-        size_t elements = 0;
-        size_t capacity = 0;
+        size_t elements = 0U;
+        size_t capacity = 0U;
         static_assert(std::is_trivially_destructible_v<T>, "Detors are not called");
         static_assert(std::is_trivially_copyable_v<T>, "Uses memcpy to copy values");
         static_assert(std::is_default_constructible_v<T>, "No params supported");

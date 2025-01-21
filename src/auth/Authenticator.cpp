@@ -26,31 +26,31 @@ namespace tpunkt
         TPUNKT_MACROS_GLOBAL_GET(Authenticator);
     }
 
-    AuthStatus Authenticator::userLogin(const UserName& name, Credentials& credentials, AuthToken& token)
+    AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed, AuthToken& out)
     {
-        SecureEraser eraser{credentials};
+        SecureEraser eraser{consumed};
         const SecureBox<User>* userBox = nullptr;
-        if(userStore.login(name, credentials, userBox) == false || userBox == nullptr)
+        if(!userStore.login(name, consumed, userBox) || userBox == nullptr)
         {
             LOG_INFO("UserAction : LoginUser : Invalid authentication");
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
-        sessionStore.add(userBox);
 
         LOG_INFO("UserAction : LoginUser : Success");
         return AuthStatus::OK;
     }
 
-    AuthStatus Authenticator::userAdd(const UserName& name, Credentials& credentials)
+    AuthStatus Authenticator::userAdd(const UserName& name, Credentials& consumed)
     {
-        SecureEraser eraser{credentials};
+        SecureEraser eraser{consumed};
         if(userStore.nameExists(name))
         {
             LOG_INFO("UserAction : AddUser : Name already exists");
             return AuthStatus::ERR_USER_NAME_EXISTS;
         }
-        if(userStore.add(name, credentials) == false)
+
+        if(!userStore.add(name, consumed))
         {
             LOG_INFO("UserAction : AddUser : Crypto error");
             return AuthStatus::ERR_UNSUCCESSFUL;
@@ -68,14 +68,16 @@ namespace tpunkt
     {
     }
 
-    AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionData& data, SecureWrapper<SessionID>& out)
+    AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionMetaData& data,
+                                         SecureWrapper<SessionID>& out)
     {
     }
+
     AuthStatus Authenticator::sessionRemove(const AuthToken& token)
     {
     }
 
-    AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionData& data, AuthToken& out)
+    AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out)
     {
     }
 

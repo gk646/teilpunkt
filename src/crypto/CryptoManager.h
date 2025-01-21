@@ -2,6 +2,7 @@
 #define TPUNKT_CRYPTO_MANAGER_H
 
 #include <cstddef>
+#include "util/Macros.h"
 
 namespace tpunkt
 {
@@ -13,6 +14,9 @@ namespace tpunkt
 
         void encrypt(void* data, size_t len);
         void decrypt(void* data, size_t len);
+
+      private:
+        TPUNKT_MACROS_STRUCT(CryptoManager);
     };
 
     CryptoManager& GetCryptoManager();

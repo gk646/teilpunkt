@@ -1,12 +1,33 @@
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
+#ifndef TPUNKT_TIMESTAMP_H
+#define TPUNKT_TIMESTAMP_H
+
+#include <cstdint>
+#include "util/Macros.h"
+
+namespace tpunkt
+{
+
+    struct Timestamp
+    {
+        Timestamp();
+
+        // Returns true if this timestamp represents a time before the current moment
+        [[nodiscard]] bool isExpired() const;
+
+        void addSecs(uint64_t seconds);
+        void addMins(uint64_t minutes);
+        void addHours(uint64_t hours);
+        void addDays(uint64_t days);
+
+        void subtractTime(uint64_t seconds);
+
+        static Timestamp now();
+
+      private:
+        uint64_t timestamp;
+    };
 
 
+} // namespace tpunkt
 
-struct Timestamp {
-
-};
-
-
-
-#endif //TIMESTAMP_H
+#endif // TPUNKT_TIMESTAMP_H

@@ -128,6 +128,37 @@ TEST_CASE("SecureList Basic Functionality")
         REQUIRE(access3.contains(123) == true);
         REQUIRE(access3.size() == 2);
     }
+
+    SECTION("Erasing")
+    {
+        SecureList<int> list(10);
+        auto access = list.get();
+        constexpr int limit = 11;
+        for(int i = 0; i < limit; ++i)
+        {
+            access.push_back(i);
+        }
+
+        REQUIRE(access.size() == limit);
+
+        for(int i = 0; i < limit; ++i)
+        {
+            access.erase(i);
+        }
+
+        REQUIRE(access.size() == 0);
+
+        for(int i = 0; i < limit; ++i)
+        {
+            access.push_back(i);
+        }
+
+        for(int i = 0; i < limit; ++i)
+        {
+            access.eraseIndex(limit - (i + 1));
+        }
+        REQUIRE(access.size() == 0);
+    }
 }
 
 
