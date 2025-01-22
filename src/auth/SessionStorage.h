@@ -26,7 +26,6 @@ namespace tpunkt
         UserSessionData& operator=(const UserSessionData&) = delete;
         UserSessionData& operator=(UserSessionData&& other) = delete;
 
-
       private:
         const SecureBox<User>* userBox = nullptr; // Who these sessions belong to
         SecureList<Session> sessions;             // Session list
@@ -45,8 +44,8 @@ namespace tpunkt
         //===== Token Management =====//
 
         [[nodiscard]] bool tokenValid(const AuthToken& token) const;
-        bool addToken(uint32_t& random);
-        bool removeToken(uint32_t random);
+        bool addToken(const SecureBox<User>& user, uint32_t& out);
+        bool removeToken(const SecureBox<User>& user, uint32_t random);
 
       private:
         UserSessionData* getUserData(const SecureBox<User>& user);

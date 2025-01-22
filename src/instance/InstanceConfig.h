@@ -8,70 +8,83 @@
 
 namespace tpunkt
 {
-// TODO rework into 3 different types for the tree param types with their own enum checked at compile time with type check
-    // All config parameters including their default value
-    enum class ConfigKey : uint8_t
+    // check All config parameters including their default value
+
+    enum class StringParamKey : uint8_t
     {
+        INVALID,
+        // Name of this instance
+        // teilpunkt-instance
+        INSTANCE_NAME,
+        ENUM_SIZE
+    };
+
+    enum class NumberParamKey : uint8_t
+    {
+        INVALID,
+        // Cooldown before any given ip address can create another account
+        // 30
+        USER_IP_ACCOUNT_CREATION_TIMEOUT_MIN,
         // Max amount of session per user
         // 3
         USER_MAX_ALLOWED_SESSIONS,
         // Max amount of tasks (e.g. uploads, downloads etc.) a user can have at the same time
         // 3
         USER_MAX_ALLOWED_TASKS,
-        // Cooldown before any given ip address can create another account
-        // 30
-        USER_IP_ACCOUNT_CREATION_TIMEOUT_MIN,
-        // If set only the instance admin can create new accounts
-        // false
-        USER_ONLY_ADMIN_CREATE_ACCOUNT,
-        // Name of this instance
-        // teilpunkt-instance
-        INSTANCE_NAME,
+        // Time until a new session expires in seconds
+        USER_SESSION_EXPIRATION_DELAY_SECS,
         // Max allowed number of requests to the server per user per minute
         // 50
         API_REQUESTS_PER_USER_PER_MIN,
-        // Amount of params
+
         ENUM_SIZE
     };
 
-    enum class ConfigParamType : uint8_t
+    enum class BoolParamKey : uint8_t
     {
         INVALID,
-        STRING,
-        NUMBER,
-        BOOL
+        // If set only the instance admin can create new accounts - account creation is disabled for non-admins
+        // Also disables name side channel attacks (get registered names by querying registered ones)
+        // false
+        USER_ONLY_ADMIN_CREATE_ACCOUNT,
+        ENUM_SIZE
     };
 
-    struct ConfigParam final
+    struct StringConfigParam final
     {
-
-        [[nodiscard]] const char* getString() const;
-
-        [[nodiscard]] bool getBool() const;
-
-        [[nodiscard]] int64_t getInteger() const;
-
-      private:
-        ConfigParamType type{};
-        union
-        {
-            FixedString<TPUNKT_INSTANCE_CONFIG_STRING_LEN> string;
-            int64_t integer{};
-            bool boolean;
-        };
-        friend InstanceConfig;
+        ConfigString string{};
     };
 
+    struct NumberConfigParam final
+    {
+        uint32_t number;
+    };
+
+    struct BoolConfigParam final
+    {
+        bool boolean;
+    };
+
+    // Type safe storage for different config parameters - avoids template as its only little code to write
     struct InstanceConfig final
     {
         InstanceConfig();
         ~InstanceConfig();
-        [[nodiscard]] const ConfigParam& getParam(ConfigKey key) const;
 
-        void setParam(ConfigKey key);
+        // Returns the config string for the given value
+        // Will NEVER be nullptr
+        [[nodiscard]] const char* getString(StringParamKey key) const;
+        [[nodiscard]] uint32_t getNumber(NumberParamKey key) const;
+        [[nodiscard]] bool getBool(BoolParamKey key) const;
+
+        void setString(StringParamKey key, const ConfigString& string);
+        void setNumber(NumberParamKey key, uint32_t number);
+        void setBool(BoolParamKey key, bool boolean);
 
       private:
-        ConfigParam params[ static_cast<int>(ConfigKey::ENUM_SIZE) ]{};
+        StringConfigParam stringParams[ static_cast<int>(StringParamKey::ENUM_SIZE) ]{};
+        NumberConfigParam numberParams[ static_cast<int>(NumberParamKey::ENUM_SIZE) ]{};
+        BoolConfigParam boolParams[ static_cast<int>(BoolParamKey::ENUM_SIZE) ]{};
         TPUNKT_MACROS_STRUCT(InstanceConfig);
     };
 

@@ -17,6 +17,8 @@ namespace tpunkt
         ERR_UNSUCCESSFUL,
         // userAdd
         ERR_USER_NAME_EXISTS,
+        // all Methods that accept a token
+        ERR_INVALID_TOKEN,
     };
 
     struct Authenticator final
@@ -52,7 +54,7 @@ namespace tpunkt
         //===== Token Management =====//
 
         // Returns true if the given auth token is valid
-        bool tokenValid(const AuthToken& token);
+        [[nodiscard]] bool tokenValid(const AuthToken& token) const;
 
         // Invalidates the given token - zeroes it and deletes it internally
         AuthStatus tokenInvalidate(AuthToken& token);

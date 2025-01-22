@@ -5,17 +5,18 @@
 #include <sodium/core.h>
 #include "util/Logging.h"
 #include "auth/Authenticator.h"
+#include "instance/InstanceConfig.h"
 
-static void handleSignal(int signal)
-{
-}
+static void handleSignal(int signal){}
 
 #define TEST_INIT()                                                                                                    \
-    sodium_init();                                                                                                     \
+    (void)sodium_init();                                                                                               \
     tpunkt::Logger logger{};                                                                                           \
+    tpunkt::InstanceConfig config{};                                                                                   \
     tpunkt::Authenticator auth{};                                                                                      \
-    tpunkt::CryptoManager crypto{};                                                                                      \
+    tpunkt::CryptoManager crypto{};                                                                                    \
+    tpunkt::EventMonitor monitor{};                                                                                    \
     LOG_INFO("Initialized Testing Environment");                                                                       \
-    signal(SIGTRAP, handleSignal);                                                                                     \
+    signal(SIGTRAP, handleSignal);
 
 #endif // TESTCOMMONS_H

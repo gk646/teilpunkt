@@ -6,18 +6,17 @@
 
 namespace tpunkt
 {
-    const SecureBox<User>& AuthToken::getUserBox() const
+    const SecureBox<User>* AuthToken::getUserBox() const
     {
-        if(userBox != nullptr) [[likely]]
-        {
-            return *userBox;
-        }
-        LOG_FATAL("No box present");
+        return userBox;
     }
 
     AuthToken::~AuthToken()
     {
-        GetAuthenticator().tokenInvalidate(*this);
+        if(GetAuthenticator().tokenInvalidate(*this) != AuthStatus::OK)
+        {
+            LOG_CRITICAL("Failed to invalidate token");
+        }
     }
 
 } // namespace tpunkt

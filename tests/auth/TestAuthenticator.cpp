@@ -56,7 +56,6 @@ TEST_CASE("Add, Login, and Delete User")
         REQUIRE(status == AuthStatus::OK);
     }
 
-    return;
     // Login
     {
         AuthToken token{};
@@ -69,7 +68,8 @@ TEST_CASE("Add, Login, and Delete User")
         AuthToken token{};
         auto status = login(userName, password, token);
         REQUIRE(status == AuthStatus::OK);
-        remove(token);
+        status = remove(token);
+        REQUIRE(status == AuthStatus::OK);
     }
 
     // Test for removal

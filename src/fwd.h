@@ -26,6 +26,7 @@ namespace tpunkt
     using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
     using UserAgentString = FixedString<50>;
     using HashedIP = FixedString<16>;
+    using ConfigString = FixedString<50>;
 
 
 } // namespace tpunkt

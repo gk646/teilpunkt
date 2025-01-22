@@ -1,6 +1,7 @@
 #include <sodium/randombytes.h>
 #include "auth/SessionStorage.h"
 #include "auth/AuthToken.h"
+#include "instance/InstanceConfig.h"
 
 namespace tpunkt
 {
@@ -15,19 +16,19 @@ namespace tpunkt
         auto sessionList = userData->sessions.get();
         const auto size = sessionList.size();
 
-        if(size >= 10U)                  // Deny if too many
+        if(size >= GetInstanceConfig().getNumber(NumberParamKey::USER_MAX_ALLOWED_SESSIONS)) // Deny if too many
         {
             return false;
         }
 
         Session session{};
         session.data = data;
-        session.expiration.addDays(5U); // Get config value
+        session.expiration.addMins(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_DELAY_SECS));
 
         randombytes_buf(session.sessionID.data(), session.sessionID.capacity());
         out = session.sessionID;
 
-        sessionList.push_back(std::move(session));
+        sessionList.push_back(session);
         return true;
     }
 
@@ -43,8 +44,7 @@ namespace tpunkt
         {
             if(sessionList[ i ].data.remoteAddress == address)
             {
-                sessionList.eraseIndex(i);
-                return true;
+                return sessionList.eraseIndex(i);
             }
         }
         return false;
@@ -62,8 +62,7 @@ namespace tpunkt
         {
             if(sessionList[ i ].sessionID == sessionId)
             {
-                sessionList.eraseIndex(i);
-                return true;
+                return sessionList.eraseIndex(i);
             }
         }
         return false;
@@ -71,7 +70,12 @@ namespace tpunkt
 
     bool SessionStorage::tokenValid(const AuthToken& token) const
     {
-        const auto* userData = getUserData(token.getUserBox());
+        if(token.getUserBox() == nullptr)
+        {
+            return false; // Invalid token - not complete
+        }
+
+        const auto* userData = getUserData(*token.getUserBox());
         if(userData == nullptr)
         {
             return false;
@@ -88,14 +92,37 @@ namespace tpunkt
         }
     }
 
-    bool SessionStorage::addToken(uint32_t& random)
+    bool SessionStorage::addToken(const SecureBox<User>& user, uint32_t& out)
     {
+        auto* userData = getUserData(user);
+        if(userData == nullptr)
+        {
+            userData = &sessions.emplace_back(&user);
+        }
 
+        out = randombytes_random();
+        userData->tokens.push_back(out);
+        return true;
     }
 
-    bool SessionStorage::removeToken(uint32_t random)
+    bool SessionStorage::removeToken(const SecureBox<User>& user, uint32_t random)
     {
+        auto* userData = getUserData(user);
+        if(userData == nullptr)
+        {
+            return true; // Token is invalid as user doesnt exist
+        }
 
+        for(auto& token : userData->tokens)
+        {
+            if(token == random)
+            {
+                token = userData->tokens.back();
+                userData->tokens.pop_back();
+                return true;
+            }
+        }
+        return true; // Token could not be found - not valid anymore
     }
 
     UserSessionData* SessionStorage::getUserData(const SecureBox<User>& user)

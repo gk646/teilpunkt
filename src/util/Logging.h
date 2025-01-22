@@ -58,6 +58,6 @@ namespace tpunkt
             LOG_INFO(#type " : " #action " : " #status);                                                               \
         }                                                                                                              \
         GetEventMonitor().log(EventType::type, EventAction::action, EventStatus::status);                              \
-    } while(0)
+    } while(false)
 
 #endif // TPUNKT_LOGGER_H

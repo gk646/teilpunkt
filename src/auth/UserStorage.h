@@ -5,6 +5,7 @@
 #include "auth/Credentials.h"
 #include "common/User.h"
 #include "datastructures/SecureBox.h"
+#include "datastructures/SecureWrapper.h"
 
 namespace tpunkt
 {
@@ -25,6 +26,7 @@ namespace tpunkt
 
       private:
         std::vector<SecureBox<User>> users;
+        SecureWrapper<uint32_t> currUserID; // At first launch chosen randomly - then incremented for each new user
         TPUNKT_MACROS_STRUCT(UserStorage);
     };
 

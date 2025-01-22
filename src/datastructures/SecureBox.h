@@ -32,12 +32,26 @@ namespace tpunkt
 
             T& get()
             {
-                return *box.val;
+                if(box.val != nullptr)
+                {
+                    return *box.val;
+                }
+                else
+                {
+                    LOG_FATAL("No value present");
+                }
             }
 
             const T& get() const
             {
-                return *box.val;
+                if(box.val != nullptr)
+                {
+                    return *box.val;
+                }
+                else
+                {
+                    LOG_FATAL("No value present");
+                }
             }
 
           private:
@@ -48,6 +62,8 @@ namespace tpunkt
         SecureBox()
         {
             val = TPUNKT_SECUREALLOC(val, sizeof(T));
+            GetCryptoManager().encrypt(val, sizeof(T));
+            sodium_mprotect_noaccess(val);
         }
 
         SecureBox(SecureBox&& other) noexcept
@@ -72,8 +88,12 @@ namespace tpunkt
 
         ~SecureBox()
         {
-            TPUNKT_SECUREFREE(val);
-            val = nullptr;
+            if(val)
+            {
+                sodium_mprotect_readwrite(val);
+                TPUNKT_SECUREFREE(val);
+                val = nullptr;
+            }
         }
 
         BoxReader<false> get()
