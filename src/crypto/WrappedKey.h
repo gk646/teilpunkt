@@ -1,9 +1,17 @@
-#ifndef WRAPPEDKEY_H
-#define WRAPPEDKEY_H
+#ifndef TPUNKT_WRAPPED_KEY_H
+#define TPUNKT_WRAPPED_KEY_H
 
-struct WrappedKey final
+#include "common/FileHandle.h"
+
+namespace tpunkt
 {
-    int key;
-};
+    struct WrappedKey final
+    {
+        int key;
+        FileHandle fileHandle;
+    };
 
-#endif // WRAPPEDKEY_H
+} // namespace tpunkt
+
+
+#endif // TPUNKT_WRAPPED_KEY_H

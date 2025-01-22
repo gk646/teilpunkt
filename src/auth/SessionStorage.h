@@ -10,16 +10,15 @@ namespace tpunkt
 {
     struct UserSessionData final
     {
-        explicit UserSessionData(const SecureBox<User>* user) : userBox(user)
+        explicit UserSessionData(const uint32_t user) : userID(user)
         {
         }
 
         // Only allow move construction
-        UserSessionData(UserSessionData&& other) noexcept : userBox(other.userBox)
+        UserSessionData(UserSessionData&& other) noexcept : userID(other.userID)
         {
             sessions = std::move(other.sessions);
             tokens = std::move(other.tokens);
-            other.userBox = nullptr;
         }
 
         UserSessionData(const UserSessionData&) = delete;
@@ -27,9 +26,9 @@ namespace tpunkt
         UserSessionData& operator=(UserSessionData&& other) = delete;
 
       private:
-        const SecureBox<User>* userBox = nullptr; // Who these sessions belong to
-        SecureList<Session> sessions;             // Session list
-        std::vector<uint32_t> tokens;             // Token list
+        const uint32_t userID;        // Which users session data
+        SecureList<Session> sessions; // Session list
+        std::vector<uint32_t> tokens; // Token list
         friend SessionStorage;
     };
 
@@ -37,19 +36,26 @@ namespace tpunkt
     {
         SessionStorage() = default;
 
-        bool add(const SecureBox<User>& user, const SessionMetaData& data, SessionID& out);
-        bool removeByRemote(const SecureBox<User>& user, const HashedIP& address);
-        bool removeByID(const SecureBox<User>& user, const SessionID& sessionId);
+        //===== Session Management =====//
+
+        bool add(uint32_t userID, const SessionMetaData& data, SessionID& out);
+
+        bool removeByRemote(uint32_t userID, const HashedIP& address);
+
+        bool removeByID(uint32_t userID, const SessionID& sessionId);
 
         //===== Token Management =====//
 
         [[nodiscard]] bool tokenValid(const AuthToken& token) const;
-        bool addToken(const SecureBox<User>& user, uint32_t& out);
-        bool removeToken(const SecureBox<User>& user, uint32_t random);
+
+        bool addToken(uint32_t userID, uint32_t& random);
+
+        bool removeToken(const AuthToken& token);
 
       private:
-        UserSessionData* getUserData(const SecureBox<User>& user);
-        [[nodiscard]] const UserSessionData* getUserData(const SecureBox<User>& user) const;
+        UserSessionData* getUserData(uint32_t userID);
+
+        [[nodiscard]] const UserSessionData* getUserData(uint32_t userID) const;
 
         std::vector<UserSessionData> sessions;
         TPUNKT_MACROS_STRUCT(SessionStorage);

@@ -14,10 +14,13 @@ namespace tpunkt
     struct UserStorage final
     {
         bool add(const UserName& name, const Credentials& credentials);
-        bool remove(const UserName& name);
-        bool login(const UserName& name, const Credentials& credentials, const SecureBox<User>*& user);
-        bool changeName();
-        bool changeCredentials();
+
+        bool remove(uint32_t userID);
+
+        bool login(const UserName& name, const Credentials& credentials, uint32_t& userID) const;
+
+        [[nodiscard]] bool changeCredentials(uint32_t userID, const UserName& newName,
+                                             const Credentials& newCredentials);
 
         [[nodiscard]] bool nameExists(const UserName& name) const;
 

@@ -40,9 +40,12 @@ namespace tpunkt
 #define LOG_DEBUG(msg, ...) GetLogger().log(LogLevel::DEBUG, msg, ##__VA_ARGS__)
 #define LOG_INFO(msg, ...) GetLogger().log(LogLevel::INFO, msg, ##__VA_ARGS__)
 #define LOG_WARNING(msg, ...) GetLogger().log(LogLevel::WARNING, msg, ##__VA_ARGS__)
-#define LOG_ERROR(msg, ...) GetLogger().logEx(LogLevel::ERROR, __PRETTY_FUNCTION__,  __FILE__, __LINE__,msg, ##__VA_ARGS__)
-#define LOG_CRITICAL(msg, ...) GetLogger().logEx(LogLevel::CRITICAL, __PRETTY_FUNCTION__,  __FILE__, __LINE__,msg, ##__VA_ARGS__)
-#define LOG_FATAL(msg, ...) GetLogger().logEx(LogLevel::FATAL, __PRETTY_FUNCTION__,  __FILE__, __LINE__,msg, ##__VA_ARGS__)
+#define LOG_ERROR(msg, ...)                                                                                            \
+    GetLogger().logEx(LogLevel::ERROR, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_CRITICAL(msg, ...)                                                                                         \
+    GetLogger().logEx(LogLevel::CRITICAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_FATAL(msg, ...)                                                                                            \
+    GetLogger().logEx(LogLevel::FATAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 
 #define STRINGIFY(x) #x
 

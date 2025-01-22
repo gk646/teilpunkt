@@ -21,10 +21,30 @@ namespace tpunkt
         CredentialsType type{};
         union
         {
-            char buf [crypto_pwhash_STRBYTES]{};
+            char buf[ crypto_pwhash_STRBYTES ]{};
             FixedString<crypto_pwhash_STRBYTES> passkey;
             FixedString<crypto_pwhash_STRBYTES> password;
         };
+        bool operator==(const Credentials& other) const
+        {
+            if(type != other.type)
+            {
+                return false;
+            }
+
+            if(type == CredentialsType::PASSWORD)
+            {
+                return password == other.password;
+            }
+
+            if(type == CredentialsType::PASSKEY)
+            {
+                return passkey == other.passkey;
+            }
+
+            LOG_FATAL("Invalid enum value");
+            return false;
+        }
     };
 
 } // namespace tpunkt

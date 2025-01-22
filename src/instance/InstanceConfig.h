@@ -32,11 +32,11 @@ namespace tpunkt
         // 3
         USER_MAX_ALLOWED_TASKS,
         // Time until a new session expires in seconds
+        // 1 day = 24 * 60 * 60
         USER_SESSION_EXPIRATION_DELAY_SECS,
         // Max allowed number of requests to the server per user per minute
         // 50
         API_REQUESTS_PER_USER_PER_MIN,
-
         ENUM_SIZE
     };
 
@@ -57,7 +57,7 @@ namespace tpunkt
 
     struct NumberConfigParam final
     {
-        uint32_t number;
+        int32_t number;
     };
 
     struct BoolConfigParam final
@@ -82,6 +82,7 @@ namespace tpunkt
         void setBool(BoolParamKey key, bool boolean);
 
       private:
+        void setupDefaults();
         StringConfigParam stringParams[ static_cast<int>(StringParamKey::ENUM_SIZE) ]{};
         NumberConfigParam numberParams[ static_cast<int>(NumberParamKey::ENUM_SIZE) ]{};
         BoolConfigParam boolParams[ static_cast<int>(BoolParamKey::ENUM_SIZE) ]{};

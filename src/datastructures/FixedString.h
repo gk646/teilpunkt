@@ -3,6 +3,7 @@
 
 // Fixed string for names/keys that handles overflow and truncation
 #include <cstddef>
+#include <cstring>
 #include "util/Logging.h"
 
 namespace tpunkt
@@ -59,18 +60,18 @@ namespace tpunkt
             return *this;
         }
 
-        bool operator==(const char* str)
+        bool operator==(const char* other)
         {
             for(size_t i = 0U; i < length; ++i)
             {
-                const auto c = str[ i ];
+                const auto oChar = other[ i ];
 
-                if(c == '\0')
+                if(oChar == '\0')
                 {
-                    return arr[ i ] == c;
+                    return arr[ i ] == oChar;
                 }
 
-                if(arr[ i ] != c)
+                if(arr[ i ] != oChar)
                 {
                     return false;
                 }

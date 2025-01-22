@@ -12,9 +12,9 @@ static void handleSignal(int signal){}
 #define TEST_INIT()                                                                                                    \
     (void)sodium_init();                                                                                               \
     tpunkt::Logger logger{};                                                                                           \
+    tpunkt::CryptoManager crypto{};                                                                                    \
     tpunkt::InstanceConfig config{};                                                                                   \
     tpunkt::Authenticator auth{};                                                                                      \
-    tpunkt::CryptoManager crypto{};                                                                                    \
     tpunkt::EventMonitor monitor{};                                                                                    \
     LOG_INFO("Initialized Testing Environment");                                                                       \
     signal(SIGTRAP, handleSignal);

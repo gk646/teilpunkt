@@ -21,43 +21,48 @@ namespace tpunkt
         ERR_INVALID_TOKEN,
     };
 
+    // Every method is atomic
     struct Authenticator final
     {
         //===== User Management =====//
 
-        // Logs the user in and assigns token on success
-        AuthStatus userLogin(const UserName& name, Credentials& consumed, AuthToken& out);
-
-        // Adds a new user - username must be unique
+        // Username must be unique
         AuthStatus userAdd(const UserName& name, Credentials& consumed);
 
-        // Removes the user and all their sessions
+        // Assigns token on success
+        AuthStatus userLogin(const UserName& name, Credentials& consumed, AuthToken& out);
+
+        // Deletes all associated sessions
         AuthStatus userRemove(const AuthToken& token);
 
-        // Changes the users credentials
         AuthStatus userChangeCredentials(const AuthToken& token, const UserName& newName, Credentials& consumed);
 
         //===== Session Management =====//
 
-        // Adds a session and returns the session id
+        // Assigns SessionID on success
         AuthStatus sessionAdd(const AuthToken& token, const SessionMetaData& data, SecureWrapper<SessionID>& out);
 
-        // Remove the session associated with the token
         AuthStatus sessionRemove(const AuthToken& token);
 
-        // Tries to authenticate the user via the session id
+        // Assigns token on success
         AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out);
 
-        // Get all session for the user associated with the token
         AuthStatus sessionGet(const AuthToken& token);
 
         //===== Token Management =====//
 
-        // Returns true if the given auth token is valid
         [[nodiscard]] bool tokenValid(const AuthToken& token) const;
 
-        // Invalidates the given token - zeroes it and deletes it internally
-        AuthStatus tokenInvalidate(AuthToken& token);
+        AuthStatus tokenInvalidate(AuthToken& consumed);
+
+        //===== User Data =====//
+        // Part of the authenticator as data access needs the same atomicity as adding/deleting users
+
+        // Assigns the username on success
+        AuthStatus getUserName(const AuthToken& token, UserName& out);
+
+        // Assigns the users wrapped key for the given file on success
+        AuthStatus getWrappedKey(FileHandle handle, SecureWrapper<WrappedKey>& out);
 
         Authenticator();
         ~Authenticator();

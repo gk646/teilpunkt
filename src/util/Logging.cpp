@@ -21,7 +21,7 @@ namespace tpunkt
         TPUNKT_MACROS_GLOBAL_RESET(Logger);
     }
 
-    void Logger::setEnableFileLogging(bool value)
+    void Logger::setEnableFileLogging(const bool value)
     {
         logToFile = value;
     }
@@ -30,8 +30,10 @@ namespace tpunkt
     {
         // Special case - logger can get itself
         if(global::Logger != nullptr)
+        {
             return *global::Logger;
-        fprintf(stderr, "No logger");
+        }
+        (void)fprintf(stderr, "No logger");
         exit(1);
     }
 
@@ -63,53 +65,68 @@ namespace tpunkt
     void Logger::log(const LogLevel level, const char* msg, ...) const
     {
         if(level < minimalLevel)
+        {
             return;
+        }
 
         FILE* output = (level >= LogLevel::ERROR) ? stderr : stdout;
 
-        fprintf(output, "%s ", GetLevelString(level));
+        (void)fprintf(output, "%s ", GetLevelString(level));
 
         va_list va_args;
         va_start(va_args, msg);
-        vfprintf(output, msg, va_args);
+        (void)vfprintf(output, msg, va_args);
         va_end(va_args);
 
-        fputc('\n', output);
+        (void)fputc('\n', output);
+        (void)fflush(output);
 
-        fflush(output);
         if(level == LogLevel::CRITICAL)
-            raise(SIGTERM);
-        else if(level == LogLevel::FATAL)
+        {
+            (void)raise(SIGTERM);
+        }
+
+        if(level == LogLevel::FATAL)
+        {
             exit(1);
+        }
     }
 
-    void Logger::logEx(LogLevel level, const char* function, const char* file, int line, const char* msg, ...) const
+    void Logger::logEx(const LogLevel level, const char* method, const char* file, const int line, const char* msg,
+                       ...) const
     {
         if(level < minimalLevel)
+        {
             return;
+        }
 
         FILE* output = stdout;
         if(level >= LogLevel::ERROR)
         {
             output = stderr;
-            raise(SIGTRAP);
+            (void)raise(SIGTRAP);
         }
 
-        fprintf(output, "%s %s:%d\n", function, file, line);
-        fprintf(output, "%s ", GetLevelString(level));
+        (void)fprintf(output, "%s %s:%d\n", method, file, line);
+        (void)fprintf(output, "%s ", GetLevelString(level));
 
         va_list va_args;
         va_start(va_args, msg);
-        vfprintf(output, msg, va_args);
+        (void)vfprintf(output, msg, va_args);
         va_end(va_args);
 
-        fputc('\n', output);
+        (void)fputc('\n', output);
+        (void)fflush(output);
 
-        fflush(output);
         if(level == LogLevel::CRITICAL)
-            raise(SIGTERM);
-        else if(level == LogLevel::FATAL)
+        {
+            (void)raise(SIGTERM);
+        }
+
+        if(level == LogLevel::FATAL)
+        {
             exit(1);
+        }
     }
 
 

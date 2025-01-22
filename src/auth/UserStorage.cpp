@@ -1,10 +1,20 @@
+#include <sodium/randombytes.h>
 #include "auth/UserStorage.h"
 #include "util/FileIO.h"
 
 namespace tpunkt
 {
+    constexpr size_t PW_HASH_OPS_LVL = crypto_pwhash_OPSLIMIT_MODERATE;
+    constexpr size_t PW_HASH_MEM_LVL = crypto_pwhash_MEMLIMIT_INTERACTIVE;
+
     UserStorage::UserStorage()
     {
+        auto idReader = currUserID.get();
+        do
+        {
+            idReader.get() = randombytes_random() / 2U; // At least 2.4 billion entries - non zero
+        } while(idReader.get() == 0U);
+
         // IO
     }
 
@@ -25,9 +35,7 @@ namespace tpunkt
                     char* storePw = newCredentials.password.data();
                     const char* newPw = credentials.password.c_str();
                     const auto newPwLen = credentials.password.size();
-                    constexpr auto calcDiff = crypto_pwhash_OPSLIMIT_MODERATE;
-                    constexpr auto memoryDiff = crypto_pwhash_MEMLIMIT_INTERACTIVE;
-                    if(crypto_pwhash_str(storePw, newPw, newPwLen, calcDiff, memoryDiff) != 0)
+                    if(crypto_pwhash_str(storePw, newPw, newPwLen, PW_HASH_OPS_LVL, PW_HASH_MEM_LVL) != 0)
                     {
                         return false; // Out of memory
                     }
@@ -43,25 +51,15 @@ namespace tpunkt
         newUser.name = name;
         newUser.credentials = newCredentials;
 
+        // Assign id
+        auto idReader = currUserID.get();
+        newUser.userID = idReader.get();
+        idReader.get()++; // Increment for next user
+
         return true;
     }
 
-    bool UserStorage::remove(const UserName& name)
-    {
-        for(auto it = users.begin(); it != users.end(); ++it)
-        {
-            const auto boxReader = it->get();
-            if(boxReader.get().name == name)
-            {
-                *it = std::move(users.back());
-                users.pop_back();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool UserStorage::login(const UserName& name, const Credentials& credentials, const SecureBox<User>*& loginUser)
+    bool UserStorage::login(const UserName& name, const Credentials& credentials, uint32_t& userID) const
     {
         for(const auto& box : users)
         {
@@ -79,9 +77,9 @@ namespace tpunkt
                             const auto& inputPw = credentials.password;
                             if(crypto_pwhash_str_verify(storedPw.c_str(), inputPw.c_str(), inputPw.size()) != 0)
                             {
-                                return false; // Failed comparison
+                                return false;     // Failed comparison
                             }
-                            loginUser = &box; // Save the box
+                            userID = user.userID; // Save the userID
                             return true;
                         }
                     case CredentialsType::PASSKEY:
@@ -89,6 +87,64 @@ namespace tpunkt
                         }
                         break;
                 }
+            }
+        }
+        return false;
+    }
+
+    bool UserStorage::changeCredentials(const uint32_t userID, const UserName& newName,
+                                        const Credentials& newCredentials)
+    {
+        for(auto& box : users)
+        {
+            auto boxReader = box.get();
+            auto& user = boxReader.get();
+
+            if(user.userID == userID)
+            {
+                user.name = newName;                                      // Always assign new name
+                if(user.credentials == newCredentials)                    // No need to assign new credentials
+                {
+                    return true;
+                }
+
+                switch(newCredentials.type)
+                {
+                    case CredentialsType::INVALID:
+                        return false;
+                    case CredentialsType::PASSWORD:
+                        {
+                            Credentials tempCredentials = newCredentials; // Store into local copy
+                            char* storePw = tempCredentials.password.data();
+                            const char* newPw = newCredentials.password.c_str();
+                            const auto newPwLen = newCredentials.password.size();
+                            if(crypto_pwhash_str(storePw, newPw, newPwLen, PW_HASH_OPS_LVL, PW_HASH_MEM_LVL) != 0)
+                            {
+                                return false;                             // Out of memory - user password didn't change
+                            }
+                            user.credentials = tempCredentials;           // Successful - assign new credentials
+                            return true;
+                        }
+                    case CredentialsType::PASSKEY:
+                        {
+                        }
+                        break;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool UserStorage::remove(const uint32_t userID)
+    {
+        for(auto& userBox : users)
+        {
+            auto boxReader = userBox.get();
+            if(boxReader.get().userID == userID)
+            {
+                userBox = std::move(users.back());
+                users.pop_back();
+                return true;
             }
         }
         return false;

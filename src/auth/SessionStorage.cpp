@@ -5,12 +5,12 @@
 
 namespace tpunkt
 {
-    bool SessionStorage::add(const SecureBox<User>& user, const SessionMetaData& data, SessionID& out)
+    bool SessionStorage::add(const uint32_t userID, const SessionMetaData& data, SessionID& out)
     {
-        auto* userData = getUserData(user);
+        auto* userData = getUserData(userID);
         if(userData == nullptr)
         {
-            userData = &sessions.emplace_back(&user);
+            userData = &sessions.emplace_back(userID);
         }
 
         auto sessionList = userData->sessions.get();
@@ -32,9 +32,9 @@ namespace tpunkt
         return true;
     }
 
-    bool SessionStorage::removeByRemote(const SecureBox<User>& user, const HashedIP& address)
+    bool SessionStorage::removeByRemote(const uint32_t userID, const HashedIP& address)
     {
-        auto* userData = getUserData(user);
+        auto* userData = getUserData(userID);
         if(userData == nullptr)
         {
             return false;
@@ -50,9 +50,9 @@ namespace tpunkt
         return false;
     }
 
-    bool SessionStorage::removeByID(const SecureBox<User>& user, const SessionID& sessionId)
+    bool SessionStorage::removeByID(const uint32_t userID, const SessionID& sessionId)
     {
-        auto* userData = getUserData(user);
+        auto* userData = getUserData(userID);
         if(userData == nullptr)
         {
             return false;
@@ -70,54 +70,54 @@ namespace tpunkt
 
     bool SessionStorage::tokenValid(const AuthToken& token) const
     {
-        if(token.getUserBox() == nullptr)
+        if(token.userID == 0U)
         {
-            return false; // Invalid token - not complete
+            return false; // Invalid userID
         }
 
-        const auto* userData = getUserData(*token.getUserBox());
+        const auto* userData = getUserData(token.userID);
         if(userData == nullptr)
         {
             return false;
         }
-        else
+
+        for(const auto random : userData->tokens)
         {
-            for(const auto random : userData->tokens)
+            if(random == token.random)
             {
-                if(random == token.random)
-                {
-                    return true;
-                }
+                return true;
             }
         }
+
+        return false;
     }
 
-    bool SessionStorage::addToken(const SecureBox<User>& user, uint32_t& out)
+    bool SessionStorage::addToken(const uint32_t userID, uint32_t& random)
     {
-        auto* userData = getUserData(user);
+        auto* userData = getUserData(userID);
         if(userData == nullptr)
         {
-            userData = &sessions.emplace_back(&user);
+            userData = &sessions.emplace_back(userID);
         }
 
-        out = randombytes_random();
-        userData->tokens.push_back(out);
+        random = randombytes_random();
+        userData->tokens.push_back(random);
         return true;
     }
 
-    bool SessionStorage::removeToken(const SecureBox<User>& user, uint32_t random)
+    bool SessionStorage::removeToken(const AuthToken& token)
     {
-        auto* userData = getUserData(user);
+        auto* userData = getUserData(token.userID);
         if(userData == nullptr)
         {
             return true; // Token is invalid as user doesnt exist
         }
 
-        for(auto& token : userData->tokens)
+        for(auto& savedRandom : userData->tokens)
         {
-            if(token == random)
+            if(savedRandom == token.random)
             {
-                token = userData->tokens.back();
+                savedRandom = userData->tokens.back();
                 userData->tokens.pop_back();
                 return true;
             }
@@ -125,11 +125,11 @@ namespace tpunkt
         return true; // Token could not be found - not valid anymore
     }
 
-    UserSessionData* SessionStorage::getUserData(const SecureBox<User>& user)
+    UserSessionData* SessionStorage::getUserData(const uint32_t userID)
     {
         for(auto& session : sessions)
         {
-            if(session.userBox == &user)
+            if(session.userID == userID)
             {
                 return &session;
             }
@@ -137,11 +137,11 @@ namespace tpunkt
         return nullptr;
     }
 
-    const UserSessionData* SessionStorage::getUserData(const SecureBox<User>& user) const
+    const UserSessionData* SessionStorage::getUserData(const uint32_t userID) const
     {
-        for(auto& session : sessions)
+        for(const auto& session : sessions)
         {
-            if(session.userBox == &user)
+            if(session.userID == userID)
             {
                 return &session;
             }

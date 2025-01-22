@@ -1,23 +1,20 @@
 #ifndef TPUNKT_AUTH_TOKEN_H
 #define TPUNKT_AUTH_TOKEN_H
 
+#include <cstdint>
 #include "fwd.h"
-#include "datastructures/SecureWrapper.h"
-#include "datastructures/FixedString.h"
+#include "util/Macros.h"
 
 namespace tpunkt
 {
     struct AuthToken final
     {
-        // Returns the identity this token authenticates
-        [[nodiscard]] const SecureBox<User>* getUserBox() const;
-
         AuthToken() = default;
         ~AuthToken();
 
       private:
-        const SecureBox<User>* userBox = nullptr; // User this token authenticates
-        uint32_t random{};                        // Random number to make this token non forgeable
+        uint32_t random{}; // Random number to make this token non forgeable
+        uint32_t userID{}; // Which user this token authenticates
         TPUNKT_MACROS_STRUCT(AuthToken);
         friend Authenticator;
         friend SessionStorage;

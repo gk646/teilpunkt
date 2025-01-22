@@ -36,10 +36,11 @@ int32_t main()
     {
         tpunkt::Logger logger{};
         {
+            tpunkt::CryptoManager crypto{};
             tpunkt::InstanceConfig config{};
             tpunkt::Authenticator auth{};
-            tpunkt::CryptoManager crypto{};
             tpunkt::EventMonitor monitor{};
+
             tpunkt::WebServer server{};
             server.run();
         }

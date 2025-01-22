@@ -18,12 +18,12 @@ namespace tpunkt
 
             explicit WrapperReader(WrapperType& originalWrapper) : wrapper(originalWrapper)
             {
-                GetCryptoManager().decrypt((void*)&val, sizeof(T));
+                GetCryptoManager().decrypt(static_cast<void*>(&wrapper.val), sizeof(T));
             }
 
             ~WrapperReader()
             {
-                GetCryptoManager().encrypt((void*)&wrapper.val, sizeof(T));
+                GetCryptoManager().encrypt(static_cast<void*>(&wrapper.val), sizeof(T));
             }
 
             T& get()
@@ -45,6 +45,8 @@ namespace tpunkt
         {
             GetCryptoManager().encrypt(&val, sizeof(T));
         }
+
+        // No destructor - does neither decrypt nor zero the contents - might be reused
 
         template <typename... Args>
         explicit SecureWrapper(Args&&... args) : val(std::forward<Args>(args)...)

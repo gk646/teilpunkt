@@ -25,29 +25,6 @@ namespace tpunkt
         TPUNKT_MACROS_GLOBAL_GET(Authenticator);
     }
 
-    AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed, AuthToken& out)
-    {
-        SecureEraser eraser{consumed};
-        const SecureBox<User>* userBox = nullptr;
-        if(!userStore.login(name, consumed, userBox) || userBox == nullptr)
-        {
-            LOG_EVENT(UserAction, UserLogin, Invalid_Authentication);
-            return AuthStatus::ERR_UNSUCCESSFUL;
-        }
-
-        uint32_t random{};
-        if(!sessionStore.addToken(*userBox, random))
-        {
-            LOG_EVENT(UserAction, UserLogin, Generic_Unsuccessful);
-            return AuthStatus::ERR_UNSUCCESSFUL;
-        }
-        out.random = random;
-        out.userBox = userBox;
-
-        LOG_EVENT(UserAction, UserLogin, Successful);
-        return AuthStatus::OK;
-    }
-
     AuthStatus Authenticator::userAdd(const UserName& name, Credentials& consumed)
     {
         SecureEraser eraser{consumed};
@@ -73,6 +50,30 @@ namespace tpunkt
         return AuthStatus::OK;
     }
 
+    AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed, AuthToken& out)
+    {
+        SecureEraser eraser{consumed};
+
+        uint32_t userID{};
+        if(!userStore.login(name, consumed, userID))
+        {
+            LOG_EVENT(UserAction, UserLogin, Invalid_Authentication);
+            return AuthStatus::ERR_UNSUCCESSFUL;
+        }
+
+        uint32_t random{};
+        if(!sessionStore.addToken(userID, random))
+        {
+            LOG_EVENT(UserAction, UserLogin, Generic_Unsuccessful);
+            return AuthStatus::ERR_UNSUCCESSFUL;
+        }
+
+        out.random = random;
+        out.userID = userID;
+        LOG_EVENT(UserAction, UserLogin, Successful);
+        return AuthStatus::OK;
+    }
+
     AuthStatus Authenticator::userRemove(const AuthToken& token)
     {
         if(!tokenValid(token))
@@ -81,8 +82,7 @@ namespace tpunkt
             return AuthStatus::ERR_INVALID_TOKEN;
         }
 
-        const auto userBox = token.getUserBox()->get(); // Never null after token is valid
-        if(!userStore.remove(userBox.get().name))
+        if(!userStore.remove(token.userID))
         {
             LOG_EVENT(UserAction, UserRemove, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
@@ -102,8 +102,14 @@ namespace tpunkt
             return AuthStatus::ERR_INVALID_TOKEN;
         }
 
+        if(!userStore.changeCredentials(token.userID, newName, consumed))
+        {
+            LOG_EVENT(UserAction, UserChangeCredentials, Generic_Unsuccessful);
+            return AuthStatus::ERR_UNSUCCESSFUL;
+        }
+
+        LOG_EVENT(UserAction, UserChangeCredentials, Successful);
         return AuthStatus::OK;
-        // userStore.changeCredentials();
     }
 
     AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionMetaData& data,
@@ -114,19 +120,34 @@ namespace tpunkt
             LOG_EVENT(UserAction, UserSessionAdd, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
+
+        SessionID sessionId;
+        if(!sessionStore.add(token.userID, data, sessionId))
+        {
+            LOG_EVENT(UserAction, UserSessionAdd, Generic_Unsuccessful);
+            return AuthStatus::ERR_UNSUCCESSFUL;
+        }
+
+        // Assign session id
+        auto reader = out.get();
+        reader.get() = sessionId;
+
+        LOG_EVENT(UserAction, UserSessionAdd, Successful);
+        return AuthStatus::OK;
     }
 
     AuthStatus Authenticator::sessionRemove(const AuthToken& token)
     {
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserSessionAdd, Invalid_Token);
+            LOG_EVENT(UserAction, UserSessionRemove, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
     }
 
     AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out)
     {
+
     }
 
     bool Authenticator::tokenValid(const AuthToken& token) const
@@ -134,20 +155,22 @@ namespace tpunkt
         return sessionStore.tokenValid(token);
     }
 
-    AuthStatus Authenticator::tokenInvalidate(AuthToken& token)
+    AuthStatus Authenticator::tokenInvalidate(AuthToken& consumed)
     {
-        SecureEraser eraser{token};
-        if(!tokenValid(token))
+        SecureEraser eraser{consumed};
+        if(!tokenValid(consumed))
         {
             LOG_EVENT(InternalCode, TokenInvalidate, Successful);
-            return AuthStatus::OK;                                       // Already invalid
+            return AuthStatus::OK;
         }
 
-        if(!sessionStore.removeToken(*token.getUserBox(), token.random)) // Valid after token is valid
+        if(!sessionStore.removeToken(consumed))
         {
             LOG_EVENT(InternalCode, TokenInvalidate, Generic_Unsuccessful);
+            LOG_CRITICAL("Failed to invalidate token");
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
+
         LOG_EVENT(InternalCode, TokenInvalidate, Successful);
         return AuthStatus::OK;
     }

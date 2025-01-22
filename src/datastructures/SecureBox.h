@@ -36,10 +36,7 @@ namespace tpunkt
                 {
                     return *box.val;
                 }
-                else
-                {
-                    LOG_FATAL("No value present");
-                }
+                LOG_FATAL("No value present");
             }
 
             const T& get() const
