@@ -28,8 +28,13 @@ namespace tpunkt
         randombytes_buf(session.sessionID.data(), session.sessionID.capacity());
         out = session.sessionID;
 
-        sessionList.push_back(session);
+        sessionList.push_back(std::move(session));
         return true;
+    }
+
+    bool SessionStorage::get(const SessionID& sessionId, const SessionMetaData& data, uint32_t& userID)
+    {
+        
     }
 
     bool SessionStorage::removeByRemote(const uint32_t userID, const HashedIP& address)

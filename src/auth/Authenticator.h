@@ -42,6 +42,7 @@ namespace tpunkt
         // Assigns SessionID on success
         AuthStatus sessionAdd(const AuthToken& token, const SessionMetaData& data, SecureWrapper<SessionID>& out);
 
+        // TODO needs additional parameter by which to identify session
         AuthStatus sessionRemove(const AuthToken& token);
 
         // Assigns token on success
@@ -62,7 +63,7 @@ namespace tpunkt
         AuthStatus getUserName(const AuthToken& token, UserName& out);
 
         // Assigns the users wrapped key for the given file on success
-        AuthStatus getWrappedKey(FileHandle handle, SecureWrapper<WrappedKey>& out);
+        AuthStatus getWrappedKey(const AuthToken& token, FileHandle handle, SecureWrapper<WrappedKey>& out);
 
         Authenticator();
         ~Authenticator();

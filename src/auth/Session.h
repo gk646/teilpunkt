@@ -23,7 +23,21 @@ namespace tpunkt
     struct Session final
     {
         Session() = default;
-        Session(const Session&) = default;
+
+        Session& operator=(Session&& other) noexcept
+        {
+            if(this != &other)
+            {
+                sessionID = std::move(other.sessionID);
+                data = std::move(other.data);
+                expiration = std::move(other.expiration);
+
+                other.sessionID.clear();
+                other.expiration.zero();
+            }
+            return *this;
+        }
+
 
       private:
         SessionID sessionID;

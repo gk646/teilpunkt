@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <catch_amalgamated.hpp>
 #include "datastructures/SecureList.h"
 #include "TestCommons.h"
@@ -112,21 +111,25 @@ TEST_CASE("SecureList Basic Functionality")
     SECTION("Move Constructor and Assignment")
     {
         SecureList<int> list1(5);
-        auto access1 = list1.get();
-        access1.push_back(123);
+        {
+            auto access1 = list1.get();
+            access1.push_back(123);
+        }
 
         SecureList<int> list2 = std::move(list1); // Move constructor
-        auto access2 = list2.get();
-
-        access2.push_back(1);
-        REQUIRE(access2.contains(123) == true);
+        {
+            auto access2 = list2.get();
+            access2.push_back(1);
+            REQUIRE(access2.contains(123) == true);
+        }
 
         SecureList<int> list3;
-        list3 = std::move(list2);                 // Move assignment
-        auto access3 = list3.get();
-
-        REQUIRE(access3.contains(123) == true);
-        REQUIRE(access3.size() == 2);
+        {
+            list3 = std::move(list2);             // Move assignment
+            auto access3 = list3.get();
+            REQUIRE(access3.contains(123) == true);
+            REQUIRE(access3.size() == 2);
+        }
     }
 
     SECTION("Erasing")
@@ -160,7 +163,6 @@ TEST_CASE("SecureList Basic Functionality")
         REQUIRE(access.size() == 0);
     }
 }
-
 
 TEST_CASE("SecureList Initializer Check")
 {

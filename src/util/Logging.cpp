@@ -129,5 +129,17 @@ namespace tpunkt
         }
     }
 
+    void Logger::logFatal(const char* method, const char* file, int line, const char* msg, ...) const
+    {
+        (void)raise(SIGTRAP); // Debugbreak
+        (void)fprintf(stderr, "%s %s:%d\n", method, file, line);
+        (void)fprintf(stderr, "%s ", GetLevelString(LogLevel::FATAL));
+        va_list va_args;
+        va_start(va_args, msg);
+        (void)vfprintf(stderr, msg, va_args);
+        va_end(va_args);
+        exit(1);
+    }
+
 
 } // namespace tpunkt

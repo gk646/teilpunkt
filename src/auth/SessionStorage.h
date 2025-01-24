@@ -15,10 +15,9 @@ namespace tpunkt
         }
 
         // Only allow move construction
-        UserSessionData(UserSessionData&& other) noexcept : userID(other.userID)
+        UserSessionData(UserSessionData&& other) noexcept
+            : userID(other.userID), sessions(std::move(other.sessions)), tokens(std::move(other.tokens))
         {
-            sessions = std::move(other.sessions);
-            tokens = std::move(other.tokens);
         }
 
         UserSessionData(const UserSessionData&) = delete;
@@ -39,6 +38,9 @@ namespace tpunkt
         //===== Session Management =====//
 
         bool add(uint32_t userID, const SessionMetaData& data, SessionID& out);
+
+        // If the session is identified but the data does not match its revoked!
+        bool get(const SessionID& sessionId, const SessionMetaData& data, uint32_t& userID);
 
         bool removeByRemote(uint32_t userID, const HashedIP& address);
 

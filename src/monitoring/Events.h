@@ -10,19 +10,28 @@ namespace tpunkt
         INVALID,
         API_Request,
         UserAction,
+        ServerAction,
         InternalCode,
     };
 
     enum class EventAction : uint8_t
     {
         INVALID,
-        UserLogin,
+        // User
         UserAdd,
+        UserLogin,
         UserRemove,
         UserChangeCredentials,
-        UserSessionAdd,
-        UserSessionRemove,
+        // Session
+        SessionAdd,
+        SessionRemove,
+        SessionAuthenticate,
+        SessionGetSessions,
+        // Token
         TokenInvalidate,
+        // UserData
+        UserDataGetName,
+        UserDataGetWrappedKey,
     };
 
     enum class EventStatus : uint8_t
@@ -38,6 +47,7 @@ namespace tpunkt
         WARNINGS,
         // Warnings
         Generic_Unsuccessful,
+        SessionMetaData_Mismatch,
 
     };
 

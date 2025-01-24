@@ -31,11 +31,8 @@ namespace tpunkt
 
     struct FileReader final
     {
-        FileReader( const char* path );
-
 
       private:
-        const char* path;
         TPUNKT_MACROS_STRUCT( FileReader );
     };
 

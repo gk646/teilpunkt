@@ -2,7 +2,7 @@
 
 namespace tpunkt
 {
-    StorageStatus::StorageStatus(StorageStatusType status) : status(status)
+    StorageStatus::StorageStatus(const StorageStatusType status) : status(status)
     {
     }
 

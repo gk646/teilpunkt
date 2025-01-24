@@ -53,6 +53,11 @@ namespace tpunkt
         timestamp -= seconds * 1'000'000'000'000U;
     }
 
+    void Timestamp::zero()
+    {
+        timestamp = 0U;
+    }
+
     Timestamp Timestamp::now()
     {
         return {};

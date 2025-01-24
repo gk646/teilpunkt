@@ -15,26 +15,25 @@ namespace tpunkt
     template <typename T>
     struct SecureList final
     {
-
         // Scoped accessor class
-        struct ListAccess final
+        struct ListReader final
         {
-            explicit ListAccess(SecureList& originalList) : list(originalList)
+            explicit ListReader(SecureList& originalList) : list(originalList)
             {
-                if(list.arr) [[likely]]
+                if(list.arr == nullptr || list.hasReader)
                 {
-                    sodium_mprotect_readwrite(list.arr);
-                    GetCryptoManager().decrypt(list.arr, list.elements * sizeof(T));
+                    LOG_CRITICAL("Made reader from moved box or box already has reader");
                 }
+                list.hasReader = true;
+                sodium_mprotect_readwrite(list.arr);
+                GetCryptoManager().decrypt(list.arr, list.elements * sizeof(T));
             }
 
-            ~ListAccess()
+            ~ListReader()
             {
-                if(list.arr) [[likely]]
-                {
-                    GetCryptoManager().encrypt(list.arr, list.elements * sizeof(T));
-                    sodium_mprotect_noaccess(list.arr);
-                }
+                list.hasReader = false;
+                GetCryptoManager().encrypt(list.arr, list.elements * sizeof(T));
+                sodium_mprotect_noaccess(list.arr);
             }
 
             [[nodiscard]] size_t size() const
@@ -68,7 +67,19 @@ namespace tpunkt
                     grow(list.capacity > 0U ? list.capacity * 2U : 10U);
                 }
                 ::new(&list.arr[ list.elements ]) T();
-                memcpy(list.arr + list.elements, &value, sizeof(T));
+                list.arr[ list.elements ] = value;
+                ++list.elements;
+            }
+
+            // Adds a new element at the end
+            void push_back(T&& value)
+            {
+                if(list.elements == list.capacity)
+                {
+                    grow(list.capacity > 0U ? list.capacity * 2U : 10U);
+                }
+                ::new(&list.arr[ list.elements ]) T();
+                list.arr[list.elements ] = std::move(value);
                 ++list.elements;
             }
 
@@ -94,7 +105,7 @@ namespace tpunkt
                         // Not at last place - copy last place to the matching one
                         if(i != list.elements - 1U) [[likely]]
                         {
-                            memcpy(list.arr + i, list.arr + (list.elements - 1U), sizeof(T));
+                            list.arr[ i ] = std::move(list.arr[ list.elements - 1U ]);
                         }
                         --list.elements;
                         return true;
@@ -115,7 +126,7 @@ namespace tpunkt
 
                 if(idx != list.elements - 1U) [[likely]]
                 {
-                    memcpy(list.arr + idx, list.arr + (list.elements - 1U), sizeof(T));
+                    list.arr[ idx ] = std::move(list.arr[ list.elements - 1U ]);
                 }
                 --list.elements;
                 return true;
@@ -142,7 +153,7 @@ namespace tpunkt
 
             struct Iterator final
             {
-                explicit Iterator(T* ptr) : ptr(ptr)
+                explicit Iterator(T* initPtr) : ptr(initPtr)
                 {
                 }
 
@@ -220,12 +231,12 @@ namespace tpunkt
                 list.capacity = newCapacity;
             }
             SecureList& list;
-            TPUNKT_MACROS_STRUCT(ListAccess);
+            TPUNKT_MACROS_STRUCT(ListReader);
         };
 
-        ListAccess get()
+        ListReader get()
         {
-            return ListAccess{*this};
+            return ListReader{*this};
         }
 
         explicit SecureList(const size_t initialCapacity = 10) : capacity(initialCapacity)
@@ -238,11 +249,12 @@ namespace tpunkt
             sodium_mprotect_noaccess(arr);
         }
 
-        SecureList(SecureList&& other) noexcept
+        SecureList(SecureList&& other) noexcept : arr(other.arr), elements(other.elements), capacity(other.capacity)
         {
-            arr = other.arr;
-            elements = other.elements;
-            capacity = other.capacity;
+            if(hasReader || other.hasReader)
+            {
+                LOG_CRITICAL("No move with active reader");
+            }
             other.arr = nullptr;
             other.capacity = 0U;
             other.elements = 0U;
@@ -250,24 +262,28 @@ namespace tpunkt
 
         SecureList& operator=(SecureList&& other) noexcept
         {
-            if(this == &other)
+            if(hasReader || other.hasReader)
             {
-                return *this;
+                LOG_CRITICAL("No move with active reader");
             }
-            arr = other.arr;
-            elements = other.elements;
-            capacity = other.capacity;
-            other.arr = nullptr;
-            other.capacity = 0U;
-            other.elements = 0U;
+            if(this != &other)
+            {
+                arr = other.arr;
+                elements = other.elements;
+                capacity = other.capacity;
+                other.arr = nullptr;
+                other.capacity = 0U;
+                other.elements = 0U;
+            }
             return *this;
         }
 
-        SecureList(const SecureList& other) = delete;
-        SecureList& operator=(const SecureList& other) = delete;
-
         ~SecureList()
         {
+            if(hasReader)
+            {
+                LOG_CRITICAL("Cant destroy with active reader");
+            }
             if(arr)
             {
                 sodium_mprotect_readwrite(arr);
@@ -275,12 +291,15 @@ namespace tpunkt
             TPUNKT_SECUREFREE(arr);
         }
 
+        SecureList(const SecureList& other) = delete;
+        SecureList& operator=(const SecureList& other) = delete;
+
       private:
         T* arr = nullptr;
         size_t elements = 0U;
         size_t capacity = 0U;
+        mutable bool hasReader = false; // Keep track if we have a reader - if yes disallow moving and dtor
         static_assert(std::is_trivially_destructible_v<T>, "Detors are not called");
-        static_assert(std::is_trivially_copyable_v<T>, "Uses memcpy to copy values");
         static_assert(std::is_default_constructible_v<T>, "No params supported");
     };
 

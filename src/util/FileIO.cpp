@@ -9,9 +9,6 @@ namespace tpunkt
         return access( path, F_OK ) == 0;
     }
 
-    FileReader::FileReader( const char* path ) : path( path )
-    {
-    }
 
 
 } // namespace tpunkt

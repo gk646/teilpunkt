@@ -11,9 +11,9 @@ namespace tpunkt
 {
     struct User final
     {
-        UserName name{};               // Unique name of the user
-        Credentials credentials{};     // Auth credentials
-        SecureList<WrappedKey> keys{}; // Resource keys
+        UserName name;               // Unique name of the user
+        Credentials credentials;     // Auth credentials
+        SecureList<WrappedKey> keys; // Resource keys
         uint32_t userID;               // Abstract unique identifier
 
       private:

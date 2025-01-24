@@ -36,6 +36,20 @@ static AuthStatus login(const char* userName, const char* password, AuthToken& t
     REQUIRE(credentials.password == emptyCredentials.password); // Zeroed out
     return status;
 }
+static AuthStatus changeCredentials(const AuthToken& token, const char* newUser, const char* newPw)
+{
+    const UserName name{newUser};
+
+    Credentials credentials{};
+    credentials.type = CredentialsType::PASSWORD;
+    credentials.password = newPw;
+
+    const auto status = GetAuthenticator().userChangeCredentials(token, name, credentials);
+
+    Credentials emptyCredentials{};
+    REQUIRE(credentials.password == emptyCredentials.password); // Zeroed out
+    return status;
+}
 
 static AuthStatus remove(const AuthToken& token)
 {
@@ -66,6 +80,7 @@ TEST_CASE("Add, Login, and Delete User")
     // Remove
     {
         AuthToken token{};
+
         auto status = login(userName, password, token);
         REQUIRE(status == AuthStatus::OK);
         status = remove(token);
@@ -80,6 +95,83 @@ TEST_CASE("Add, Login, and Delete User")
     }
 }
 
-TEST_CASE("User Story Fuzzy")
+TEST_CASE("Token copying")
 {
+    TEST_INIT();
+
+    // Setup
+    const char* userName = "MyUserName";
+    const char* password = "password123";
+
+    // Signup
+    {
+        auto status = signup(userName, password);
+        REQUIRE(status == AuthStatus::OK);
+    }
+
+    AuthToken outerToken;
+    // Login
+    {
+        AuthToken token{};
+        auto status = login(userName, password, token);
+        memcpy(&outerToken, &token, sizeof(AuthToken)); // Copy token forcefully
+        REQUIRE(status == AuthStatus::OK);
+    }
+    // Invalid
+    REQUIRE_FALSE(GetAuthenticator().tokenValid(outerToken));
+    // Methods return invalid token
+    REQUIRE(GetAuthenticator().userRemove(outerToken) == AuthStatus::ERR_INVALID_TOKEN);
+}
+
+TEST_CASE("Return value on invalid token")
+{
+    TEST_INIT();
+    AuthToken token{};
+    //
+    Credentials c{};
+    UserName n{};
+    REQUIRE(GetAuthenticator().userRemove(token) == AuthStatus::ERR_INVALID_TOKEN);
+    REQUIRE(GetAuthenticator().userChangeCredentials(token, n, c) == AuthStatus::ERR_INVALID_TOKEN);
+
+    SessionMetaData data{};
+    SecureWrapper<SessionID> id;
+    REQUIRE(GetAuthenticator().sessionAdd(token, data, id) == AuthStatus::ERR_INVALID_TOKEN);
+    REQUIRE(GetAuthenticator().sessionRemove(token) == AuthStatus::ERR_INVALID_TOKEN);
+    REQUIRE(GetAuthenticator().sessionGet(token) == AuthStatus::ERR_INVALID_TOKEN);
+
+    FileHandle handle;
+    SecureWrapper<WrappedKey> key;
+    REQUIRE(GetAuthenticator().getUserName(token, n) == AuthStatus::ERR_INVALID_TOKEN);
+    REQUIRE(GetAuthenticator().getWrappedKey(token, handle, key) == AuthStatus::ERR_INVALID_TOKEN);
+}
+
+
+TEST_CASE("Change Credentials")
+{
+    TEST_INIT();
+    // Setup
+    const char* userName = "MyUserName";
+    const char* newUser = "MyNewUserName";
+    const char* password = "password123";
+    const char* newPassword = "newpassword123";
+    // Signup
+    {
+        auto status = signup(userName, password);
+        REQUIRE(status == AuthStatus::OK);
+    }
+
+    // Login
+    {
+        AuthToken token{};
+        auto status = login(userName, password, token);
+        REQUIRE(status == AuthStatus::OK);
+        status = changeCredentials(token, newUser, newPassword);
+        REQUIRE(status == AuthStatus::OK);
+    }
+
+    {
+        AuthToken token{};
+        auto status = login(newUser, newPassword, token);
+        REQUIRE(status == AuthStatus::OK);
+    }
 }

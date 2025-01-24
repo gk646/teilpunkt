@@ -21,6 +21,9 @@ namespace tpunkt
 
         void subtractTime(uint64_t seconds);
 
+        // zeros the timestamp - always expires
+        void zero();
+
         static Timestamp now();
 
       private:

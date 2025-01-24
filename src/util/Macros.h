@@ -37,7 +37,7 @@
     {                                                                                                                  \
         return *global::var;                                                                                           \
     }                                                                                                                  \
-    LOG_FATAL("%-15s is not assigned", #var)
+    LOG_FATAL("%-15s is not assigned", #var);                                                                          \
 
 
 #define TPUNKT_MACROS_STARTUP_PRINT()                                                                                  \

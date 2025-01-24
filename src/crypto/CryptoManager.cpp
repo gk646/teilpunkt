@@ -28,10 +28,14 @@ namespace tpunkt
 
     void CryptoManager::encrypt(void* data, size_t len)
     {
+        (void)data;
+        (void)len;
     }
 
     void CryptoManager::decrypt(void* data, size_t len)
     {
+        (void)data;
+        (void)len;
     }
 
 } // namespace tpunkt

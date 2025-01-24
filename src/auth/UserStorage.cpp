@@ -137,10 +137,15 @@ namespace tpunkt
 
     bool UserStorage::remove(const uint32_t userID)
     {
+
         for(auto& userBox : users)
         {
-            auto boxReader = userBox.get();
-            if(boxReader.get().userID == userID)
+            bool found = false;
+            {
+                auto boxReader = userBox.get();
+                found = boxReader.get().userID == userID;
+            }
+            if(found)
             {
                 userBox = std::move(users.back());
                 users.pop_back();

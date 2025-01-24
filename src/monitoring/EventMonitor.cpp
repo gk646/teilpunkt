@@ -27,7 +27,9 @@ namespace tpunkt
 
     void EventMonitor::log(EventType type, EventAction action, EventStatus status)
     {
-
+        (void)type;
+        (void)action;
+        (void)status;
     }
 
 } // namespace tpunkt

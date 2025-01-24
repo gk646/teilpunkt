@@ -19,7 +19,7 @@ TEST_CASE("FixedString Tests")
     {
         FixedString<10> str("Hello");
         REQUIRE(str.size() == 5);
-        REQUIRE(std::strcmp(str.c_str(), "Hello") == 0);
+        REQUIRE(str == "Hello");
     }
 
     SECTION("Truncation")
@@ -45,7 +45,7 @@ TEST_CASE("FixedString Tests")
     SECTION("AssignFixedString")
     {
         FixedString<10> str1("Hello");
-        FixedString<10> str2;
+        FixedString<5> str2;
         str2 = str1;
         REQUIRE(str2.size() == 5);
         REQUIRE(std::strcmp(str2.c_str(), "Hello") == 0);
@@ -80,7 +80,7 @@ TEST_CASE("FixedString Tests")
     {
         FixedString<10> str;
         str = nullptr; // Simulate passing a null pointer
-        REQUIRE(std::strcmp(str.c_str(), "") == 0);
+        REQUIRE(str == "");
     }
 
     SECTION("SizeCalculation")
@@ -99,5 +99,18 @@ TEST_CASE("FixedString Tests")
         REQUIRE(data[ 0 ] == 'H');
         data[ 0 ] = 'J'; // Modify via `data()`
         REQUIRE(std::strcmp(str.c_str(), "Jello") == 0);
+    }
+
+    SECTION("Copy constructor")
+    {
+        FixedString<10> str("Hello");
+        FixedString str2{str};
+
+        REQUIRE(str2 == str);
+        REQUIRE(str2 == "Hello");
+
+        FixedString<15> str3{str}; // Different template
+        REQUIRE(str3 == str);
+        REQUIRE(str3 == "Hello");
     }
 }

@@ -4,7 +4,9 @@
 // Fixed string for names/keys that handles overflow and truncation
 #include <cstddef>
 #include <cstring>
+#include <sodium/utils.h>
 #include "util/Logging.h"
+
 
 namespace tpunkt
 {
@@ -18,33 +20,10 @@ namespace tpunkt
             assign(string, 0);
         }
 
-        [[nodiscard]] const char* c_str() const
+        template <signed oLength>
+        explicit FixedString(const FixedString<oLength>& other)
         {
-            return arr;
-        }
-
-        char* data()
-        {
-            return arr;
-        }
-
-        [[nodiscard]] size_t size() const
-        {
-            // Protected against missing 0 terminator
-            for(size_t i = 0U; i < length + 1U; ++i)
-            {
-                if(arr[ i ] == '\0')
-                {
-                    return i;
-                }
-            }
-            LOG_CRITICAL("Missing string terminator");
-            return length;
-        }
-
-        [[nodiscard]] constexpr size_t capacity() const
-        {
-            return length;
+            this = other;
         }
 
         template <size_t oLength>
@@ -52,31 +31,6 @@ namespace tpunkt
         {
             assign(other.c_str(), oLength);
             return *this;
-        }
-
-        FixedString& operator=(const char* assignString)
-        {
-            assign(assignString, 0);
-            return *this;
-        }
-
-        bool operator==(const char* other)
-        {
-            for(size_t i = 0U; i < length; ++i)
-            {
-                const auto oChar = other[ i ];
-
-                if(oChar == '\0')
-                {
-                    return arr[ i ] == oChar;
-                }
-
-                if(arr[ i ] != oChar)
-                {
-                    return false;
-                }
-            }
-            return false; // Other string is longer
         }
 
         template <size_t oLength>
@@ -105,6 +59,65 @@ namespace tpunkt
                 }
             }
             return arr[ length ] == other.c_str()[ length ] && arr[ length ] == '\0'; // Same length
+        }
+
+        FixedString& operator=(const char* assignString)
+        {
+            assign(assignString, 0);
+            return *this;
+        }
+
+        bool operator==(const char* other)
+        {
+            for(size_t i = 0U; i < length; ++i)
+            {
+                const auto oChar = other[ i ];
+
+                if(oChar == '\0')
+                {
+                    return arr[ i ] == oChar;
+                }
+
+                if(arr[ i ] != oChar)
+                {
+                    return false;
+                }
+            }
+            return false; // Other string is longer
+        }
+
+        [[nodiscard]] const char* c_str() const
+        {
+            return arr;
+        }
+
+        char* data()
+        {
+            return arr;
+        }
+
+        void clear()
+        {
+            sodium_memzero(arr, length);
+        }
+
+        [[nodiscard]] size_t size() const
+        {
+            // Protected against missing 0 terminator
+            for(size_t i = 0U; i < length + 1U; ++i)
+            {
+                if(arr[ i ] == '\0')
+                {
+                    return i;
+                }
+            }
+            LOG_CRITICAL("Missing string terminator");
+            return length;
+        }
+
+        [[nodiscard]] constexpr size_t capacity() const
+        {
+            return length;
         }
 
       private:
@@ -150,6 +163,5 @@ namespace tpunkt
     };
 
 } // namespace tpunkt
-
 
 #endif // TPUNKT_FIXED_STRING_H

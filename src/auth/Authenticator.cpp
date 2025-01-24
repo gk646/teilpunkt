@@ -117,14 +117,14 @@ namespace tpunkt
     {
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserSessionAdd, Invalid_Token);
+            LOG_EVENT(UserAction, SessionAdd, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
 
         SessionID sessionId;
         if(!sessionStore.add(token.userID, data, sessionId))
         {
-            LOG_EVENT(UserAction, UserSessionAdd, Generic_Unsuccessful);
+            LOG_EVENT(UserAction, SessionAdd, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
@@ -132,7 +132,7 @@ namespace tpunkt
         auto reader = out.get();
         reader.get() = sessionId;
 
-        LOG_EVENT(UserAction, UserSessionAdd, Successful);
+        LOG_EVENT(UserAction, SessionAdd, Successful);
         return AuthStatus::OK;
     }
 
@@ -140,14 +140,41 @@ namespace tpunkt
     {
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserSessionRemove, Invalid_Token);
+            LOG_EVENT(UserAction, SessionRemove, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
     }
 
     AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out)
     {
+        uint32_t userID = 0U;
+        if(!sessionStore.get(sessionId, data, userID))
+        {
+            LOG_EVENT(UserAction, SessionAuthenticate, Generic_Unsuccessful);
+            return AuthStatus::ERR_UNSUCCESSFUL;
+        }
 
+        uint32_t random = 0U;
+        if(!sessionStore.addToken(userID, random))
+        {
+            LOG_EVENT(UserAction, SessionAuthenticate, Generic_Unsuccessful);
+            return AuthStatus::ERR_UNSUCCESSFUL;
+        }
+
+        out.random = random;
+        out.userID = userID;
+
+        LOG_EVENT(UserAction, SessionAuthenticate, Successful);
+        return AuthStatus::OK;
+    }
+
+    AuthStatus Authenticator::sessionGet(const AuthToken& token)
+    {
+        if(!tokenValid(token))
+        {
+            LOG_EVENT(UserAction, SessionGetSessions, Invalid_Token);
+            return AuthStatus::ERR_INVALID_TOKEN;
+        }
     }
 
     bool Authenticator::tokenValid(const AuthToken& token) const
@@ -158,21 +185,32 @@ namespace tpunkt
     AuthStatus Authenticator::tokenInvalidate(AuthToken& consumed)
     {
         SecureEraser eraser{consumed};
-        if(!tokenValid(consumed))
-        {
-            LOG_EVENT(InternalCode, TokenInvalidate, Successful);
-            return AuthStatus::OK;
-        }
-
         if(!sessionStore.removeToken(consumed))
         {
-            LOG_EVENT(InternalCode, TokenInvalidate, Generic_Unsuccessful);
+            LOG_EVENT(InternalCode, TokenInvalidate, Invalid_Token);
             LOG_CRITICAL("Failed to invalidate token");
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
-
         LOG_EVENT(InternalCode, TokenInvalidate, Successful);
         return AuthStatus::OK;
+    }
+
+    AuthStatus Authenticator::getUserName(const AuthToken& token, UserName& out)
+    {
+        if(!tokenValid(token))
+        {
+            LOG_EVENT(UserAction, UserDataGetName, Invalid_Token);
+            return AuthStatus::ERR_INVALID_TOKEN;
+        }
+    }
+
+    AuthStatus Authenticator::getWrappedKey(const AuthToken& token, FileHandle handle, SecureWrapper<WrappedKey>& out)
+    {
+        if(!tokenValid(token))
+        {
+            LOG_EVENT(UserAction, UserDataGetWrappedKey, Invalid_Token);
+            return AuthStatus::ERR_INVALID_TOKEN;
+        }
     }
 
 } // namespace tpunkt

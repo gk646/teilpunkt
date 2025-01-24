@@ -26,6 +26,7 @@ namespace tpunkt
         void setLogLevel(LogLevel level);
         void log(LogLevel level, const char* msg, ...) const;
         void logEx(LogLevel level, const char* method, const char* file, int line, const char* msg, ...) const;
+        [[noreturn]] void logFatal(const char* method, const char* file, int line, const char* msg, ...) const;
 
       private:
         LogLevel minimalLevel = LogLevel::INFO;
@@ -37,6 +38,7 @@ namespace tpunkt
 
 } // namespace tpunkt
 
+
 #define LOG_DEBUG(msg, ...) GetLogger().log(LogLevel::DEBUG, msg, ##__VA_ARGS__)
 #define LOG_INFO(msg, ...) GetLogger().log(LogLevel::INFO, msg, ##__VA_ARGS__)
 #define LOG_WARNING(msg, ...) GetLogger().log(LogLevel::WARNING, msg, ##__VA_ARGS__)
@@ -44,8 +46,7 @@ namespace tpunkt
     GetLogger().logEx(LogLevel::ERROR, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 #define LOG_CRITICAL(msg, ...)                                                                                         \
     GetLogger().logEx(LogLevel::CRITICAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-#define LOG_FATAL(msg, ...)                                                                                            \
-    GetLogger().logEx(LogLevel::FATAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
+#define LOG_FATAL(msg, ...) GetLogger().logFatal(__PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 
 #define STRINGIFY(x) #x
 
