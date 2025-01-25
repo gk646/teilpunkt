@@ -27,6 +27,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::userAdd(const UserName& name, Credentials& consumed)
     {
+        SpinlockGuard lock{authLock};
         SecureEraser eraser{consumed};
         if(GetInstanceConfig().getBool(BoolParamKey::USER_ONLY_ADMIN_CREATE_ACCOUNT))
         {
@@ -52,6 +53,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed, AuthToken& out)
     {
+        SpinlockGuard lock{authLock};
         SecureEraser eraser{consumed};
 
         uint32_t userID{};
@@ -76,6 +78,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::userRemove(const AuthToken& token)
     {
+        SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
             LOG_EVENT(UserAction, UserRemove, Invalid_Token);
@@ -95,6 +98,7 @@ namespace tpunkt
     AuthStatus Authenticator::userChangeCredentials(const AuthToken& token, const UserName& newName,
                                                     Credentials& consumed)
     {
+        SpinlockGuard lock{authLock};
         SecureEraser eraser{consumed};
         if(!tokenValid(token))
         {
@@ -115,6 +119,7 @@ namespace tpunkt
     AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionMetaData& data,
                                          SecureWrapper<SessionID>& out)
     {
+        SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
             LOG_EVENT(UserAction, SessionAdd, Invalid_Token);
@@ -138,6 +143,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::sessionRemove(const AuthToken& token)
     {
+        SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
             LOG_EVENT(UserAction, SessionRemove, Invalid_Token);
@@ -147,6 +153,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out)
     {
+        SpinlockGuard lock{authLock};
         uint32_t userID = 0U;
         if(!sessionStore.get(sessionId, data, userID))
         {
@@ -170,6 +177,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::sessionGet(const AuthToken& token)
     {
+        SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
             LOG_EVENT(UserAction, SessionGetSessions, Invalid_Token);
@@ -177,13 +185,19 @@ namespace tpunkt
         }
     }
 
-    bool Authenticator::tokenValid(const AuthToken& token) const
+    bool Authenticator::tokenValid(const AuthToken& token)
     {
+        if(!authLock.isLocked()) // Can be called within lock or standalone
+        {
+            SpinlockGuard lock{authLock};
+            return sessionStore.tokenValid(token);
+        }
         return sessionStore.tokenValid(token);
     }
 
     AuthStatus Authenticator::tokenInvalidate(AuthToken& consumed)
     {
+        SpinlockGuard lock{authLock};
         SecureEraser eraser{consumed};
         if(!sessionStore.removeToken(consumed))
         {
@@ -197,6 +211,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::getUserName(const AuthToken& token, UserName& out)
     {
+        SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
             LOG_EVENT(UserAction, UserDataGetName, Invalid_Token);
@@ -206,6 +221,7 @@ namespace tpunkt
 
     AuthStatus Authenticator::getWrappedKey(const AuthToken& token, FileHandle handle, SecureWrapper<WrappedKey>& out)
     {
+        SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
             LOG_EVENT(UserAction, UserDataGetWrappedKey, Invalid_Token);

@@ -91,7 +91,7 @@ namespace tpunkt
 
                     // Content
                     char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);
-                    fread(content, statbuf.st_size, 1, file);
+                    fread(content, static_cast<size_t>(statbuf.st_size), 1, file);
                     content[ statbuf.st_size ] = '\0';
                     fclose(file);
 

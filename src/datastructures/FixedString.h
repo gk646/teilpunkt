@@ -7,7 +7,6 @@
 #include <sodium/utils.h>
 #include "util/Logging.h"
 
-
 namespace tpunkt
 {
     template <size_t length>
@@ -20,10 +19,10 @@ namespace tpunkt
             assign(string, 0);
         }
 
-        template <signed oLength>
+        template <size_t oLength>
         explicit FixedString(const FixedString<oLength>& other)
         {
-            this = other;
+            *this = other;
         }
 
         template <size_t oLength>

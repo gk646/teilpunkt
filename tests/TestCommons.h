@@ -17,6 +17,6 @@ static void handleSignal(int signal){}
     tpunkt::Authenticator auth{};                                                                                      \
     tpunkt::EventMonitor monitor{};                                                                                    \
     LOG_INFO("Initialized Testing Environment");                                                                       \
-    signal(SIGTRAP, handleSignal);
+    (void)signal(SIGTRAP, handleSignal)
 
 #endif // TESTCOMMONS_H

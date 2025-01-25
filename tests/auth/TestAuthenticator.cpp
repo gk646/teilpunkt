@@ -1,8 +1,9 @@
 #define CATCH_CONFIG_MAIN // Include somewhere once
 
 #include <catch_amalgamated.hpp>
-#include "TestCommons.h"
+#include <thread>
 
+#include "TestCommons.h"
 #include "auth/AuthToken.h"
 
 using namespace tpunkt;
@@ -36,6 +37,7 @@ static AuthStatus login(const char* userName, const char* password, AuthToken& t
     REQUIRE(credentials.password == emptyCredentials.password); // Zeroed out
     return status;
 }
+
 static AuthStatus changeCredentials(const AuthToken& token, const char* newUser, const char* newPw)
 {
     const UserName name{newUser};

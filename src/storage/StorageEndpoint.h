@@ -8,7 +8,6 @@
 
 namespace tpunkt
 {
-
     enum class StorageStatusType : uint8_t
     {
         INVALID = 0,
@@ -17,15 +16,6 @@ namespace tpunkt
         ERR_NOT_ENOUGH_SPACE,
         ERR_ACTION_DENIED,
     };
-
-    struct StorageStatus final
-    {
-        StorageStatusType status;
-        explicit StorageStatus(StorageStatusType status);
-        [[nodiscard]] bool isOK() const;
-        [[nodiscard]] const char* getErrorMessage() const;
-    };
-
 
     enum class StorageEndpointType : uint8_t
     {
@@ -39,6 +29,7 @@ namespace tpunkt
         FixedString<TPUNKT_STORAGE_NAME_LEN> name;
         StorageEndpointType type;
 
+        /*
         StorageStatus addFile();
         StorageStatus removeFile();
         StorageStatus changeFile();
@@ -50,6 +41,7 @@ namespace tpunkt
         StorageStatus renameDirectory();
 
         StorageStatus clear();
+        */
 
     };
 

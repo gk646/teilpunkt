@@ -34,7 +34,7 @@ namespace tpunkt
 
     bool SessionStorage::get(const SessionID& sessionId, const SessionMetaData& data, uint32_t& userID)
     {
-        
+        return true;
     }
 
     bool SessionStorage::removeByRemote(const uint32_t userID, const HashedIP& address)

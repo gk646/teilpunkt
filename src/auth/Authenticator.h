@@ -6,6 +6,7 @@
 #include "auth/SessionStorage.h"
 #include "auth/UserStorage.h"
 #include "datastructures/SecureWrapper.h"
+#include "datastructures/Spinlock.h"
 
 namespace tpunkt
 {
@@ -52,7 +53,7 @@ namespace tpunkt
 
         //===== Token Management =====//
 
-        [[nodiscard]] bool tokenValid(const AuthToken& token) const;
+        [[nodiscard]] bool tokenValid(const AuthToken& token);
 
         AuthStatus tokenInvalidate(AuthToken& consumed);
 
@@ -69,8 +70,9 @@ namespace tpunkt
         ~Authenticator();
 
       private:
-        SessionStorage sessionStore;
-        UserStorage userStore;
+        Spinlock authLock;           // Makes all operations atomic
+        SessionStorage sessionStore; // Saves all sessions and tokens
+        UserStorage userStore;       // Saves all userdata
         TPUNKT_MACROS_STRUCT(Authenticator);
     };
 

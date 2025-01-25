@@ -79,7 +79,7 @@ namespace tpunkt
                     grow(list.capacity > 0U ? list.capacity * 2U : 10U);
                 }
                 ::new(&list.arr[ list.elements ]) T();
-                list.arr[list.elements ] = std::move(value);
+                list.arr[ list.elements ] = std::move(value);
                 ++list.elements;
             }
 
@@ -220,10 +220,11 @@ namespace tpunkt
                     ::new(&newVal[ i ]) T();
                 }
 
-                // Make old writeable
-                sodium_mprotect_readwrite(list.arr);
                 // Copy from old
-                memcpy(newVal, list.arr, sizeof(T) * list.elements);
+                for(size_t i = 0U; i < list.elements; ++i)
+                {
+                    newVal[ i ] = std::move(list.arr[ i ]);
+                }
                 // Delete old
                 TPUNKT_SECUREFREE(list.arr);
                 // Assign new to old - will be protected in dtor

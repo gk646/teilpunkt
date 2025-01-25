@@ -57,7 +57,7 @@ namespace tpunkt
 
     struct NumberConfigParam final
     {
-        int32_t number;
+        uint32_t number;
     };
 
     struct BoolConfigParam final

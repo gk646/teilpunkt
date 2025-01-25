@@ -8,9 +8,18 @@
 
 namespace tpunkt
 {
+    enum class StorageStatus : uint8_t
+    {
+
+    };
 
     struct Storage final
     {
+
+
+
+
+      private:
         std::vector<StorageEndpoint> endpoints;
     };
 
