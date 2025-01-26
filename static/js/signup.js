@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = `username=${username}\npassword=${hashedPasswordBase64}`;
 
         try {
-            const response = await fetchWithErrorHandling('/api/signup', {
+            const response = await fetchWithErrorHandling('/api/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',

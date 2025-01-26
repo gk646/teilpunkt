@@ -15,6 +15,7 @@ namespace tpunkt
         server.get( "/*", StaticEndpoint::handle );
         server.post( "/api/signup", SignupEndpoint::handle );
         server.post( "/api/login", LoginEndpoint::handle );
+        server.post( "/api/upload", UploadEndpoint::handle );
         TPUNKT_MACROS_GLOBAL_ASSIGN( Server );
     }
 

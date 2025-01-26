@@ -13,8 +13,8 @@ namespace tpunkt
         ~AuthToken();
 
       private:
+        UserID userID{};   // Which user this token authenticates
         uint32_t random{}; // Random number to make this token non forgeable
-        uint32_t userID{}; // Which user this token authenticates
         TPUNKT_MACROS_STRUCT(AuthToken);
         friend Authenticator;
         friend SessionStorage;

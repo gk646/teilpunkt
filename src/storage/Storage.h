@@ -1,26 +1,22 @@
 #ifndef TPUNKT_STORAGE_H
 #define TPUNKT_STORAGE_H
 
-#include <cstdint>
-#include <vector>
-
 #include "storage/StorageEndpoint.h"
+#include "datastructures/Spinlock.h"
 
 namespace tpunkt
 {
-    enum class StorageStatus : uint8_t
-    {
-
-    };
-
+    // All operations are atomic
     struct Storage final
     {
 
-
-
-
       private:
+        //===== Endpoint Management =====//
+
+
         std::vector<StorageEndpoint> endpoints;
+        Spinlock storageLock;
+        friend StorageTransaction;
     };
 
     Storage& GetStorage();

@@ -23,6 +23,7 @@ namespace tpunkt
     };
 
     // Every method is atomic
+    // Admin can only Add
     struct Authenticator final
     {
         //===== User Management =====//
@@ -49,6 +50,7 @@ namespace tpunkt
         // Assigns token on success
         AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out);
 
+        // TODO make collector class / vector like container with stack memory / wrapper around c pointer with len
         AuthStatus sessionGet(const AuthToken& token);
 
         //===== Token Management =====//
@@ -64,7 +66,10 @@ namespace tpunkt
         AuthStatus getUserName(const AuthToken& token, UserName& out);
 
         // Assigns the users wrapped key for the given file on success
-        AuthStatus getWrappedKey(const AuthToken& token, FileHandle handle, SecureWrapper<WrappedKey>& out);
+        AuthStatus getWrappedKey(const AuthToken& token, FileID file, SecureWrapper<WrappedKey>& out);
+
+        //===== Admin  =====//
+
 
         Authenticator();
         ~Authenticator();

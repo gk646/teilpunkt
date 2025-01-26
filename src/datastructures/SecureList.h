@@ -3,7 +3,6 @@
 
 #include <sodium/utils.h>
 #include <type_traits>
-#include <cstring>
 #include "util/Memory.h"
 #include "util/Macros.h"
 #include "util/Logging.h"

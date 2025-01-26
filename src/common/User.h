@@ -14,7 +14,7 @@ namespace tpunkt
         UserName name;               // Unique name of the user
         Credentials credentials;     // Auth credentials
         SecureList<WrappedKey> keys; // Resource keys
-        uint32_t userID;               // Abstract unique identifier
+        UserID userID;               // Abstract unique identifier
 
       private:
         TPUNKT_MACROS_STRUCT(User);

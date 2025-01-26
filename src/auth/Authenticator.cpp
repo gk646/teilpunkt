@@ -56,7 +56,7 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         SecureEraser eraser{consumed};
 
-        uint32_t userID{};
+        UserID userID{};
         if(!userStore.login(name, consumed, userID))
         {
             LOG_EVENT(UserAction, UserLogin, Invalid_Authentication);
@@ -154,7 +154,7 @@ namespace tpunkt
     AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out)
     {
         SpinlockGuard lock{authLock};
-        uint32_t userID = 0U;
+        auto userID = UserID::INVALID;
         if(!sessionStore.get(sessionId, data, userID))
         {
             LOG_EVENT(UserAction, SessionAuthenticate, Generic_Unsuccessful);
@@ -219,7 +219,7 @@ namespace tpunkt
         }
     }
 
-    AuthStatus Authenticator::getWrappedKey(const AuthToken& token, FileHandle handle, SecureWrapper<WrappedKey>& out)
+    AuthStatus Authenticator::getWrappedKey(const AuthToken& token, FileID handle, SecureWrapper<WrappedKey>& out)
     {
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))

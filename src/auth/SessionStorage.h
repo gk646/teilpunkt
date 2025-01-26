@@ -10,7 +10,7 @@ namespace tpunkt
 {
     struct UserSessionData final
     {
-        explicit UserSessionData(const uint32_t user) : userID(user)
+        explicit UserSessionData(const UserID user) : userID(user)
         {
         }
 
@@ -25,7 +25,7 @@ namespace tpunkt
         UserSessionData& operator=(UserSessionData&& other) = delete;
 
       private:
-        const uint32_t userID;        // Which users session data
+        const UserID userID;          // Which users session data
         SecureList<Session> sessions; // Session list
         std::vector<uint32_t> tokens; // Token list
         friend SessionStorage;
@@ -37,27 +37,27 @@ namespace tpunkt
 
         //===== Session Management =====//
 
-        bool add(uint32_t userID, const SessionMetaData& data, SessionID& out);
+        bool add(UserID userID, const SessionMetaData& data, SessionID& out);
 
         // If the session is identified but the data does not match its revoked!
-        bool get(const SessionID& sessionId, const SessionMetaData& data, uint32_t& userID);
+        bool get(const SessionID& sessionId, const SessionMetaData& data, UserID& userID);
 
-        bool removeByRemote(uint32_t userID, const HashedIP& address);
+        bool removeByRemote(UserID userID, const HashedIP& address);
 
-        bool removeByID(uint32_t userID, const SessionID& sessionId);
+        bool removeByID(UserID userID, const SessionID& sessionId);
 
         //===== Token Management =====//
 
         [[nodiscard]] bool tokenValid(const AuthToken& token) const;
 
-        bool addToken(uint32_t userID, uint32_t& random);
+        bool addToken(UserID userID, uint32_t& random);
 
         bool removeToken(const AuthToken& token);
 
       private:
-        UserSessionData* getUserData(uint32_t userID);
+        UserSessionData* getUserData(UserID userID);
 
-        [[nodiscard]] const UserSessionData* getUserData(uint32_t userID) const;
+        [[nodiscard]] const UserSessionData* getUserData(UserID userID) const;
 
         std::vector<UserSessionData> sessions;
         TPUNKT_MACROS_STRUCT(SessionStorage);

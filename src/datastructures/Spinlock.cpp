@@ -4,7 +4,6 @@
 
 namespace tpunkt
 {
-
     Spinlock::Spinlock()
     {
         flag.clear(std::memory_order_release);

@@ -12,7 +12,7 @@ namespace tpunkt
         Timestamp();
 
         // Returns true if this timestamp represents a time before the current moment
-        [[nodiscard]] bool isExpired() const;
+        [[nodiscard]] bool inThePast() const;
 
         void addSecs(uint64_t seconds);
         void addMins(uint64_t minutes);

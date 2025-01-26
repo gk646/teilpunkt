@@ -5,17 +5,19 @@
 
 #include "datastructures/FixedString.h"
 #include "storage/VirtualFilesystem.h"
+#include "storage/Transaction.h"
 
 namespace tpunkt
 {
-    enum class StorageStatusType : uint8_t
+
+    enum class StorageStatus : uint8_t
     {
-        INVALID = 0,
-        OK = 1,
-        ERR_NOT_INITIALIZED,
-        ERR_NOT_ENOUGH_SPACE,
-        ERR_ACTION_DENIED,
+        INVALID,
+        OK,
+        ERR_NO_SUCH_ENDPOINT,
+        ERR_UNSUPPORTED_OPERATION,
     };
+
 
     enum class StorageEndpointType : uint8_t
     {
@@ -23,32 +25,38 @@ namespace tpunkt
         REMOTE_FILE_SYSTEM,
     };
 
+
     struct StorageEndpoint
     {
-        VirtualFilesystem virtualFilesystem;
-        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
-        StorageEndpointType type;
+        virtual ~StorageEndpoint() = default;
 
-        /*
-        StorageStatus addFile();
-        StorageStatus removeFile();
-        StorageStatus changeFile();
-        StorageStatus renameFile();
+        //===== File Manipulation =====//
 
-        StorageStatus addDirectory();
-        StorageStatus removeDirectory();
-        StorageStatus changeDirectory();
-        StorageStatus renameDirectory();
+        virtual StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size) = 0;
+        virtual StorageStatus removeFile();
+        virtual StorageStatus changeFile();
+        virtual StorageStatus renameFile();
+
+        virtual StorageStatus addDirectory();
+        virtual StorageStatus removeDirectory();
+        virtual StorageStatus changeDirectory();
+        virtual StorageStatus renameDirectory();
 
         StorageStatus clear();
-        */
 
+        //===== Storage Info =====//
+
+        virtual StorageStatus canBeAdded();
+
+      private:
+        VirtualFilesystem virtualFilesystem;
+        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
+        StorageEndpointType type{};
     };
 
     struct LocalFileSystemEndpoint final : StorageEndpoint
     {
-
     };
 
 } // namespace tpunkt
-#endif //TPUNKT_STORAGE_ENDPOINT_H
+#endif // TPUNKT_STORAGE_ENDPOINT_H

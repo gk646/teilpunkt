@@ -15,11 +15,11 @@ namespace tpunkt
     {
         bool add(const UserName& name, const Credentials& credentials);
 
-        bool remove(uint32_t userID);
+        bool remove(UserID user);
 
-        bool login(const UserName& name, const Credentials& credentials, uint32_t& userID) const;
+        bool login(const UserName& name, const Credentials& credentials, UserID& userID) const;
 
-        [[nodiscard]] bool changeCredentials(uint32_t userID, const UserName& newName,
+        [[nodiscard]] bool changeCredentials(UserID use, const UserName& newName,
                                              const Credentials& newCredentials);
 
         [[nodiscard]] bool nameExists(const UserName& name) const;
@@ -29,7 +29,7 @@ namespace tpunkt
 
       private:
         std::vector<SecureBox<User>> users;
-        SecureWrapper<uint32_t> currUserID; // At first launch chosen randomly - then incremented for each new user
+        SecureWrapper<std::underlying_type_t<UserID>> currUserID; // At first launch chosen randomly - then incremented for each new user
         TPUNKT_MACROS_STRUCT(UserStorage);
     };
 

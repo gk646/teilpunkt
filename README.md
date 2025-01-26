@@ -1,10 +1,10 @@
 ## teilpunkt
 
 > [!IMPORTANT]
-> Until version 1.0.0 this is not production ready. Use at your own risk (see License).
+> Until version 1.0.0 it is not recommended for production use.
 
 
-`teilpunkt`™ _(ger. sharepoint)_ is a C++ 20 secure file sharing server. 
+`teilpunkt`™ _(ger. sharepoint)_ is a highly secure, self-hosted file server.
 
 Note: This made to compile with GCC and for a Linux kernel as open source is essential for security.
 
@@ -38,8 +38,7 @@ These are the actively used security measures used by `teilpunkt`.
 
 ### Storage
 
-- Use of encryption for all persisted files 
-
+- Use of encryption for all persisted files
 
 ### Transfer
 
@@ -48,10 +47,11 @@ These are the actively used security measures used by `teilpunkt`.
 
 ### Deployment
 
-- Runs on GNU/Linux
+- Runs only on recent GNU/Linux
 - All unneeded ports blocked (with setup.sh)
 - Core dumps disabled (with setup.sh)
-- Use of locking, blocking and encrypting sensitive in memory data
+- Use of locking and blocking sensitive memory regions
+- Use of encrypting sensitive data in memory with TPM support
 
 ### Frontend
 
@@ -65,9 +65,9 @@ These are the actively used security measures used by `teilpunkt`.
 - Use of simple code style (_C + templates_)
 - Use of only few dynamic memory
 
-
 ### Compilation
 
+- Only compiles with recent GCC
 - Use of safe optimization level -O2
 - Use of symbol stripping (except relocation information to not hinder ASLR)
-- Use of maximum compiler warning flags
+- Use of many compiler warning flags

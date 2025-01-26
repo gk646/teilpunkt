@@ -8,13 +8,13 @@ namespace tpunkt
     {
         uint64_t getCurrentMonotonicTime()
         {
-            timespec ts{};
-            if(clock_gettime(CLOCK_MONOTONIC_RAW, &ts) != 0)
+            timespec time{};
+            if(clock_gettime(CLOCK_MONOTONIC_RAW, &time) != 0)
             {
                 LOG_CRITICAL("Failed to retrieve time");
                 return 0U;
             }
-            return static_cast<uint64_t>(ts.tv_nsec);
+            return static_cast<uint64_t>(time.tv_nsec);
         }
     } // namespace
 
@@ -23,7 +23,7 @@ namespace tpunkt
     {
     }
 
-    bool Timestamp::isExpired() const
+    bool Timestamp::inThePast() const
     {
         return now().timestamp > timestamp;
     }

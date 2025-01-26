@@ -5,7 +5,7 @@
 
 namespace tpunkt
 {
-    bool SessionStorage::add(const uint32_t userID, const SessionMetaData& data, SessionID& out)
+    bool SessionStorage::add(const UserID userID, const SessionMetaData& data, SessionID& out)
     {
         auto* userData = getUserData(userID);
         if(userData == nullptr)
@@ -32,12 +32,12 @@ namespace tpunkt
         return true;
     }
 
-    bool SessionStorage::get(const SessionID& sessionId, const SessionMetaData& data, uint32_t& userID)
+    bool SessionStorage::get(const SessionID& sessionId, const SessionMetaData& data, UserID& userID)
     {
         return true;
     }
 
-    bool SessionStorage::removeByRemote(const uint32_t userID, const HashedIP& address)
+    bool SessionStorage::removeByRemote(const UserID userID, const HashedIP& address)
     {
         auto* userData = getUserData(userID);
         if(userData == nullptr)
@@ -55,7 +55,7 @@ namespace tpunkt
         return false;
     }
 
-    bool SessionStorage::removeByID(const uint32_t userID, const SessionID& sessionId)
+    bool SessionStorage::removeByID(const UserID userID, const SessionID& sessionId)
     {
         auto* userData = getUserData(userID);
         if(userData == nullptr)
@@ -75,7 +75,7 @@ namespace tpunkt
 
     bool SessionStorage::tokenValid(const AuthToken& token) const
     {
-        if(token.userID == 0U)
+        if(token.userID == UserID::INVALID)
         {
             return false; // Invalid userID
         }
@@ -97,7 +97,7 @@ namespace tpunkt
         return false;
     }
 
-    bool SessionStorage::addToken(const uint32_t userID, uint32_t& random)
+    bool SessionStorage::addToken(const UserID userID, uint32_t& random)
     {
         auto* userData = getUserData(userID);
         if(userData == nullptr)
@@ -130,7 +130,7 @@ namespace tpunkt
         return true; // Token could not be found - not valid anymore
     }
 
-    UserSessionData* SessionStorage::getUserData(const uint32_t userID)
+    UserSessionData* SessionStorage::getUserData(const UserID userID)
     {
         for(auto& session : sessions)
         {
@@ -142,7 +142,7 @@ namespace tpunkt
         return nullptr;
     }
 
-    const UserSessionData* SessionStorage::getUserData(const uint32_t userID) const
+    const UserSessionData* SessionStorage::getUserData(const UserID userID) const
     {
         for(const auto& session : sessions)
         {

@@ -141,7 +141,7 @@ TEST_CASE("Return value on invalid token")
     REQUIRE(GetAuthenticator().sessionRemove(token) == AuthStatus::ERR_INVALID_TOKEN);
     REQUIRE(GetAuthenticator().sessionGet(token) == AuthStatus::ERR_INVALID_TOKEN);
 
-    FileHandle handle;
+    FileID handle;
     SecureWrapper<WrappedKey> key;
     REQUIRE(GetAuthenticator().getUserName(token, n) == AuthStatus::ERR_INVALID_TOKEN);
     REQUIRE(GetAuthenticator().getWrappedKey(token, handle, key) == AuthStatus::ERR_INVALID_TOKEN);

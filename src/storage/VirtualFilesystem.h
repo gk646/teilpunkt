@@ -1,34 +1,42 @@
 #ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
-#include <vector>
-#include <cstdint>
 #include "datastructures/FixedString.h"
-#include "config.h"
+#include "storage/VirtualFile.h"
+
+
+// Uses "/" as separator
 
 namespace tpunkt
 {
-    struct VirtualFile final
+    struct FileDescriptor final
     {
-        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
-        uint64_t encryptedSize{};
+        static FileDescriptor fromString(const char* string);
+
+      private:
+        bool valid = false;
+        FileSystemPath path;
     };
 
-    struct VirtualDirectory final
+    struct FilesystemCreateInfo final
     {
-        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
-        std::vector<VirtualFile> files;
-        std::vector<VirtualDirectory> subdirectories;
+        FixedString<50> name;
+        uint64_t maxSize; // Max size in bytes
     };
 
     struct VirtualFilesystem
     {
-        VirtualDirectory root;
+        VirtualFilesystem(const FilesystemCreateInfo& info);
 
-        VirtualFilesystem();
+        bool fileExists(const FileDescriptor& name);
+
+        bool canCreateFile(UserID user, const FileCreationInfo& info);
+
+      private:
+        VirtualDirectory root;
     };
 
 } // namespace tpunkt
 
 
-#endif //TPUNKT_VIRTUAL_FILESYSTEM_H
+#endif // TPUNKT_VIRTUAL_FILESYSTEM_H

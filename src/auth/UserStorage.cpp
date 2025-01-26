@@ -1,6 +1,5 @@
 #include <sodium/randombytes.h>
 #include "auth/UserStorage.h"
-#include "util/FileIO.h"
 
 namespace tpunkt
 {
@@ -12,9 +11,8 @@ namespace tpunkt
         auto idReader = currUserID.get();
         do
         {
-            idReader.get() = randombytes_random() / 2U; // At least 2.4 billion entries - non zero
+            idReader.get() = randombytes_random() / 2U; // At least 2.1 billion entries - non zero
         } while(idReader.get() == 0U);
-
         // IO
     }
 
@@ -53,13 +51,13 @@ namespace tpunkt
 
         // Assign id
         auto idReader = currUserID.get();
-        newUser.userID = idReader.get();
+        newUser.userID = static_cast<UserID>(idReader.get());
         idReader.get()++; // Increment for next user
 
         return true;
     }
 
-    bool UserStorage::login(const UserName& name, const Credentials& credentials, uint32_t& userID) const
+    bool UserStorage::login(const UserName& name, const Credentials& credentials, UserID& userID) const
     {
         for(const auto& box : users)
         {
@@ -92,8 +90,7 @@ namespace tpunkt
         return false;
     }
 
-    bool UserStorage::changeCredentials(const uint32_t userID, const UserName& newName,
-                                        const Credentials& newCredentials)
+    bool UserStorage::changeCredentials(const UserID userID, const UserName& newName, const Credentials& newCredentials)
     {
         for(auto& box : users)
         {
@@ -135,7 +132,7 @@ namespace tpunkt
         return false;
     }
 
-    bool UserStorage::remove(const uint32_t userID)
+    bool UserStorage::remove(const UserID userID)
     {
 
         for(auto& userBox : users)
