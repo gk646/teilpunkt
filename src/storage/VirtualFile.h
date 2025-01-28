@@ -43,8 +43,6 @@ namespace tpunkt
 
     struct VirtualFile final
     {
-
-
         VirtualFile(const VirtualFile&) = delete;
         VirtualFile& operator=(const VirtualFile&) = delete;
 
@@ -56,6 +54,11 @@ namespace tpunkt
 
     struct VirtualDirectory final
     {
+
+        VirtualDirectory(const VirtualDirectory&) = delete;
+        VirtualDirectory& operator=(const VirtualDirectory&) = delete;
+
+      private:
         FileName name;
         std::vector<VirtualFile> files;
         std::vector<VirtualDirectory> subdirectories;

@@ -3,20 +3,12 @@
 
 #include "datastructures/FixedString.h"
 #include "storage/VirtualFile.h"
-
+#include "storage/FileDescriptors.h"
 
 // Uses "/" as separator
 
 namespace tpunkt
 {
-    struct FileDescriptor final
-    {
-        static FileDescriptor fromString(const char* string);
-
-      private:
-        bool valid = false;
-        FileSystemPath path;
-    };
 
     struct FilesystemCreateInfo final
     {
@@ -26,9 +18,9 @@ namespace tpunkt
 
     struct VirtualFilesystem
     {
-        VirtualFilesystem(const FilesystemCreateInfo& info);
+        explicit VirtualFilesystem(const FilesystemCreateInfo& info);
 
-        bool fileExists(const FileDescriptor& name);
+      //  bool fileExists(const FileDescriptor& name);
 
         bool canCreateFile(UserID user, const FileCreationInfo& info);
 

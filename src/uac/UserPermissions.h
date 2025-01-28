@@ -16,13 +16,12 @@ namespace tpunkt
     };
 
 
-    struct UserLimits final{
+    struct UserLimits final
+    {
 
-        };
-
-
+    };
 
 
 } // namespace tpunkt
 
-#endif //TPUNKT_PERMISSIONS_H
+#endif // TPUNKT_PERMISSIONS_H

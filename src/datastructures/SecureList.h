@@ -7,6 +7,7 @@
 #include "util/Macros.h"
 #include "util/Logging.h"
 #include "crypto/CryptoManager.h"
+#include "datastructures/Iterator.h"
 
 namespace tpunkt
 {
@@ -150,57 +151,19 @@ namespace tpunkt
                 return list.elements;
             }
 
-            struct Iterator final
-            {
-                explicit Iterator(T* initPtr) : ptr(initPtr)
-                {
-                }
-
-                T& operator*()
-                {
-                    return *ptr;
-                }
-
-                Iterator& operator++()
-                {
-                    ++ptr;
-                    return *this;
-                }
-
-                Iterator operator++(int)
-                {
-                    Iterator temp = *this;
-                    ++(*this);
-                    return temp;
-                }
-
-                bool operator==(const Iterator& other) const
-                {
-                    return ptr == other.ptr;
-                }
-
-                bool operator!=(const Iterator& other) const
-                {
-                    return ptr != other.ptr;
-                }
-
-              private:
-                T* ptr;
-            };
-
-            Iterator begin() const
+            Iterator<const T> begin() const
             {
                 return Iterator{list.arr};
             }
-            Iterator end() const
+            Iterator<const T> end() const
             {
                 return Iterator{list.arr + list.elements};
             }
-            Iterator begin()
+            Iterator<T> begin()
             {
                 return Iterator{list.arr};
             }
-            Iterator end()
+            Iterator<T> end()
             {
                 return Iterator{list.arr + list.elements};
             }

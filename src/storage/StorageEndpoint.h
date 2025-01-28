@@ -5,7 +5,7 @@
 
 #include "datastructures/FixedString.h"
 #include "storage/VirtualFilesystem.h"
-#include "storage/Transaction.h"
+#include "storage/StorageTransaction.h"
 
 namespace tpunkt
 {
@@ -32,7 +32,7 @@ namespace tpunkt
 
         //===== File Manipulation =====//
 
-        virtual StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size) = 0;
+       // virtual StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size) = 0;
         virtual StorageStatus removeFile();
         virtual StorageStatus changeFile();
         virtual StorageStatus renameFile();
@@ -54,9 +54,6 @@ namespace tpunkt
         StorageEndpointType type{};
     };
 
-    struct LocalFileSystemEndpoint final : StorageEndpoint
-    {
-    };
 
 } // namespace tpunkt
 #endif // TPUNKT_STORAGE_ENDPOINT_H

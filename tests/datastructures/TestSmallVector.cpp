@@ -1,5 +1,5 @@
 #include <catch_amalgamated.hpp>
-#include "datastructures/Collector.h"
+#include "datastructures/SmallVector.h"
 #include "TestCommons.h"
 
 using namespace tpunkt;

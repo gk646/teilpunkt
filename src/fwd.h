@@ -38,9 +38,11 @@ namespace tpunkt
         INVALID = 0
     };
 
-    enum class FileID : uint32_t
+    struct FileID final
     {
-        INVALID = 0
+        uint32_t fileID;
+        bool directory;
+        uint8_t endpoint;
     };
 
     enum class GroupID : uint16_t
@@ -48,10 +50,9 @@ namespace tpunkt
         INVALID = 0
     };
 
-    enum class DirectoryID : uint32_t
-    {
-        INVALID = 0
-    };
+    template <typename T, size_t N>
+    struct SmallVector;
+
 
 } // namespace tpunkt
 

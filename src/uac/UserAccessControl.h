@@ -4,6 +4,7 @@
 #include "fwd.h"
 #include "uac/UserPermissions.h"
 #include "datastructures/Spinlock.h"
+#include "uac/PermissionStorage.h"
 
 namespace tpunkt
 {
@@ -15,7 +16,7 @@ namespace tpunkt
     };
 
     // All operations are atomic
-    // Permissions are automatically inherited implicity for all child files/dirs - until explicit change
+    // Permissions are automatically inherited implicitly for all child files/dirs - until explicit change
     //
     struct UserAccessControl final
     {
@@ -23,14 +24,9 @@ namespace tpunkt
 
         UACStatus lookupFile(UserID user, PermissionFlag perm, FileID file);
 
-        UACStatus lookupDir(UserID user, PermissionFlag perm, DirectoryID dir);
-
         //===== Rules =====//
 
-        UACStatus ruleAdd(GroupID group, PermissionFlag perm, DirectoryID dir);
         UACStatus ruleAdd(GroupID group, PermissionFlag perm, FileID file);
-
-        UACStatus ruleAdd(UserID user, PermissionFlag perm, DirectoryID dir);
         UACStatus ruleAdd(UserID user, PermissionFlag perm, FileID file);
 
         //===== Groups =====//
@@ -43,7 +39,7 @@ namespace tpunkt
 
         //===== Data =====//
 
-        UACStatus getUserLimits(UserID user, uint64_t);
+        UACStatus getUserLimits(UserID user, UserLimits);
 
         UACStatus getUserGroups(UserID user, Collector<GroupID>& collector);
 
