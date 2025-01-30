@@ -6,10 +6,9 @@
 #include "storage/StorageDTOs.h"
 #include "datastructures/Spinlock.h"
 
-
 namespace tpunkt
 {
-    // All operations are atomic
+    // All write operations are atomic across a single endpoint
     // Implicitly checks permissions using the UAC
     struct Storage final
     {
@@ -23,21 +22,22 @@ namespace tpunkt
 
         //===== User Add =====//
 
-      //
+        //
         StorageStatus userAddFile(UserID user, const FileCreationInfo& info, StorageTransaction& transaction);
 
         //===== Endpoint Management =====//
 
-
       private:
+        uint32_t getNextFileID();
+
         std::vector<StorageEndpoint> endpoints;
         Spinlock storageLock;
+        uint32_t fileID{};
         friend StorageTransaction;
     };
 
     // Can only access storage with valid token
-    Storage& GetStorage(const AuthToken& token);
-
+    Storage* GetStorage(const AuthToken& token);
 
 } // namespace tpunkt
 

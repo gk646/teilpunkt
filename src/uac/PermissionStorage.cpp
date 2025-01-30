@@ -4,6 +4,7 @@ namespace tpunkt
 {
     bool PermissionStorage::userHasPermission(const UserID user, PermissionFlag perm, const FileID file)
     {
+        /*
         for(const auto& entry : userFiles)
         {
             if(entry.user == user && entry.file == file)
@@ -15,6 +16,7 @@ namespace tpunkt
                 }
             }
         }
+        */
     }
 
     bool PermissionStorage::groupHasPermission(GroupID group, PermissionFlag perm, FileID file)

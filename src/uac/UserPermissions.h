@@ -5,7 +5,6 @@
 
 namespace tpunkt
 {
-
     enum class PermissionFlag : uint8_t
     {
         READ = 0b001,
@@ -20,7 +19,6 @@ namespace tpunkt
     {
 
     };
-
 
 } // namespace tpunkt
 

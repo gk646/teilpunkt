@@ -19,6 +19,8 @@ namespace tpunkt
     template <typename T>
     struct SecureList;
     struct InstanceConfig;
+    struct Storage;
+    struct VirtualDirectory;
 
     template <typename T>
     struct Collector;
@@ -30,7 +32,7 @@ namespace tpunkt
     using UserAgentString = FixedString<50>;
     using HashedIP = FixedString<16>;
     using ConfigString = FixedString<50>;
-    using FileName = FixedString<63>;         // Max length for any single file name
+    using FileName = FixedString<32>;         // Max length for any single file name
     using FileSystemPath = FixedString<1023>; // Max length of any file path including the file name
 
     enum class UserID : uint32_t
@@ -43,6 +45,7 @@ namespace tpunkt
         uint32_t fileID;
         bool directory;
         uint8_t endpoint;
+        bool operator==(const FileID &) const = default;
     };
 
     enum class GroupID : uint16_t

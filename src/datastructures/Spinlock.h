@@ -2,6 +2,7 @@
 #define TPUNKT_SPINLOCK_H
 
 #include <atomic>
+#include "util/Macros.h"
 
 namespace tpunkt
 {
@@ -19,6 +20,7 @@ namespace tpunkt
         std::atomic_flag flag = ATOMIC_FLAG_INIT;
         bool hasGuard = false;
         friend SpinlockGuard;
+        TPUNKT_MACROS_STRUCT(Spinlock);
     };
 
 
@@ -29,6 +31,7 @@ namespace tpunkt
 
       private:
         Spinlock& lock;
+        TPUNKT_MACROS_STRUCT(SpinlockGuard);
     };
 
 

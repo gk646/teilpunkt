@@ -12,20 +12,24 @@ namespace tpunkt
 
     struct FilesystemCreateInfo final
     {
-        FixedString<50> name;
+        FileName name;
         uint64_t maxSize; // Max size in bytes
+        uint8_t id;
     };
 
     struct VirtualFilesystem
     {
         explicit VirtualFilesystem(const FilesystemCreateInfo& info);
 
-      //  bool fileExists(const FileDescriptor& name);
+        bool createFile(FileID dir, const FileCreationInfo& info);
+
+        bool fileExists(FileID file);
 
         bool canCreateFile(UserID user, const FileCreationInfo& info);
 
       private:
         VirtualDirectory root;
+        uint8_t id;
     };
 
 } // namespace tpunkt

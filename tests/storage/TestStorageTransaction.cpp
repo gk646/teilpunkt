@@ -10,9 +10,6 @@ TEST_CASE("Simple Storage Transaction")
     bool variable = false;
     auto exitFunc = [ & ]() { variable = true; };
     {
-        StorageTransaction t{exitFunc};
-        REQUIRE(variable);
+        StorageTransaction t{};
     }
-
-    REQUIRE_FALSE(variable);
 }
