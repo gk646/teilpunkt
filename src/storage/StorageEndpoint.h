@@ -4,9 +4,9 @@
 #include <cstdint>
 
 #include "datastructures/FixedString.h"
-#include "storage/VirtualFilesystem.h"
-#include "storage/StorageTransaction.h"
-#include "storage/DataStore.h"
+#include "storage/vfs/VirtualFilesystem.h"
+#include "storage/vfs/StorageTransaction.h"
+#include "storage/vfs/DataStore.h"
 
 namespace tpunkt
 {
@@ -30,7 +30,7 @@ namespace tpunkt
 
         //===== File Manipulation =====//
 
-        //StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size);
+        // StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size);
         StorageStatus removeFile();
         StorageStatus changeFile();
         StorageStatus renameFile();
@@ -48,8 +48,8 @@ namespace tpunkt
         virtual StorageStatus canBeAdded();
 
       private:
-        DataStore* dataStore;
         VirtualFilesystem virtualFilesystem;
+        DataStore* dataStore = nullptr;
         FixedString<TPUNKT_STORAGE_NAME_LEN> name;
         StorageEndpointType type{};
     };

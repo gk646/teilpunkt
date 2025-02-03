@@ -1,13 +1,13 @@
 #ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
-#include "storage/VirtualDirectory.h"
+#include "storage/vfs/VirtualDirectory.h"
+#include "storage/vfs/VirtualFilesystemCache.h"
 #include "datastructures/FixedString.h"
-#include "storage/VirtualFile.h"
+#include "storage/vfs/VirtualFile.h"
+#include "datastructures/Spinlock.h"
 
 
-// Uses "/" as separator
-// File names must be unique per directory - case-sensitive
 namespace tpunkt
 {
 
@@ -20,6 +20,9 @@ namespace tpunkt
         UserID creator{};
     };
 
+
+    // File names must be unique per directory - case-sensitive
+    // Any modifications are atomic for the whole filesystem - for simplicity
     struct VirtualFilesystem
     {
         explicit VirtualFilesystem(const FilesystemCreateInfo& info);
@@ -32,6 +35,7 @@ namespace tpunkt
 
       private:
         VirtualDirectory root;
+        Spinlock systemLock;
         uint8_t id;
     };
 

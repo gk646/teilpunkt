@@ -1,6 +1,6 @@
 #include <catch_amalgamated.hpp>
 #include "TestCommons.h"
-#include "storage/VirtualDirectory.h"
+#include "storage/vfs/VirtualDirectory.h"
 
 using namespace tpunkt;
 

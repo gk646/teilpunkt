@@ -2,11 +2,10 @@
 #define TPUNKT_VIRTUAL_DIRECTORY_H
 
 #include <vector>
-#include "storage/VirtualFile.h"
+#include "storage/vfs/VirtualFile.h"
 
 namespace tpunkt
 {
-
     struct DirectoryCreationInfo final
     {
         FileName name;
@@ -31,6 +30,9 @@ namespace tpunkt
         Timestamp lastEdit;
         Timestamp creation;
         uint32_t accessCount{};             // How often directory was accessed
+        uint32_t changeCount{};             // How often directory was accessed
+        uint32_t subdirFileCount;           // Files contained in all subdirs (only those)
+        uint32_t subdirDirCount;            // Dirs contained in all subdirs (only those)
     };
 
     // Currently built using vectors - not cache and fragmentation friendly - done for simplicity - can be changed
@@ -38,7 +40,7 @@ namespace tpunkt
     {
         explicit VirtualDirectory(const DirectoryCreationInfo& info);
         VirtualDirectory& operator=(VirtualDirectory&&) = default;
-        VirtualDirectory (VirtualDirectory&&) = default;
+        VirtualDirectory(VirtualDirectory&&) = default;
 
         VirtualDirectory(const VirtualDirectory&) = delete;
         VirtualDirectory& operator=(const VirtualDirectory&) = delete;
@@ -62,12 +64,19 @@ namespace tpunkt
         // Returns true if the given name is an existing file or directory name - case-sensitive
         [[nodiscard]] bool nameExists(const FileName& name) const;
 
+        // Only in this directory
         [[nodiscard]] uint32_t getFileCount() const;
         [[nodiscard]] uint32_t getDirCount() const;
 
+        // Includes all subdirectories (recursive)
+        [[nodiscard]] uint32_t getTotalFileCount() const;
+        [[nodiscard]] uint32_t getTotalDirCount() const;
+
       private:
-        void propagateAdd(uint64_t size);
-        void propagateRemove(uint64_t size);
+        void propagateAddFile(uint64_t size);
+        void propagateRemoveFile(uint64_t size);
+        void propagateAddDir();
+        void propagateRemoveDir();
 
         DirectoryInfo info;
         DirectoryStats stats;

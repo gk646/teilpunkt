@@ -1,4 +1,4 @@
-#include "storage/VirtualDirectory.h"
+#include "storage/vfs/VirtualDirectory.h"
 
 namespace tpunkt
 {
@@ -12,7 +12,7 @@ namespace tpunkt
         if(fits && unique)
         {
             files.emplace_back(info);
-            propagateAdd(info.size);
+            propagateAddFile(info.size);
             return true;
         }
         return false;
@@ -29,7 +29,7 @@ namespace tpunkt
         {
             if(file.info.id == fileID)
             {
-                propagateRemove(file.info.size);
+                propagateRemoveFile(file.info.size);
                 file = std::move(files.back());
                 files.pop_back();
                 return true;
@@ -40,7 +40,7 @@ namespace tpunkt
 
     bool VirtualDirectory::directoryAdd(const DirectoryCreationInfo& info)
     {
-        VirtualDirectory dir{info};
+        propagateAddDir();
         subdirectories.emplace_back(info);
         return true;
     }
@@ -60,6 +60,7 @@ namespace tpunkt
                 {
                     return false; // Cant remove
                 }
+                propagateRemoveDir();
                 dir = std::move(subdirectories.back());
                 subdirectories.pop_back();
                 return true;
@@ -111,7 +112,16 @@ namespace tpunkt
         return subdirectories.size();
     }
 
-    void VirtualDirectory::propagateAdd(const uint64_t size)
+    uint32_t VirtualDirectory::getTotalFileCount() const
+    {
+        return getFileCount() + stats.subdirFileCount;
+    }
+    uint32_t VirtualDirectory::getTotalDirCount() const
+    {
+        return getDirCount() + stats.subdirDirCount;
+    }
+
+    void VirtualDirectory::propagateAddFile(const uint64_t size)
     {
         VirtualDirectory* current = this;
         while(current != nullptr)
@@ -122,11 +132,14 @@ namespace tpunkt
                 return;
             }
             current->info.sizeCurrent += size;
+            if(current != this) [[likely]]
+            {
+                current->stats.subdirFileCount++;
+            }
             current = current->info.parent;
         }
     }
-
-    void VirtualDirectory::propagateRemove(const uint64_t size)
+    void VirtualDirectory::propagateRemoveFile(const uint64_t size)
     {
         VirtualDirectory* current = this;
         while(current != nullptr)
@@ -137,6 +150,41 @@ namespace tpunkt
                 return;
             }
             current->info.sizeCurrent -= size;
+            if(current != this) [[likely]]
+            {
+                if(current->stats.subdirFileCount == 0)
+                {
+                    LOG_CRITICAL("Internal Error: Subdir File Count Mismatch");
+                    return;
+                }
+                current->stats.subdirFileCount--;
+            }
+            current = current->info.parent;
+        }
+    }
+
+    void VirtualDirectory::propagateAddDir()
+    {
+        VirtualDirectory* current = this->info.parent;
+        while(current != nullptr)
+        {
+            current->stats.subdirDirCount++;
+            current = current->info.parent;
+        }
+    }
+
+
+    void VirtualDirectory::propagateRemoveDir()
+    {
+        VirtualDirectory* current = this->info.parent;
+        while(current != nullptr)
+        {
+            if(current->stats.subdirFileCount == 0)
+            {
+                LOG_CRITICAL("Internal Error: Subdir Dir Count Mismatch");
+                return;
+            }
+            current->stats.subdirDirCount--;
             current = current->info.parent;
         }
     }

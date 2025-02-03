@@ -2,8 +2,8 @@
 #define TPUNKT_STORAGE_H
 
 #include <vector>
-#include "storage/StorageEndpoint.h"
-#include "storage/StorageDTOs.h"
+#include "storage/vfs/StorageEndpoint.h"
+#include "storage/vfs/StorageDTOs.h"
 #include "datastructures/Spinlock.h"
 
 namespace tpunkt

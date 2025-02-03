@@ -7,7 +7,6 @@
 
 namespace tpunkt
 {
-
     // Provided at creation
     struct FileCreationInfo final
     {

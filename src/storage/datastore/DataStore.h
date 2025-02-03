@@ -6,8 +6,7 @@
 
 namespace tpunkt
 {
-
-    // Actual datastore interface - data is only handled encrypted
+    // Actual datastore interface - data is only given and received encrypted
     // Only cares about data - doesn't know anything else - permissions etc. handled on layers above
     // Files are only identified by their ID from our side
     struct DataStore

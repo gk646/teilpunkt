@@ -1,0 +1,12 @@
+#ifndef VIRTUALFILESYSTEMCACHE_H
+#define VIRTUALFILESYSTEMCACHE_H
+
+
+
+struct VirtualFilesystemCache {
+
+};
+
+
+
+#endif //VIRTUALFILESYSTEMCACHE_H

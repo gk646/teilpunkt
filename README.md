@@ -71,3 +71,8 @@ These are the actively used security measures used by `teilpunkt`.
 - Use of safe optimization level -O2
 - Use of symbol stripping (except relocation information to not hinder ASLR)
 - Use of many compiler warning flags
+
+## Implementation
+
+
+### Threading

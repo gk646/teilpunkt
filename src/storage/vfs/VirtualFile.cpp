@@ -1,4 +1,4 @@
-#include "storage/VirtualFile.h"
+#include "storage/vfs/VirtualFile.h"
 
 namespace tpunkt
 {
