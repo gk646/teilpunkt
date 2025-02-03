@@ -15,7 +15,9 @@ namespace tpunkt
     {
         FileName name;
         uint64_t maxSize = 0; // Max size in bytes
-        uint8_t id = 0;
+        FileID rootID;
+        uint8_t endpointID = 0;
+        UserID creator{};
     };
 
     struct VirtualFilesystem

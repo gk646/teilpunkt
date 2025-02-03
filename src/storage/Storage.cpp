@@ -3,9 +3,9 @@
 namespace tpunkt
 {
 
-    uint32_t Storage::getNextFileID()
+    FileID Storage::getNextFileID(const bool isDirectory, const uint8_t endPoint)
     {
         SpinlockGuard lock{storageLock};
-        return fileID++;
+        return FileID{.fileID=fileID++, .isDirectory=isDirectory, .endpoint=endPoint};
     }
 } // namespace tpunkt

@@ -29,11 +29,12 @@ namespace tpunkt
         //===== Endpoint Management =====//
 
       private:
-        uint32_t getNextFileID(bool isDirectory, uint8_t endPoint);
+        FileID getNextFileID(bool isDirectory, uint8_t endPoint);
 
         std::vector<StorageEndpoint> endpoints;
         Spinlock storageLock;
-        uint32_t fileID{};
+        uint32_t fileID = 0;
+        uint8_t endpoint = 0;
         friend StorageTransaction;
     };
 

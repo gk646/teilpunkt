@@ -36,10 +36,6 @@ namespace tpunkt
     };
 
 
-    template <DataStore store>
-    struct is_async;
-
-
 } // namespace tpunkt
 
 #endif // TPUNKT_DATASTORE_H
