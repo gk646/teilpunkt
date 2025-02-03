@@ -6,10 +6,10 @@
 #include "datastructures/FixedString.h"
 #include "storage/VirtualFilesystem.h"
 #include "storage/StorageTransaction.h"
+#include "storage/DataStore.h"
 
 namespace tpunkt
 {
-
     enum class StorageStatus : uint8_t
     {
         INVALID,
@@ -18,13 +18,11 @@ namespace tpunkt
         ERR_UNSUPPORTED_OPERATION,
     };
 
-
     enum class StorageEndpointType : uint8_t
     {
         LOCAL_FILE_SYSTEM,
         REMOTE_FILE_SYSTEM,
     };
-
 
     struct StorageEndpoint
     {
@@ -32,15 +30,16 @@ namespace tpunkt
 
         //===== File Manipulation =====//
 
-       // virtual StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size) = 0;
-        virtual StorageStatus removeFile();
-        virtual StorageStatus changeFile();
-        virtual StorageStatus renameFile();
+        //StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size);
+        StorageStatus removeFile();
+        StorageStatus changeFile();
+        StorageStatus renameFile();
 
-        virtual StorageStatus addDirectory();
-        virtual StorageStatus removeDirectory();
-        virtual StorageStatus changeDirectory();
-        virtual StorageStatus renameDirectory();
+        StorageStatus addDirectory();
+        StorageStatus removeDirectory();
+
+        StorageStatus changeDirectory();
+        StorageStatus renameDirectory();
 
         StorageStatus clear();
 
@@ -49,11 +48,12 @@ namespace tpunkt
         virtual StorageStatus canBeAdded();
 
       private:
+        DataStore* dataStore;
         VirtualFilesystem virtualFilesystem;
         FixedString<TPUNKT_STORAGE_NAME_LEN> name;
         StorageEndpointType type{};
     };
 
-
 } // namespace tpunkt
+
 #endif // TPUNKT_STORAGE_ENDPOINT_H

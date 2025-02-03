@@ -17,7 +17,6 @@ namespace tpunkt
     {
     }
 
-
     bool VirtualFilesystem::canCreateFile(UserID user, const FileCreationInfo& info)
     {
 

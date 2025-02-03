@@ -2,11 +2,9 @@
 #define TPUNKT_TIMESTAMP_H
 
 #include <cstdint>
-#include "util/Macros.h"
 
 namespace tpunkt
 {
-
     struct Timestamp
     {
         Timestamp();

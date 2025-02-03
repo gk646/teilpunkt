@@ -23,12 +23,13 @@ namespace tpunkt
         //===== User Add =====//
 
         //
-        StorageStatus userAddFile(UserID user, const FileCreationInfo& info, StorageTransaction& transaction);
+        StorageStatus userAddFile(UserID user, FileID dir, const FileCreationInfo& info,
+                                  StorageTransaction& transaction);
 
         //===== Endpoint Management =====//
 
       private:
-        uint32_t getNextFileID();
+        uint32_t getNextFileID(bool isDirectory, uint8_t endPoint);
 
         std::vector<StorageEndpoint> endpoints;
         Spinlock storageLock;

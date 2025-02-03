@@ -23,7 +23,6 @@ namespace tpunkt
         TPUNKT_MACROS_STRUCT(Spinlock);
     };
 
-
     struct SpinlockGuard final
     {
         explicit SpinlockGuard(Spinlock& spinlock);
