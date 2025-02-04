@@ -4,9 +4,7 @@ file(GLOB_RECURSE TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 list(REMOVE_ITEM SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/main.cpp")
 
-
 add_executable(teilpunkt-tests ${TEST_FILES} ${SOURCE_FILES})
-
 
 target_include_directories(teilpunkt-tests PRIVATE
         ../src
