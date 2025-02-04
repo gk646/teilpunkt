@@ -1,4 +1,4 @@
-#include "storage/vfs/DataStore.h"
+#include "storage/datastore/DataStore.h"
 
 
 namespace tpunkt

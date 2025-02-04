@@ -6,7 +6,7 @@
 
 namespace tpunkt
 {
-    // Actual datastore interface - data is only given and received encrypted
+    // Actual datastore interface - data is given and received encrypted only.
     // Only cares about data - doesn't know anything else - permissions etc. handled on layers above
     // Files are only identified by their ID from our side
     struct DataStore
@@ -18,8 +18,6 @@ namespace tpunkt
 
         // Deletes the given file
         virtual bool deleteFile(uint32_t fileID) = 0;
-
-        virtual bool exists() = 0;
 
         //
         virtual bool writeChunk();

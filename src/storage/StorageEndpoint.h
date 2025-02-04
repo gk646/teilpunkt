@@ -5,8 +5,8 @@
 
 #include "datastructures/FixedString.h"
 #include "storage/vfs/VirtualFilesystem.h"
-#include "storage/vfs/StorageTransaction.h"
-#include "storage/vfs/DataStore.h"
+#include "storage/datastore/DataStore.h"
+#include "storage/datastore/StorageTransaction.h"
 
 namespace tpunkt
 {

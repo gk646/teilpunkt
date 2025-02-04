@@ -34,7 +34,7 @@ You can configure multiple storage locations (storage endpoints)
 
 ## Security
 
-These are the actively used security measures used by `teilpunkt`.
+These are the active (and passive) security measures used by `teilpunkt`.
 
 ### Storage
 
@@ -74,5 +74,34 @@ These are the actively used security measures used by `teilpunkt`.
 
 ## Implementation
 
-
 ### Threading
+
+#### WebServer Threads _(2-4)_:
+
+- Handle incoming HTTP requests
+- Directly do tasks that return immediately:
+    - Modify virtual filesystem
+    - Create, Login or Remove users
+    - Change settings, etc.
+- Also handles chunked file transfer:
+  - Use of non-blocking sockets allows to have many connections even per thread
+
+#### Worker Threads _(1-2):_
+- Priority-based queue worker system 
+  - Only run tasks that are explicitly given to them
+
+#### Background Thread _(1):_
+- Runs an event loop to schedule set tasks
+  - Send audit logs 
+  - Invoke plugins
+  - 
+
+This means it runs hardware concurrent on devices with 4+ cores.
+
+
+### Files and Data
+
+Data is generally handled in **32kb** chunks. Specifically chunking is used for:
+- HTTP messages
+- Filesystem I/O
+- Encryption/Decryption

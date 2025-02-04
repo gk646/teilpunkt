@@ -7,6 +7,18 @@ namespace tpunkt
     {
     }
 
+    VirtualDirectory* VirtualDirectory::searchDir(const FileID dirID)
+    {
+        for(auto& dir : subdirectories)
+        {
+            if(dir.info.id == dirID)
+            {
+                return &dir;
+            }
+        }
+        return nullptr;
+    }
+
     bool VirtualDirectory::fileAdd(const FileCreationInfo& info, const bool fits, const bool unique)
     {
         if(fits && unique)
@@ -45,16 +57,16 @@ namespace tpunkt
         return true;
     }
 
-    bool VirtualDirectory::directoryRemove(const FileID fileID)
+    bool VirtualDirectory::directoryRemove(const FileID dirID)
     {
-        if(!fileID.isDirectory)
+        if(!dirID.isDirectory)
         {
             return false;
         }
 
         for(auto& dir : subdirectories)
         {
-            if(dir.info.id == fileID)
+            if(dir.info.id == dirID)
             {
                 if(dir.getFileCount() != 0)
                 {
@@ -74,7 +86,7 @@ namespace tpunkt
         const VirtualDirectory* current = this;
         while(current != nullptr)
         {
-            if(current->info.sizeCurrent + fileSize >= current->info.sizeLimit)
+            if(current->info.sizeCurrent + fileSize > current->info.sizeLimit)
             {
                 return false;
             }
@@ -126,7 +138,7 @@ namespace tpunkt
         VirtualDirectory* current = this;
         while(current != nullptr)
         {
-            if(current->info.sizeCurrent + size >= current->info.sizeLimit)
+            if(current->info.sizeCurrent + size > current->info.sizeLimit)
             {
                 LOG_CRITICAL("Internal Error: Directory Size Mismatch");
                 return;
@@ -139,6 +151,7 @@ namespace tpunkt
             current = current->info.parent;
         }
     }
+
     void VirtualDirectory::propagateRemoveFile(const uint64_t size)
     {
         VirtualDirectory* current = this;
@@ -163,7 +176,7 @@ namespace tpunkt
         }
     }
 
-    void VirtualDirectory::propagateAddDir()
+    void VirtualDirectory::propagateAddDir() const
     {
         VirtualDirectory* current = this->info.parent;
         while(current != nullptr)
@@ -173,8 +186,7 @@ namespace tpunkt
         }
     }
 
-
-    void VirtualDirectory::propagateRemoveDir()
+    void VirtualDirectory::propagateRemoveDir() const
     {
         VirtualDirectory* current = this->info.parent;
         while(current != nullptr)

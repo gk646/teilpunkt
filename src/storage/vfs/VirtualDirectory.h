@@ -45,16 +45,20 @@ namespace tpunkt
         VirtualDirectory(const VirtualDirectory&) = delete;
         VirtualDirectory& operator=(const VirtualDirectory&) = delete;
 
+        //===== Get =====//
+
+        VirtualDirectory* searchDir(FileID dirID);
+
         //===== Manipulation =====//
 
-        // Does not check if the file fits - passed for explicitness that its checked first
+        // Does not check if the file fits - passed for explicitness that its manually checked first
         bool fileAdd(const FileCreationInfo& info, bool fits, bool unique);
 
         bool fileRemove(FileID fileID);
 
         bool directoryAdd(const DirectoryCreationInfo& info);
 
-        bool directoryRemove(FileID fileID);
+        bool directoryRemove(FileID dirID);
 
         //===== Information =====//
 
@@ -75,8 +79,8 @@ namespace tpunkt
       private:
         void propagateAddFile(uint64_t size);
         void propagateRemoveFile(uint64_t size);
-        void propagateAddDir();
-        void propagateRemoveDir();
+        void propagateAddDir() const;
+        void propagateRemoveDir() const;
 
         DirectoryInfo info;
         DirectoryStats stats;

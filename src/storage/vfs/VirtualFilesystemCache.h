@@ -1,12 +1,11 @@
-#ifndef VIRTUALFILESYSTEMCACHE_H
-#define VIRTUALFILESYSTEMCACHE_H
+#ifndef TPUNKT_VIRTUALFILESYSTEMCACHE_H
+#define TPUNKT_VIRTUALFILESYSTEMCACHE_H
 
+namespace tpunkt
+{
+    struct VirtualFilesystemCache
+    {
+    };
+} // namespace tpunkt
 
-
-struct VirtualFilesystemCache {
-
-};
-
-
-
-#endif //VIRTUALFILESYSTEMCACHE_H
+#endif // TPUNKT_VIRTUALFILESYSTEMCACHE_H

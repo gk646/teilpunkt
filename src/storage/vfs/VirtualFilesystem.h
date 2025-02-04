@@ -35,6 +35,7 @@ namespace tpunkt
 
       private:
         VirtualDirectory root;
+        VirtualFilesystemCache cache;
         Spinlock systemLock;
         uint8_t id;
     };

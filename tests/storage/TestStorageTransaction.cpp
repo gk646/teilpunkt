@@ -1,6 +1,6 @@
 #include <catch_amalgamated.hpp>
 #include "TestCommons.h"
-#include "storage/vfs/StorageTransaction.h"
+#include "storage/datastore/StorageTransaction.h"
 
 using namespace tpunkt;
 

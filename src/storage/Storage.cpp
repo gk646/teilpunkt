@@ -1,4 +1,4 @@
-#include "storage/vfs/Storage.h"
+#include "storage/Storage.h"
 
 namespace tpunkt
 {
