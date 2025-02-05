@@ -7,11 +7,11 @@ namespace tpunkt
     {
     }
 
-    VirtualDirectory* VirtualDirectory::searchDir(const FileID dirID)
+    VirtualDirectory* VirtualDirectory::searchDir(const FileID dirid)
     {
         for(auto& dir : subdirectories)
         {
-            if(dir.info.id == dirID)
+            if(dir.info.id == dirid)
             {
                 return &dir;
             }
@@ -19,7 +19,7 @@ namespace tpunkt
         return nullptr;
     }
 
-    bool VirtualDirectory::fileAdd(const FileCreationInfo& info, const bool fits, const bool unique)
+    bool VirtualDirectory::addFile(const FileCreationInfo& info, const bool fits, const bool unique)
     {
         if(fits && unique)
         {
@@ -30,17 +30,21 @@ namespace tpunkt
         return false;
     }
 
-    bool VirtualDirectory::fileRemove(const FileID fileID)
+    bool VirtualDirectory::removeFile(const FileID fileid)
     {
-        if(fileID.isDirectory)
+        if(fileid.isDirectory)
         {
             return false;
         }
 
         for(auto& file : files)
         {
-            if(file.info.id == fileID)
+            if(file.info.id == fileid)
             {
+                GetEventMonitor().logData<EventType::FileSystem>(EventAction::FilesystemRemoveFile,
+                                                                 EventStatus::Successful,
+                                                                 FileSystemEventData{file.info.id, file.info.name});
+                LOG_EVENT(FileSystem, FilesystemRemoveFile, Invalid_Authentication);
                 propagateRemoveFile(file.info.size);
                 file = std::move(files.back());
                 files.pop_back();
@@ -50,28 +54,29 @@ namespace tpunkt
         return false;
     }
 
-    bool VirtualDirectory::directoryAdd(const DirectoryCreationInfo& info)
+    bool VirtualDirectory::addDirectory(const DirectoryCreationInfo& info)
     {
         propagateAddDir();
         subdirectories.emplace_back(info);
         return true;
     }
 
-    bool VirtualDirectory::directoryRemove(const FileID dirID)
+    bool VirtualDirectory::removeDirectory(const FileID dirid)
     {
-        if(!dirID.isDirectory)
+        if(!dirid.isDirectory)
         {
             return false;
         }
 
         for(auto& dir : subdirectories)
         {
-            if(dir.info.id == dirID)
+            if(dir.info.id == dirid)
             {
                 if(dir.getFileCount() != 0)
                 {
                     return false; // Cant remove
                 }
+                // TODO proper move
                 propagateRemoveDir();
                 dir = std::move(subdirectories.back());
                 subdirectories.pop_back();
@@ -79,6 +84,15 @@ namespace tpunkt
             }
         }
         return false;
+    }
+
+    bool VirtualDirectory::removeAllFiles()
+    {
+        for(int i = 0; i < files.size(); ++i)
+        {
+            removeFile(files[ i ].info.id);
+        }
+        return true;
     }
 
     bool VirtualDirectory::canFit(const uint64_t fileSize) const
@@ -128,6 +142,7 @@ namespace tpunkt
     {
         return getFileCount() + stats.subdirFileCount;
     }
+
     uint32_t VirtualDirectory::getTotalDirCount() const
     {
         return getDirCount() + stats.subdirDirCount;

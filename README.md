@@ -8,6 +8,9 @@
 
 Note: This made to compile with GCC and for a Linux kernel as open source is essential for security.
 
+**Feature Highlights:**
+- Audit Logging with plugin API
+
 ## Authentication
 
 - Passkeys

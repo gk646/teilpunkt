@@ -32,4 +32,16 @@ namespace tpunkt
         (void)status;
     }
 
+    template <EventType type, typename EventData>
+    void EventMonitor::logData(EventAction action, EventStatus status, EventData data)
+    {
+    }
+
+    template <>
+    void EventMonitor::logData<EventType::FileSystem, FileSystemEventData>(EventAction action, EventStatus status, FileSystemEventData data) {
+
+    }
+
+
+
 } // namespace tpunkt

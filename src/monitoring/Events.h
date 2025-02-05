@@ -8,9 +8,10 @@ namespace tpunkt
     enum class EventType : uint8_t
     {
         INVALID,
-        API_Request,
-        UserAction,
-        ServerAction,
+        // API_Request,
+        //   ServerAction,
+        Authentication,
+        FileSystem,
         InternalCode,
     };
 
@@ -22,6 +23,9 @@ namespace tpunkt
         UserLogin,
         UserRemove,
         UserChangeCredentials,
+        // UserData
+        UserDataGetName,
+        UserDataGetWrappedKey,
         // Session
         SessionAdd,
         SessionRemove,
@@ -29,9 +33,12 @@ namespace tpunkt
         SessionGetSessions,
         // Token
         TokenInvalidate,
-        // UserData
-        UserDataGetName,
-        UserDataGetWrappedKey,
+
+        // Virtual File System
+        FilesystemAddFile,
+        FilesystemRemoveFile,
+        FilesystemAddDirectory,
+        FilesystemAdd
     };
 
     enum class EventStatus : uint8_t

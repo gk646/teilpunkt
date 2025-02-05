@@ -31,23 +31,23 @@ namespace tpunkt
         SecureEraser eraser{consumed};
         if(GetInstanceConfig().getBool(BoolParamKey::USER_ONLY_ADMIN_CREATE_ACCOUNT))
         {
-            LOG_EVENT(UserAction, UserAdd, Feature_Disabled);
+            LOG_EVENT(Authentication, UserAdd, Feature_Disabled);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
         if(userStore.nameExists(name))
         {
-            LOG_EVENT(UserAction, UserAdd, Username_Already_Exists); // We report this
+            LOG_EVENT(Authentication, UserAdd, Username_Already_Exists); // We report this
             return AuthStatus::ERR_USER_NAME_EXISTS;
         }
 
         if(!userStore.add(name, consumed))
         {
-            LOG_EVENT(UserAction, UserAdd, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, UserAdd, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
-        LOG_EVENT(UserAction, UserAdd, Successful);
+        LOG_EVENT(Authentication, UserAdd, Successful);
         return AuthStatus::OK;
     }
 
@@ -59,20 +59,20 @@ namespace tpunkt
         UserID userID{};
         if(!userStore.login(name, consumed, userID))
         {
-            LOG_EVENT(UserAction, UserLogin, Invalid_Authentication);
+            LOG_EVENT(Authentication, UserLogin, Invalid_Authentication);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
         uint32_t random{};
         if(!sessionStore.addToken(userID, random))
         {
-            LOG_EVENT(UserAction, UserLogin, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, UserLogin, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
         out.random = random;
         out.userID = userID;
-        LOG_EVENT(UserAction, UserLogin, Successful);
+        LOG_EVENT(Authentication, UserLogin, Successful);
         return AuthStatus::OK;
     }
 
@@ -81,17 +81,17 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserRemove, Invalid_Token);
+            LOG_EVENT(Authentication, UserRemove, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
 
         if(!userStore.remove(token.userID))
         {
-            LOG_EVENT(UserAction, UserRemove, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, UserRemove, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
-        LOG_EVENT(UserAction, UserRemove, Successful);
+        LOG_EVENT(Authentication, UserRemove, Successful);
         return AuthStatus::OK;
     }
 
@@ -102,17 +102,17 @@ namespace tpunkt
         SecureEraser eraser{consumed};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserChangeCredentials, Invalid_Token);
+            LOG_EVENT(Authentication, UserChangeCredentials, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
 
         if(!userStore.changeCredentials(token.userID, newName, consumed))
         {
-            LOG_EVENT(UserAction, UserChangeCredentials, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, UserChangeCredentials, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
-        LOG_EVENT(UserAction, UserChangeCredentials, Successful);
+        LOG_EVENT(Authentication, UserChangeCredentials, Successful);
         return AuthStatus::OK;
     }
 
@@ -122,14 +122,14 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, SessionAdd, Invalid_Token);
+            LOG_EVENT(Authentication, SessionAdd, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
 
         SessionID sessionId;
         if(!sessionStore.add(token.userID, data, sessionId))
         {
-            LOG_EVENT(UserAction, SessionAdd, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, SessionAdd, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
@@ -137,7 +137,7 @@ namespace tpunkt
         auto reader = out.get();
         reader.get() = sessionId;
 
-        LOG_EVENT(UserAction, SessionAdd, Successful);
+        LOG_EVENT(Authentication, SessionAdd, Successful);
         return AuthStatus::OK;
     }
 
@@ -146,7 +146,7 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, SessionRemove, Invalid_Token);
+            LOG_EVENT(Authentication, SessionRemove, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
     }
@@ -157,21 +157,21 @@ namespace tpunkt
         auto userID = UserID::INVALID;
         if(!sessionStore.get(sessionId, data, userID))
         {
-            LOG_EVENT(UserAction, SessionAuthenticate, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, SessionAuthenticate, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
         uint32_t random = 0U;
         if(!sessionStore.addToken(userID, random))
         {
-            LOG_EVENT(UserAction, SessionAuthenticate, Generic_Unsuccessful);
+            LOG_EVENT(Authentication, SessionAuthenticate, Generic_Unsuccessful);
             return AuthStatus::ERR_UNSUCCESSFUL;
         }
 
         out.random = random;
         out.userID = userID;
 
-        LOG_EVENT(UserAction, SessionAuthenticate, Successful);
+        LOG_EVENT(Authentication, SessionAuthenticate, Successful);
         return AuthStatus::OK;
     }
 
@@ -180,7 +180,7 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, SessionGetSessions, Invalid_Token);
+            LOG_EVENT(Authentication, SessionGetSessions, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
     }
@@ -214,7 +214,7 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserDataGetName, Invalid_Token);
+            LOG_EVENT(Authentication, UserDataGetName, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
     }
@@ -224,7 +224,7 @@ namespace tpunkt
         SpinlockGuard lock{authLock};
         if(!tokenValid(token))
         {
-            LOG_EVENT(UserAction, UserDataGetWrappedKey, Invalid_Token);
+            LOG_EVENT(Authentication, UserDataGetWrappedKey, Invalid_Token);
             return AuthStatus::ERR_INVALID_TOKEN;
         }
     }

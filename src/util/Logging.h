@@ -48,9 +48,7 @@ namespace tpunkt
     GetLogger().logEx(LogLevel::CRITICAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 #define LOG_FATAL(msg, ...) GetLogger().logFatal(__PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 
-#define STRINGIFY(x) #x
-
-#define LOG_EVENT(type, action, status)                                                                                \
+#define LOG_EVENT(type, action, status, ...)                                                                           \
     do                                                                                                                 \
     {                                                                                                                  \
         if constexpr(IsWarnEvent(EventStatus::status))                                                                 \

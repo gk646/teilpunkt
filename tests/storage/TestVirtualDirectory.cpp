@@ -50,7 +50,7 @@ TEST_CASE("VirtualDirectory")
     SECTION("Directory creation")
     {
         DirectoryCreationInfo subDirInfo{FileName{"SubDirectory"}, 500, &rootDir, getDirFileID(), generateUserID()};
-        bool added = rootDir.directoryAdd(subDirInfo);
+        bool added = rootDir.addDirectory(subDirInfo);
         REQUIRE(added == true);
         REQUIRE(rootDir.getDirCount() == 1);                  // Subdirectory is added
     }
@@ -59,8 +59,8 @@ TEST_CASE("VirtualDirectory")
     {
         DirectoryCreationInfo subDirInfo{FileName{"SubDirectoryToRemove"}, 500, &rootDir, getDirFileID(),
                                          generateUserID()};
-        rootDir.directoryAdd(subDirInfo);
-        bool removed = rootDir.directoryRemove(subDirInfo.id);
+        rootDir.addDirectory(subDirInfo);
+        bool removed = rootDir.removeDirectory(subDirInfo.id);
         REQUIRE(removed == true);
         REQUIRE(rootDir.getDirCount() == 0);                  // Subdirectory is removed
     }
@@ -70,7 +70,7 @@ TEST_CASE("VirtualDirectory")
         FileCreationInfo fileInfo{FileName{"File1"}, generateUserID(), 200, getFileFileID()};
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
-        bool added = rootDir.fileAdd(fileInfo, fits, unique); // fits = true, unique = true
+        bool added = rootDir.addFile(fileInfo, fits, unique); // fits = true, unique = true
         REQUIRE(added == true);
         REQUIRE(rootDir.getFileCount() == 1);                 // File is added
     }
@@ -80,8 +80,8 @@ TEST_CASE("VirtualDirectory")
         FileCreationInfo fileInfo{FileName{"FileToRemove"}, generateUserID(), 200, getFileFileID()};
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
-        rootDir.fileAdd(fileInfo, fits, unique);
-        bool removed = rootDir.fileRemove(fileInfo.id);
+        rootDir.addFile(fileInfo, fits, unique);
+        bool removed = rootDir.removeFile(fileInfo.id);
         REQUIRE(removed == true);
         REQUIRE(rootDir.getFileCount() == 0);                 // File is removed
     }
@@ -98,7 +98,7 @@ TEST_CASE("VirtualDirectory")
         FileCreationInfo fileInfo{FileName{"FileNameCheck"}, generateUserID(), 300, getFileFileID()};
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
-        rootDir.fileAdd(fileInfo, fits, unique);
+        rootDir.addFile(fileInfo, fits, unique);
         bool exists = rootDir.nameExists(FileName{"FileNameCheck"});
         REQUIRE(exists == true);
 
@@ -118,7 +118,7 @@ TEST_CASE("Edge cases")
         bool canFit = rootDir.canFit(fileInfo.size);
         REQUIRE(canFit == false);                             // File cannot fit
 
-        bool added = rootDir.fileAdd(fileInfo, canFit, true); // Trying to add a file that doesn't fit
+        bool added = rootDir.addFile(fileInfo, canFit, true); // Trying to add a file that doesn't fit
         REQUIRE(added == false);                              // Should fail
     }
 
@@ -130,10 +130,10 @@ TEST_CASE("Edge cases")
         bool fits = rootDir.canFit(fileInfo1.size);
         bool unique = !rootDir.nameExists(fileInfo1.name);
 
-        REQUIRE(rootDir.fileAdd(fileInfo1, fits, unique));
+        REQUIRE(rootDir.addFile(fileInfo1, fits, unique));
         fits = rootDir.canFit(fileInfo1.size);
         unique = !rootDir.nameExists(fileInfo1.name);
-        bool added = rootDir.fileAdd(fileInfo2, fits, unique); // Trying to add a file with the same name
+        bool added = rootDir.addFile(fileInfo2, fits, unique); // Trying to add a file with the same name
         REQUIRE(added == false);                               // Should fail because name is not unique
     }
 }
@@ -152,7 +152,7 @@ TEST_CASE("File creation and removal")
         VirtualDirectory dir(DirectoryCreationInfo{FileName{"Root"}, 1000, nullptr, getDirFileID(), generateUserID()});
 
         FileID nonExistentFileID{99999};
-        bool removed = dir.fileRemove(nonExistentFileID);
+        bool removed = dir.removeFile(nonExistentFileID);
         REQUIRE(removed == false); // Trying to remove a non-existent file
     }
 }
@@ -167,7 +167,7 @@ TEST_CASE("Size Limit")
     {
         FileName name{(("Sub1" + std::to_string(i)).c_str())};
         DirectoryCreationInfo dir{name, 600, &rootDir, getDirFileID(), generateUserID()};
-        rootDir.directoryAdd(dir);
+        rootDir.addDirectory(dir);
     }
 
     FileCreationInfo fileInfo{FileName{"TestFile"}, generateUserID(), 500, getFileFileID()};
@@ -178,7 +178,7 @@ TEST_CASE("Size Limit")
         REQUIRE(dir != nullptr);
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
-        REQUIRE(dir->fileAdd(fileInfo, fits, unique));
+        REQUIRE(dir->addFile(fileInfo, fits, unique));
     }
 
     // Third should fail
@@ -188,6 +188,6 @@ TEST_CASE("Size Limit")
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
         REQUIRE_FALSE(fits);
-        REQUIRE_FALSE(dir1->fileAdd(fileInfo, fits, unique));
+        REQUIRE_FALSE(dir1->addFile(fileInfo, fits, unique));
     }
 }

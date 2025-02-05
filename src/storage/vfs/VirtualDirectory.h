@@ -47,18 +47,32 @@ namespace tpunkt
 
         //===== Get =====//
 
-        VirtualDirectory* searchDir(FileID dirID);
+        VirtualFile* searchFile(FileID fileid);
+        VirtualDirectory* searchDir(FileID dirid);
 
-        //===== Manipulation =====//
+        //===== Content Manipulation Main =====//
 
         // Does not check if the file fits - passed for explicitness that its manually checked first
-        bool fileAdd(const FileCreationInfo& info, bool fits, bool unique);
+        bool addFile(const FileCreationInfo& info, bool fits, bool unique);
 
-        bool fileRemove(FileID fileID);
+        bool removeFile(FileID fileid);
 
-        bool directoryAdd(const DirectoryCreationInfo& info);
+        bool addDirectory(const DirectoryCreationInfo& info);
 
-        bool directoryRemove(FileID dirID);
+        // Only works if dir is empty
+        bool removeDirectory(FileID dirid);
+
+        //===== Content Manipulation Misc =====//
+
+        // Only for this dir - removes files individually
+        bool removeAllFiles();
+
+        //===== Self Manipulation =====//
+
+        bool rename(const FileName& name);
+
+        // Does not check authentication
+        bool changeOwner(UserID owner, bool authenticated);
 
         //===== Information =====//
 

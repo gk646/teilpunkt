@@ -2,6 +2,7 @@
 #define TPUNKT_EVENT_MONITOR_H
 
 #include "monitoring/Events.h"
+#include "monitoring/EventData.h"
 
 namespace tpunkt
 {
@@ -11,7 +12,11 @@ namespace tpunkt
         ~EventMonitor();
 
         void log(EventType type, EventAction action, EventStatus status);
+
+        template <EventType type, typename EventData>
+        void logData(EventAction action, EventStatus status, EventData data);
     };
+
 
     EventMonitor& GetEventMonitor();
 
