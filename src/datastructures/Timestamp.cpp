@@ -1,6 +1,6 @@
 #include <ctime>
-#include "datastructures/Timestamp.h"
 #include "util/Logging.h"
+#include "datastructures/Timestamp.h"
 
 namespace tpunkt
 {
@@ -17,7 +17,6 @@ namespace tpunkt
             return static_cast<uint64_t>(time.tv_nsec);
         }
     } // namespace
-
 
     Timestamp::Timestamp() : timestamp(getCurrentMonotonicTime())
     {

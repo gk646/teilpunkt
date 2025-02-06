@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <storage/Storage.h>
 #include <uWebSocket/src/HttpResponse.h>
 
 namespace tpunkt
@@ -56,8 +57,15 @@ namespace tpunkt
 
                 if(isLast)
                 {
+                    printf("Is last true\n");
+                    std::thread thread{[ & ]()
+                                       {
+                                           std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                                           printf("Ending now\n");
+                                           res->end("File uploaded successfully!");
+                                       }};
+                    thread.detach();
                     file->close();
-                    res->end("File uploaded successfully!");
                 }
             });
 
@@ -74,7 +82,6 @@ namespace tpunkt
             });
 
         transaction.get()->print("handle method end.");
-
     }
 
 } // namespace tpunkt

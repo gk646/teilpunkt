@@ -12,7 +12,7 @@ namespace tpunkt
     // Implicitly checks permissions using the UAC
     struct Storage final
     {
-        //===== User Get =====//
+        //===== Global Functions =====//
 
         // Get all the roots of all directories/files this user has access to
         StorageStatus userGetRoots(UserID user, std::vector<DirectoryInfoDTO>& roots);
@@ -20,13 +20,10 @@ namespace tpunkt
         // Collects all files in the given directory
         StorageStatus userGetDir(UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
 
-        //===== User Add =====//
-
-        //
-        StorageStatus userAddFile(UserID user, FileID dir, const FileCreationInfo& info,
-                                  StorageTransaction& transaction);
 
         //===== Endpoint Management =====//
+
+        StorageStatus getEndpoint(StorageEndpoint* endpoint);
 
       private:
         FileID getNextFileID(bool isDirectory, uint8_t endPoint);
@@ -39,7 +36,7 @@ namespace tpunkt
     };
 
     // Can only access storage with valid token
-    Storage* GetStorage(const AuthToken& token);
+    Storage* GetStorage();
 
 } // namespace tpunkt
 

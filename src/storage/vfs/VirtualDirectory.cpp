@@ -43,7 +43,7 @@ namespace tpunkt
             {
                 GetEventMonitor().logData<EventType::FileSystem>(EventAction::FilesystemRemoveFile,
                                                                  EventStatus::Successful,
-                                                                 FileSystemEventData{file.info.id, file.info.name});
+                                                                 FileSystemEventData{file.info.id});
                 LOG_EVENT(FileSystem, FilesystemRemoveFile, Invalid_Authentication);
                 propagateRemoveFile(file.info.size);
                 file = std::move(files.back());

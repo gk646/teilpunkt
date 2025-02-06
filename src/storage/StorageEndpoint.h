@@ -30,7 +30,8 @@ namespace tpunkt
 
         //===== File Manipulation =====//
 
-        // StorageStatus addFile(const FileDescriptor& descriptor, uint64_t size);
+         StorageStatus addFile(UserID user, FileID dir, const FileCreationInfo& info,
+        StorageTransaction& transaction);
         StorageStatus removeFile();
         StorageStatus changeFile();
         StorageStatus renameFile();

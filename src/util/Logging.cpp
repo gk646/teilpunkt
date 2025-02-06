@@ -18,6 +18,8 @@ namespace tpunkt
 
     Logger::~Logger()
     {
+        // Save to file etc.
+        LOG_INFO("teilpunkt closed successfully");
         TPUNKT_MACROS_GLOBAL_RESET(Logger);
     }
 

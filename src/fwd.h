@@ -40,11 +40,17 @@ namespace tpunkt
         INVALID = 0
     };
 
+    enum class EndpointID : uint8_t
+    {
+        INVALID = 0
+    };
+
     struct FileID final
     {
         uint32_t fileID;
+        // 2 bytes left
         bool isDirectory;
-        uint8_t endpoint;
+        EndpointID endpoint;
         bool operator==(const FileID&) const = default;
     };
 
@@ -52,9 +58,6 @@ namespace tpunkt
     {
         INVALID = 0
     };
-
-    template <typename T, size_t N>
-    struct SmallVector;
 
 
 } // namespace tpunkt

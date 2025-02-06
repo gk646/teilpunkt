@@ -6,6 +6,7 @@ namespace tpunkt
     struct VirtualFilesystemCache
     {
     };
+
 } // namespace tpunkt
 
 #endif // TPUNKT_VIRTUALFILESYSTEMCACHE_H

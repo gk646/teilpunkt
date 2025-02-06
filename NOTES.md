@@ -127,8 +127,22 @@ Server Story:
 2. Authenticate via any credentials (or with valid session cookie)
     - Keep user secret in memory until session expires (or logs off)
 
-Upload:
+Upload new File:
 
+User Request
+- Contains where and the name
+
+Authenticate User
+GetEndpoint from Storage from where
+Invoke create file in endpoint
+- Checks against permission table
+- Checks against filesystem
+If successful opens transaction
+- contains reference to virtual file for locking 
+- reference to datastore interface to write to 
+When last chunk has been written transaction is commited
+Else its reverted
+- Handled internally 
 
 
 
