@@ -2,9 +2,9 @@
 #define TPUNKT_ITERATOR_H
 
 
-namespace tpunkt{
-
-    template<typename T>
+namespace tpunkt
+{
+    template <typename T>
     struct Iterator final
     {
         explicit Iterator(T* initPtr) : ptr(initPtr)
@@ -39,8 +39,10 @@ namespace tpunkt{
             return ptr != other.ptr;
         }
 
-    private:
+      private:
         T* ptr;
     };
-    }
-#endif //TPUNKT_ITERATOR_H
+
+} // namespace tpunkt
+
+#endif // TPUNKT_ITERATOR_H

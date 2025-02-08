@@ -9,6 +9,24 @@
 namespace tpunkt
 {
 
+    bool ReadHandle::isValid() const
+    {
+        return fd != -1 && fileID != 0 && buffer != UINT8_MAX;
+    }
+
+    bool ReadHandle::isDone() const
+    {
+        if(end == 0)
+        {
+            return end == SIZE_MAX;
+        }
+        return position >= end;
+    }
+
+    bool WriteHandle::isValid() const
+    {
+    }
+
     DataStore::DataStore(const EndpointID endpoint) : endpoint(endpoint)
     {
         const int endpointNum = static_cast<int>(endpoint);

@@ -10,7 +10,16 @@
         LOG_FATAL("Error allocating");                                                                                 \
     }
 
+#define TPUNKT_REALLOC(var, size)                                                                                      \
+    static_cast<decltype(var)>(realloc(var, size));                                                                    \
+    if(var == nullptr)                                                                                                 \
+    {                                                                                                                  \
+        LOG_FATAL("Error allocating");                                                                                 \
+    }
+
+
 #define TPUNKT_FREE(ptr) free(ptr);
+
 
 #define TPUNKT_SECUREALLOC(var, size)                                                                                  \
     static_cast<decltype(var)>(sodium_malloc(size));                                                                   \

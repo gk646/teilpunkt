@@ -60,8 +60,6 @@ namespace tpunkt
     };
 
 
-
-
 } // namespace tpunkt
 
 #endif // TPUNKT_FWD_H

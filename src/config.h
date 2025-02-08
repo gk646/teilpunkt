@@ -20,6 +20,9 @@
 // Maximum length for usernames
 #define TPUNKT_STORAGE_USER_LEN 16
 
+// Max concurrent readers per datastore
+#define TPUNKT_STORAGE_DATASTORE_MAX_READERS 25
+
 
 //===== Server =====//
 

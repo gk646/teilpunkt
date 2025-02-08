@@ -6,7 +6,6 @@
 
 namespace tpunkt
 {
-
     struct WebServer final
     {
         uWS::SSLApp server;

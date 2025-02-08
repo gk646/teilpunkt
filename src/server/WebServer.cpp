@@ -1,5 +1,5 @@
-#include "server/WebServer.h"
 #include "server/Endpoints.h"
+#include "server/WebServer.h"
 #include "util/Logging.h"
 
 namespace tpunkt
@@ -10,45 +10,46 @@ namespace tpunkt
     }
 
     WebServer::WebServer()
-        : server( { "../key/key.pem", "../key/cert.pem", "1234" } ), staticFiles( TPUNKT_SERVER_STATIC_FILES_DIR )
+        : server({.key_file_name = "../key/key.pem", .cert_file_name = "../key/cert.pem", .passphrase = "1234"}),
+          staticFiles(TPUNKT_SERVER_STATIC_FILES_DIR)
     {
-        server.get( "/*", StaticEndpoint::handle );
-        server.post( "/api/signup", SignupEndpoint::handle );
-        server.post( "/api/login", LoginEndpoint::handle );
-        server.post( "/api/upload", UploadEndpoint::handle );
-        TPUNKT_MACROS_GLOBAL_ASSIGN( Server );
+        server.get("/*", StaticEndpoint::handle);
+        server.post("/api/signup", SignupEndpoint::handle);
+        server.post("/api/login", LoginEndpoint::handle);
+        server.post("/api/upload", UploadEndpoint::handle);
+        TPUNKT_MACROS_GLOBAL_ASSIGN(Server);
     }
 
     WebServer::~WebServer()
     {
-        TPUNKT_MACROS_GLOBAL_RESET( Server );
+        TPUNKT_MACROS_GLOBAL_RESET(Server);
     }
 
     WebServer& GetWebServer()
     {
-        TPUNKT_MACROS_GLOBAL_GET( Server );
+        TPUNKT_MACROS_GLOBAL_GET(Server);
     }
 
     void WebServer::run()
     {
-        server.listen( TPUNKT_SERVER_PORT,
-                       [](const us_listen_socket_t* socket )
-                       {
-                           if( socket )
-                           {
-                               LOG_INFO( "Server running at https://localhost:%d", TPUNKT_SERVER_PORT );
-                           }
-                           else
-                           {
-                               LOG_ERROR( "Server failed create socket" );
-                           }
-                       } );
+        server.listen(TPUNKT_SERVER_PORT,
+                      [](const us_listen_socket_t* socket)
+                      {
+                          if(socket)
+                          {
+                              LOG_INFO("Server running at https://localhost:%d", TPUNKT_SERVER_PORT);
+                          }
+                          else
+                          {
+                              LOG_ERROR("Server failed create socket");
+                          }
+                      });
         server.run();
     }
 
     void WebServer::stop()
     {
-        LOG_INFO( "Server stop requested" );
+        LOG_INFO("Server stop requested");
         server.close();
     }
 

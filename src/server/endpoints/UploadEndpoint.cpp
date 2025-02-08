@@ -41,6 +41,7 @@ namespace tpunkt
 
     void UploadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     {
+    //TODO make allocator to avoid dynamic memory here (fragmentation)
         auto transaction = std::make_shared<TestScope>("Local Scope");
 
         std::string filePath = "./uploaded_file.txt";

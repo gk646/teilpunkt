@@ -8,7 +8,6 @@
 
 namespace tpunkt
 {
-
     // All write operations are atomic across a single endpoint
     // Implicitly checks permissions using the UAC
     struct Storage final

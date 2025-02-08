@@ -5,7 +5,7 @@
     type(type&&) = delete;                                                                                             \
     type(const type&) = delete;                                                                                        \
     type& operator=(const type&) = delete;                                                                             \
-    type& operator=(const type&&) = delete
+    type& operator=(type&&) = delete
 
 #define TPUNKT_MACROS_STRUCT(type) TPUNKT_MACROS_DEL_CTORS(type)
 
