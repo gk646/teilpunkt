@@ -37,14 +37,24 @@ SpaceAfterTemplateKeyword: true
 ColumnLimit: 120
 ReflowComments: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
+
+# Includes
 IncludeCategories:
-  - Regex: '^<.*>'
+  - Regex: '^<[^/]+>'
     Priority: 1
-  - Regex: '<.*/.*>'
+    SortPriority: 1
+  - Regex: '^<.*/.*>'
     Priority: 2
-  - Regex: '".*"'
+    SortPriority: 2
+  - Regex: '^".*"'
     Priority: 3
-IncludeIsMainRegex: '([-_](test|unittest))?$'
+    SortPriority: 3
+
+IncludeIsMainRegex: 'absdf'
+IncludeBlocks: Merge
+SortIncludes: CaseInsensitive
+
+
 InsertNewlineAtEOF: true
 MacroBlockBegin: ''
 MacroBlockEnd: ''
@@ -53,8 +63,6 @@ NamespaceIndentation: All
 SpacesInAngles: false
 SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
-IncludeBlocks: Regroup
-SortIncludes: Never
 FixNamespaceComments: true
 AlignAfterOpenBracket: Align
 ContinuationIndentWidth: 4

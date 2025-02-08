@@ -1,14 +1,18 @@
 #ifndef TPUNKT_CONFIG_H
 #define TPUNKT_CONFIG_H
 
-// Crypto
+//===== Crypto =====//
 
 #define TPUNKT_CRYPTO_SESSION_ID_LEN 32
 
-// Authentication
+//===== Authentication =====//
 
 
-// Storage
+//===== Storage =====//
+
+#define TPUNKT_STORAGE_ENDPOINT_DIR "./endpoints"
+
+#define TPUNKT_STORAGE_DATASTORE_DIR "datastore"
 
 // Maximum name length for any file or storage endpoint
 #define TPUNKT_STORAGE_NAME_LEN 56
@@ -17,7 +21,9 @@
 #define TPUNKT_STORAGE_USER_LEN 16
 
 
-// Server
+//===== Server =====//
+
+#define TPUNKT_SERVER_CHUNK_SIZE 32000
 
 // Size of static file buffer
 #define TPUNKT_SERVER_STATIC_FILES_LEN 25
@@ -29,15 +35,20 @@
 #define TPUNKT_SERVER_PORT 8080
 
 
-// Monitoring
+//===== Monitoring =====//
 
 #define TPUNKT_MONITOR_REQ_PER_MIN 50
 
-// Instance
 
+//===== Instance =====//
+
+
+// Max length of any string config parameter
 #define TPUNKT_INSTANCE_CONFIG_STRING_LEN 24
 
 
-#define TPUNKT_CHUNK_SIZE 32000
+// Creation flags for folders and files - only owner can read/write
+#define TPUNKT_INSTANCE_FILE_MODE 0600
+
 
 #endif // TPUNKT_CONFIG_H

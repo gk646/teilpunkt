@@ -1,10 +1,9 @@
 #ifndef TPUNKT_UAC_H
 #define TPUNKT_UAC_H
 
+#include "datastructures/Spinlock.h"
 #include "fwd.h"
 #include "uac/UserPermissions.h"
-#include "datastructures/Spinlock.h"
-#include "uac/PermissionStorage.h"
 
 namespace tpunkt
 {
@@ -16,8 +15,7 @@ namespace tpunkt
     };
 
     // All operations are atomic
-    // Permissions are automatically inherited implicitly for all child files/dirs - until explicit change
-    //
+    // Permissions are automatically inherited implicitly for all child files/dirs - until explicitly change
     struct UserAccessControl final
     {
         //===== Lookup =====//

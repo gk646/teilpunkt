@@ -37,7 +37,7 @@
     {                                                                                                                  \
         return *global::var;                                                                                           \
     }                                                                                                                  \
-    LOG_FATAL("%-15s is not assigned", #var);                                                                          \
+    LOG_FATAL("%-15s is not assigned", #var);
 
 
 #define TPUNKT_MACROS_STARTUP_PRINT()                                                                                  \
@@ -58,7 +58,9 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 )";                                                                                                                    \
     constexpr auto BUILD_TIMESTAMP = __DATE__ " " __TIME__;                                                            \
-    fprintf(stdout, STARTUP_MSG, TPUNKT_VERSION, BUILD_TIMESTAMP)
+    (void)fprintf(stdout, STARTUP_MSG, TPUNKT_VERSION, BUILD_TIMESTAMP)
+
+
 
 
 #endif // TPUNKT_MACROS_H

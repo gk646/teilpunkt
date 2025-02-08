@@ -2,4 +2,9 @@
 #define TPUNKT_STRINGS_H
 
 
-#endif //TPUNKT_STRINGS_H
+namespace tpunkt
+{
+
+}
+
+#endif // TPUNKT_STRINGS_H

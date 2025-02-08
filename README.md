@@ -102,6 +102,10 @@ These are the active (and passive) security measures used by `teilpunkt`.
 This means it runs hardware concurrent on devices with 4+ cores.
 
 
+### Instance
+
+The executable 
+
 ### Files and Data
 
 Data is generally handled in **32kb** chunks. Specifically chunking is used for:

@@ -20,7 +20,6 @@ namespace tpunkt
         UserID creator{};
     };
 
-
     // File names must be unique per directory - case-sensitive
     // Any modifications are atomic for the whole filesystem - for simplicity
     struct VirtualFilesystem

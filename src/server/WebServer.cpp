@@ -32,7 +32,7 @@ namespace tpunkt
     void WebServer::run()
     {
         server.listen( TPUNKT_SERVER_PORT,
-                       []( us_listen_socket_t* socket )
+                       [](const us_listen_socket_t* socket )
                        {
                            if( socket )
                            {
@@ -40,7 +40,7 @@ namespace tpunkt
                            }
                            else
                            {
-                               LOG_ERROR( "Server failed to list" );
+                               LOG_ERROR( "Server failed create socket" );
                            }
                        } );
         server.run();

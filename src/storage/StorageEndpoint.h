@@ -2,11 +2,10 @@
 #define TPUNKT_STORAGE_ENDPOINT_H
 
 #include <cstdint>
-
 #include "datastructures/FixedString.h"
-#include "storage/vfs/VirtualFilesystem.h"
 #include "storage/datastore/DataStore.h"
 #include "storage/datastore/StorageTransaction.h"
+#include "storage/vfs/VirtualFilesystem.h"
 
 namespace tpunkt
 {
@@ -24,14 +23,21 @@ namespace tpunkt
         REMOTE_FILE_SYSTEM,
     };
 
+    struct StorageEndpointCreateInfo final
+    {
+        FileName name;
+        uint64_t maxSize = 0; // Max size in bytes
+        UserID creator{};
+    };
+
     struct StorageEndpoint
     {
-        virtual ~StorageEndpoint() = default;
+        explicit StorageEndpoint(const FileName& name, EndpointID endpoint);
+        ~StorageEndpoint();
 
         //===== File Manipulation =====//
 
-         StorageStatus addFile(UserID user, FileID dir, const FileCreationInfo& info,
-        StorageTransaction& transaction);
+        StorageStatus addFile(UserID user, FileID dir, const FileCreationInfo& info, StorageTransaction& transaction);
         StorageStatus removeFile();
         StorageStatus changeFile();
         StorageStatus renameFile();
@@ -46,13 +52,15 @@ namespace tpunkt
 
         //===== Storage Info =====//
 
-        virtual StorageStatus canBeAdded();
+        StorageStatus canBeAdded();
 
       private:
         VirtualFilesystem virtualFilesystem;
         DataStore* dataStore = nullptr;
-        FixedString<TPUNKT_STORAGE_NAME_LEN> name;
+        FileName name;
+        EndpointID id;
         StorageEndpointType type{};
+        FixedString<32> dir; // Physical directory of the endpoint
     };
 
 } // namespace tpunkt

@@ -1,8 +1,8 @@
 #ifndef TPUNKT_FWD_H
 #define TPUNKT_FWD_H
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include "config.h"
 
 namespace tpunkt
@@ -40,7 +40,7 @@ namespace tpunkt
         INVALID = 0
     };
 
-    enum class EndpointID : uint8_t
+    enum class EndpointID : uint16_t
     {
         INVALID = 0
     };
@@ -48,9 +48,9 @@ namespace tpunkt
     struct FileID final
     {
         uint32_t fileID;
-        // 2 bytes left
-        bool isDirectory;
         EndpointID endpoint;
+        bool isDirectory;
+        // 1 byte left
         bool operator==(const FileID&) const = default;
     };
 
@@ -58,6 +58,8 @@ namespace tpunkt
     {
         INVALID = 0
     };
+
+
 
 
 } // namespace tpunkt

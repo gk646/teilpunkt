@@ -2,12 +2,13 @@
 #define TPUNKT_STORAGE_H
 
 #include <vector>
-#include "storage/StorageEndpoint.h"
 #include "datastructures/Spinlock.h"
 #include "server/DTO.h"
+#include "storage/StorageEndpoint.h"
 
 namespace tpunkt
 {
+
     // All write operations are atomic across a single endpoint
     // Implicitly checks permissions using the UAC
     struct Storage final
@@ -20,13 +21,16 @@ namespace tpunkt
         // Collects all files in the given directory
         StorageStatus userGetDir(UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
 
-
         //===== Endpoint Management =====//
 
-        StorageStatus getEndpoint(StorageEndpoint* endpoint);
+        StorageStatus getEndpoint(EndpointID endpointId, StorageEndpoint* endpoint);
+
+        StorageStatus endpointCreate(const FileName& name);
+
+        StorageStatus endpointDelete(EndpointID endpointId);
 
       private:
-        FileID getNextFileID(bool isDirectory, uint8_t endPoint);
+        FileID getNextFileID(bool isDirectory, EndpointID endPoint);
 
         std::vector<StorageEndpoint> endpoints;
         Spinlock storageLock;

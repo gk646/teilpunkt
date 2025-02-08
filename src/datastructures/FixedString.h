@@ -1,14 +1,13 @@
 #ifndef TPUNKT_FIXED_STRING_H
 #define TPUNKT_FIXED_STRING_H
 
-// Fixed string for names/keys that handles overflow and truncation
-#include <cstddef>
 #include <cstring>
 #include <sodium/utils.h>
 #include "util/Logging.h"
 
 namespace tpunkt
 {
+    // Fixed string for names/keys that handles overflow and truncation
     template <size_t length>
     struct FixedString final
     {
