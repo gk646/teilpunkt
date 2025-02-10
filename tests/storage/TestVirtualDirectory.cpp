@@ -1,6 +1,6 @@
 #include <catch_amalgamated.hpp>
-#include "TestCommons.h"
 #include "storage/vfs/VirtualDirectory.h"
+#include "TestCommons.h"
 
 using namespace tpunkt;
 
@@ -8,12 +8,12 @@ uint32_t count = 1;
 // Mocking or creating mock data
 FileID getDirFileID()
 {
-    return FileID{.fileID = count++, .isDirectory = true, .endpoint = 0};
+    return FileID{.fileID = count++, .endpoint = EndpointID{0}, .isDirectory = true};
 }
 
 FileID getFileFileID()
 {
-    return FileID{.fileID = count++, .isDirectory = false, .endpoint = 0};
+    return FileID{.fileID = count++, .endpoint = EndpointID{0}, .isDirectory = false};
 }
 
 UserID generateUserID()
@@ -23,6 +23,8 @@ UserID generateUserID()
 
 TEST_CASE("DirectoryCreationInfo")
 {
+    TEST_INIT();
+
     SECTION("Default constructor")
     {
         DirectoryCreationInfo dirInfo;
@@ -43,6 +45,8 @@ TEST_CASE("DirectoryCreationInfo")
 
 TEST_CASE("VirtualDirectory")
 {
+    TEST_INIT();
+
     DirectoryCreationInfo rootDirInfo{FileName{"RootDirectory"}, 1000, nullptr, getDirFileID(), generateUserID()};
 
     VirtualDirectory rootDir(rootDirInfo);
@@ -109,6 +113,8 @@ TEST_CASE("VirtualDirectory")
 
 TEST_CASE("Edge cases")
 {
+    TEST_INIT();
+
     VirtualDirectory rootDir(DirectoryCreationInfo{FileName{"Root"}, 1000, nullptr, getDirFileID(), generateUserID()});
 
     SECTION("Adding file when directory is at max size")
@@ -140,6 +146,8 @@ TEST_CASE("Edge cases")
 
 TEST_CASE("File creation and removal")
 {
+    TEST_INIT();
+
     SECTION("File creation")
     {
         FileCreationInfo fileInfo{FileName{"TestFile"}, generateUserID(), 500, getFileFileID()};
@@ -174,7 +182,7 @@ TEST_CASE("Size Limit")
 
     for(int i = 0; i < 2; ++i)
     {
-        VirtualDirectory* dir = rootDir.searchDir({firstID++, true, 0});
+        VirtualDirectory* dir = rootDir.searchDir({firstID++, EndpointID{0}, true});
         REQUIRE(dir != nullptr);
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
@@ -183,7 +191,7 @@ TEST_CASE("Size Limit")
 
     // Third should fail
     {
-        VirtualDirectory* dir1 = rootDir.searchDir({firstID, true, 0});
+        VirtualDirectory* dir1 = rootDir.searchDir({firstID, EndpointID{0}, true});
         REQUIRE(dir1 != nullptr);
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);

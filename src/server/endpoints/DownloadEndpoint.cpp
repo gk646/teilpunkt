@@ -6,8 +6,9 @@ namespace tpunkt
     void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     {
 
-        res->onWritable()
-        res->tryEnd()
+       // res->onWritable()
+      //  res->tryEnd()
+        /*
         auto password = req.get_param_value("password");
         // if (!authenticate(password))
         {
@@ -29,5 +30,6 @@ namespace tpunkt
             res.status = 404; // Not Found
             res.set_content("File not found!", "text/plain");
         }
+        */
     }
 } // namespace tpunkt
