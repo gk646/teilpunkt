@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #include <catch_amalgamated.hpp>
 #include <filesystem>
 #include "storage/datastore/stores/LocalFileSystem.h"

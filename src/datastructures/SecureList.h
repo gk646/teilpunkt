@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_SECURE_LIST_H
 #define TPUNKT_SECURE_LIST_H
 

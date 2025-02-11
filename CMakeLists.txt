@@ -21,7 +21,7 @@ include(cmake/BuildOptions.cmake)
 # Add dependencies
 include(cmake/Dependencies.cmake)
 
-# Create tests
+# Build tests
 if(TPUNKT_BUILD_TESTS)
     add_subdirectory(tests)
 endif()

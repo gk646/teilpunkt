@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #include <catch_amalgamated.hpp>
 #include "TestCommons.h"
 #include "storage/vfs/VirtualFilesystem.h"

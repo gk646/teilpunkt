@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #include <uWebSocket/src/HttpResponse.h>
 #include "server/Endpoints.h"
 
@@ -32,4 +34,5 @@ namespace tpunkt
         }
         */
     }
+
 } // namespace tpunkt

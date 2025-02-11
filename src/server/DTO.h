@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_DTO_H
 #define TPUNKT_DTO_H
 
@@ -20,6 +22,8 @@ struct DirectoryInfoDTO final
 {
     FileName name;
     FileID dir{};
+    uint32_t files; // Count of files visible to user
+    uint32_t dirs;  // Count of directories visible to user
 };
 
 } // namespace tpunkt

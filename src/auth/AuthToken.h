@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_AUTH_TOKEN_H
 #define TPUNKT_AUTH_TOKEN_H
 
@@ -7,18 +9,20 @@
 
 namespace tpunkt
 {
-    struct AuthToken final
-    {
-        AuthToken() = default;
-        ~AuthToken();
+struct AuthToken final
+{
+    AuthToken() = default;
+    ~AuthToken();
 
-      private:
-        UserID userID{};   // Which user this token authenticates
-        uint32_t random{}; // Random number to make this token non forgeable
-        TPUNKT_MACROS_STRUCT(AuthToken);
-        friend Authenticator;
-        friend SessionStorage;
-    };
+    [[nodiscard]] UserID getUser() const;
+
+  private:
+    UserID userID{};   // Which user this token authenticates
+    uint32_t random{}; // Random number to make this token non forgeable
+    TPUNKT_MACROS_STRUCT(AuthToken);
+    friend Authenticator;
+    friend SessionStorage;
+};
 
 } // namespace tpunkt
 

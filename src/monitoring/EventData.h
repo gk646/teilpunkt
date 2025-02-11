@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_EVENT_DATA_H
 #define TPUNKT_EVENT_DATA_H
 
@@ -6,11 +8,11 @@
 namespace tpunkt
 {
 
-    struct FileSystemEventData final
-    {
-        FileID file;
-        //FileName name;
-    };
+struct FileSystemEventData final
+{
+    FileID file;
+    // FileName name;
+};
 
 } // namespace tpunkt
 

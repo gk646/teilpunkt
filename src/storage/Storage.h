@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_STORAGE_H
 #define TPUNKT_STORAGE_H
 
@@ -8,38 +10,46 @@
 
 namespace tpunkt
 {
-    // All write operations are atomic across a single endpoint
-    // Implicitly checks permissions using the UAC
-    struct Storage final
-    {
-        //===== Global Functions =====//
 
-        // Get all the roots of all directories/files this user has access to
-        StorageStatus userGetRoots(UserID user, std::vector<DirectoryInfoDTO>& roots);
+// Implicitly checks permissions using the UAC
+struct Storage final
+{
+    //===== Global Functions =====//
 
-        // Collects all files in the given directory
-        StorageStatus userGetDir(UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
+    // If user is different from token-user requires admin
+    StorageStatus getRoots(const AuthToken& token, UserID user, std::vector<DirectoryInfoDTO>& roots);
 
-        //===== Endpoint Management =====//
+    // If user is different from token-user requires admin
+    StorageStatus getDir(const AuthToken& token, UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
 
-        StorageStatus getEndpoint(EndpointID endpointId, StorageEndpoint* endpoint);
+    //===== Endpoint Management =====//
 
-        StorageStatus endpointCreate(const FileName& name);
+    using CreateInfo = const StorageEndpointCreateInfo&;
 
-        StorageStatus endpointDelete(EndpointID endpointId);
+    // Creates a new empty endpoint
+    StorageStatus endpointCreate(const AuthToken& token, CreateInfo info);
 
-      private:
-        FileID getNextFileID(bool isDirectory, EndpointID endPoint);
+    // Creates a new endpoint by copying from the given local file source - requires admin && process needs access
+    StorageStatus endpointCreateFrom(const AuthToken& token, CreateInfo info, const char* file, bool recurse);
 
-        std::vector<StorageEndpoint> endpoints;
-        Spinlock storageLock;
-        uint32_t fileID = 0;
-        uint8_t endpoint = 0;
-        friend StorageTransaction;
-    };
+    // Only valid if returns StorageStatus::OK
+    StorageStatus endpointGet(const AuthToken& token, EndpointID endpointId, StorageEndpoint* endpoint);
 
-    // Can only access storage with valid token
-    Storage* GetStorage();
+    // Deletes the given endpoint
+    StorageStatus endpointDelete(const AuthToken& token, EndpointID endpointId);
+
+  private:
+    FileID getNextFile(bool isDirectory, EndpointID endPoint);
+    EndpointID getNextEndpoint();
+
+    std::vector<StorageEndpoint> endpoints;
+    Spinlock storageLock;
+    uint32_t fileID = 0;
+    uint8_t endpoint = 0;
+    friend StorageTransaction;
+};
+
+Storage& GetStorage();
 
 } // namespace tpunkt
 

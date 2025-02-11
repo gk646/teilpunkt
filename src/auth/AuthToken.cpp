@@ -1,14 +1,21 @@
-#include "auth/AuthToken.h"
+// SPDX-License-Identifier: Apache License 2.0
+
 #include "auth/Authenticator.h"
+#include "auth/AuthToken.h"
 
 namespace tpunkt
 {
-    AuthToken::~AuthToken()
+AuthToken::~AuthToken()
+{
+    if(GetAuthenticator().tokenInvalidate(*this) != AuthStatus::OK)
     {
-        if(GetAuthenticator().tokenInvalidate(*this) != AuthStatus::OK)
-        {
-            LOG_CRITICAL("Failed to invalidate token");
-        }
+        LOG_CRITICAL("Failed to invalidate token");
     }
+}
+
+UserID AuthToken::getUser() const
+{
+    return userID;
+}
 
 } // namespace tpunkt

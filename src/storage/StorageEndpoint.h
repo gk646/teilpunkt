@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_STORAGE_ENDPOINT_H
 #define TPUNKT_STORAGE_ENDPOINT_H
 
@@ -13,8 +15,11 @@ enum class StorageStatus : uint8_t
 {
     INVALID,
     OK,
-    ERR_NO_SUCH_ENDPOINT,
-    ERR_UNSUPPORTED_OPERATION,
+    ERR_GENERIC,          // Generic error
+    ERR_NO_AUTH,          // Invalid authentication
+    ERR_NO_ADMIN,         // Requires admin but request doesnt have it
+    ERR_NO_PERMS,         // File access denied by local filesystem
+    ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };
 
 enum class StorageEndpointType : uint8_t
@@ -27,26 +32,26 @@ struct StorageEndpointCreateInfo final
 {
     FileName name;
     uint64_t maxSize = 0; // Max size in bytes
-    UserID creator{};
+    StorageEndpointType type{};
 };
 
 struct StorageEndpoint
 {
-    explicit StorageEndpoint(const FileName& name, EndpointID endpoint);
+    explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator, bool& success);
     ~StorageEndpoint();
 
     //===== File Manipulation =====//
 
-    StorageStatus addFile(UserID user, FileID dir, const FileCreationInfo& info, StorageTransaction& transaction);
-    StorageStatus removeFile();
+    StorageStatus fileAdd(UserID user, FileID dir, const FileCreationInfo& info, StorageTransaction& transaction);
+    StorageStatus fileRemove();
     StorageStatus changeFile();
     StorageStatus renameFile();
 
-    StorageStatus addDirectory();
-    StorageStatus removeDirectory();
+    StorageStatus dirAdd();
+    StorageStatus dirRemove();
 
-    StorageStatus changeDirectory();
-    StorageStatus renameDirectory();
+    StorageStatus dirChange();
+    StorageStatus dirRename();
 
     StorageStatus clear();
 

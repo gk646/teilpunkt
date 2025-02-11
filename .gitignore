@@ -1,3 +1,5 @@
 .idea
 cmake-build*
 external
+key
+ROADMAP.md

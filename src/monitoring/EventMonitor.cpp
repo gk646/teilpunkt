@@ -1,47 +1,49 @@
-#include <cstdlib>
+// SPDX-License-Identifier: Apache License 2.0
+
 #include "monitoring/EventMonitor.h"
-#include "util/Macros.h"
 #include "util/Logging.h"
+#include "util/Macros.h"
 
 namespace tpunkt
 {
-    namespace global
-    {
-        static EventMonitor* EventMonitor;
-    }
 
-    EventMonitor::EventMonitor()
-    {
-        TPUNKT_MACROS_GLOBAL_ASSIGN(EventMonitor);
-    }
+namespace global
+{
+static EventMonitor* EventMonitor;
+}
 
-    EventMonitor::~EventMonitor()
-    {
-        TPUNKT_MACROS_GLOBAL_RESET(EventMonitor);
-    }
+EventMonitor::EventMonitor()
+{
+    TPUNKT_MACROS_GLOBAL_ASSIGN(EventMonitor);
+}
 
-    EventMonitor& GetEventMonitor()
-    {
-        TPUNKT_MACROS_GLOBAL_GET(EventMonitor);
-    }
+EventMonitor::~EventMonitor()
+{
+    TPUNKT_MACROS_GLOBAL_RESET(EventMonitor);
+}
 
-    void EventMonitor::log(EventType type, EventAction action, EventStatus status)
-    {
-        (void)type;
-        (void)action;
-        (void)status;
-    }
+EventMonitor& GetEventMonitor()
+{
+    TPUNKT_MACROS_GLOBAL_GET(EventMonitor);
+}
 
-    template <EventType type, typename EventData>
-    void EventMonitor::logData(EventAction action, EventStatus status, EventData data)
-    {
-    }
+void EventMonitor::log(const EventType type, const EventAction action, const EventStatus status)
+{
+    (void)type;
+    (void)action;
+    (void)status;
+}
 
-    template <>
-    void EventMonitor::logData<EventType::FileSystem, FileSystemEventData>(EventAction action, EventStatus status, FileSystemEventData data) {
+template <EventType type, typename EventData>
+void EventMonitor::logData(EventAction action, EventStatus status, EventData data)
+{
+}
 
-    }
-
+template <>
+void EventMonitor::logData<EventType::FileSystem, FileSystemEventData>(EventAction action, EventStatus status,
+                                                                       FileSystemEventData data)
+{
+}
 
 
 } // namespace tpunkt

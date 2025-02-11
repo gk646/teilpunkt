@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #include <cstdio>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -187,9 +189,10 @@ bool FileSystemDataStore::closeRead(ReadHandle& handle, ResultCb callback)
     {
         if(close(handle.fd) == -1)
         {
-            LOG_ERROR("Failed to close file");
+            LOG_ERROR("Failed to close file: %s", strerror(errno));
             success = false;
         }
+        handle.fd = -1;
     }
     buffers[ handle.buffer ].unlock();
 
@@ -245,7 +248,7 @@ bool FileSystemDataStore::writeFile(WriteHandle& handle, const bool isLast, cons
     }
 
     const auto written = pwrite64(handle.tempfd, data, size, static_cast<int64_t>(handle.tempPosition));
-    if(written < 0)
+    if(written == -1)
     {
         RET_AND_CB_FALSE();
     }

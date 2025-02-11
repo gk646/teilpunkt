@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_USER_STORAGE_H
 #define TPUNKT_USER_STORAGE_H
 

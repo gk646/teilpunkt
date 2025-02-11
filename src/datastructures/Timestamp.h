@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_TIMESTAMP_H
 #define TPUNKT_TIMESTAMP_H
 

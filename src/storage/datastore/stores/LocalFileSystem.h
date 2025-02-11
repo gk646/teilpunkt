@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_LOCAL_FILESYSTEM_DATASTORE_H
 #define TPUNKT_LOCAL_FILESYSTEM_DATASTORE_H
 

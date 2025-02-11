@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #include <ctime>
 #include "util/Logging.h"
 #include "datastructures/Timestamp.h"

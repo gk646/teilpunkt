@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #include <sched.h>
 #include "datastructures/Spinlock.h"
 #include "util/Logging.h"

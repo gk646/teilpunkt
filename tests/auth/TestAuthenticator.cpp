@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #define CATCH_CONFIG_MAIN // Include somewhere once
 
 #include <catch_amalgamated.hpp>

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache License 2.0
+
 #ifndef TPUNKT_WEBSERVER_H
 #define TPUNKT_WEBSERVER_H
 
