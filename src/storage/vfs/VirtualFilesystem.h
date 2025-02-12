@@ -9,7 +9,6 @@
 #include "storage/vfs/VirtualFile.h"
 #include "storage/vfs/VirtualFilesystemCache.h"
 
-
 namespace tpunkt
 {
 
@@ -23,10 +22,12 @@ struct FilesystemCreateInfo final
 };
 
 // File names must be unique per directory - case-sensitive
-// Any modifications are atomic for the whole filesystem - for simplicity
 struct VirtualFilesystem
 {
     explicit VirtualFilesystem(const FilesystemCreateInfo& info);
+    TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
+
+    ~VirtualFilesystem();
 
     bool createFile(FileID dir, const FileCreationInfo& info);
 

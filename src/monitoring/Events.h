@@ -39,7 +39,9 @@ enum class EventAction : uint8_t
     TokenInvalidate,
     // Storage
     StorageCreateEndpoint,
-
+    StorageCreateEndpointFrom,
+    StorageGetEndpoint,
+    StorageDeleteEndpoint,
     // Virtual File System
     FilesystemAddFile,
     FilesystemRemoveFile,
@@ -58,6 +60,7 @@ enum class EventStatus : uint8_t
     FAIL_CONFIG_RESTRICTED, // Prevented due to instance config
     FAIL_NO_ADMIN,          // Not complete due to missing admin
     FAIL_USERNAME_EXISTS,
+    FAIL_NOT_FOUND,
     WARNINGS,               //----------------
     // Warnings
     WARN_OPERATION_FAILED, // Internal operation failed

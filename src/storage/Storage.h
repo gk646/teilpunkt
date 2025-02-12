@@ -33,14 +33,14 @@ struct Storage final
     StorageStatus endpointCreateFrom(const AuthToken& token, CreateInfo info, const char* file, bool recurse);
 
     // Only valid if returns StorageStatus::OK
-    StorageStatus endpointGet(const AuthToken& token, EndpointID endpointId, StorageEndpoint* endpoint);
+    StorageStatus endpointGet(const AuthToken& token, EndpointID endpointId, StorageEndpoint*& endpoint);
 
     // Deletes the given endpoint
     StorageStatus endpointDelete(const AuthToken& token, EndpointID endpointId);
 
   private:
     FileID getNextFile(bool isDirectory, EndpointID endPoint);
-    EndpointID getNextEndpoint();
+    EndpointID getEndpointID(bool increment);
 
     std::vector<StorageEndpoint> endpoints;
     Spinlock storageLock;

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache License 2.0
 
-#ifndef TPUNKT_VIRTUALFILESYSTEMCACHE_H
-#define TPUNKT_VIRTUALFILESYSTEMCACHE_H
+#ifndef TPUNKT_VIRTUAL_FILESYSTEM_CACHE_H
+#define TPUNKT_VIRTUAL_FILESYSTEM_CACHE_H
 
 namespace tpunkt
 {
-    struct VirtualFilesystemCache
+    struct VirtualFilesystemCache final
     {
     };
 
 } // namespace tpunkt
 
-#endif // TPUNKT_VIRTUALFILESYSTEMCACHE_H
+#endif // TPUNKT_VIRTUAL_FILESYSTEM_CACHE_H

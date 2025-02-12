@@ -8,32 +8,32 @@
 
 namespace tpunkt
 {
-    struct SpinlockGuard;
+struct SpinlockGuard;
 
-    struct Spinlock
-    {
-        Spinlock();
+struct Spinlock
+{
+    Spinlock();
+    TPUNKT_MACROS_MOVE_ONLY(Spinlock);
 
-        [[nodiscard]] bool isLocked() const;
+    [[nodiscard]] bool isLocked() const;
 
-      private:
-        void lock();
-        void unlock();
-        std::atomic_flag flag = ATOMIC_FLAG_INIT;
-        bool hasGuard = false;
-        friend SpinlockGuard;
-        TPUNKT_MACROS_STRUCT(Spinlock);
-    };
+  private:
+    void lock();
+    void unlock();
+    std::atomic_flag flag = ATOMIC_FLAG_INIT;
+    bool hasGuard = false;
+    friend SpinlockGuard;
+};
 
-    struct SpinlockGuard final
-    {
-        explicit SpinlockGuard(Spinlock& spinlock);
-        ~SpinlockGuard();
+struct SpinlockGuard final
+{
+    explicit SpinlockGuard(Spinlock& spinlock);
+    ~SpinlockGuard();
 
-      private:
-        Spinlock& lock;
-        TPUNKT_MACROS_STRUCT(SpinlockGuard);
-    };
+  private:
+    Spinlock& lock;
+    TPUNKT_MACROS_STRUCT(SpinlockGuard);
+};
 
 
 } // namespace tpunkt

@@ -32,39 +32,44 @@ InstanceConfig& GetInstanceConfig()
         return ret;                                                                                                    \
     }
 
-const char* InstanceConfig::getString(const StringParamKey key) const
+const char* InstanceConfig::getString(const StringParamKey key)
 {
+    SpinlockGuard guard{configLock};
     CHECK_INVALID_KEY(StringParamKey, key, "");
     return stringParams[ static_cast<int>(key) ].string.c_str();
 }
 
-uint32_t InstanceConfig::getNumber(const NumberParamKey key) const
+uint32_t InstanceConfig::getNumber(const NumberParamKey key)
 {
+    SpinlockGuard guard{configLock};
     CHECK_INVALID_KEY(NumberParamKey, key, 0);
     return numberParams[ static_cast<int>(key) ].number;
 }
 
-bool InstanceConfig::getBool(const BoolParamKey key) const
+bool InstanceConfig::getBool(const BoolParamKey key)
 {
+    SpinlockGuard guard{configLock};
     CHECK_INVALID_KEY(BoolParamKey, key, false);
     return boolParams[ static_cast<int>(key) ].boolean;
 }
 
-
 void InstanceConfig::setString(StringParamKey key, const ConfigString& string)
 {
+    SpinlockGuard guard{configLock};
     CHECK_INVALID_KEY(StringParamKey, key, );
     stringParams[ static_cast<int>(key) ].string = string;
 }
 
 void InstanceConfig::setNumber(NumberParamKey key, const uint32_t number)
 {
+    SpinlockGuard guard{configLock};
     CHECK_INVALID_KEY(NumberParamKey, key, );
     numberParams[ static_cast<int>(key) ].number = number;
 }
 
 void InstanceConfig::setBool(BoolParamKey key, const bool boolean)
 {
+    SpinlockGuard guard{configLock};
     CHECK_INVALID_KEY(BoolParamKey, key, );
     boolParams[ static_cast<int>(key) ].boolean = boolean;
 }

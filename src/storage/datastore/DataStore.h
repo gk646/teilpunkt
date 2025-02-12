@@ -43,7 +43,7 @@ struct WriteHandle final
 //      - Files are only identified by their ID from our side
 //      - Data is given and received encrypted only (assumed)
 //      - Callback might be called before the method returns
-//      - Datastores store their files in /endpoints/{id}/datastore
+//      - Datastore's store their files in /endpoints/{id}/datastore
 //      - Supports partial reads
 //      - This is any ASYNC interface - return true is good request - callback true is good operation
 //      - Operations are NOT threadsafe - must be enforced elsewhere
@@ -83,7 +83,7 @@ struct DataStore
     virtual bool closeWrite(WriteHandle& handle, bool revert, ResultCb callback) = 0;
 
   protected:
-    explicit DataStore(EndpointID endpoint);
+    explicit DataStore(EndpointID endpoint, bool& success);
     SyncedBuffer buffers[ TPUNKT_STORAGE_DATASTORE_MAX_READERS ]{}; // Cant use vector as expanding needs sync
     FixedString<64> dir;                                            // Directory of the datastore
     EndpointID endpoint;

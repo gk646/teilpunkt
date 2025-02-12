@@ -5,12 +5,14 @@
 
 #include <cstdint>
 #include "datastructures/FixedString.h"
+#include "datastructures/Spinlock.h"
 #include "fwd.h"
 #include "util/Macros.h"
 
 namespace tpunkt
 {
-// check All config parameters including their default value
+
+// All config parameters including their default value
 
 enum class StringParamKey : uint8_t
 {
@@ -46,31 +48,17 @@ enum class BoolParamKey : uint8_t
 {
     INVALID,
     // If set only the instance admin can create new accounts - account creation is disabled for non-admins
-    // Also disables name side channel attacks (get registered names by querying registered ones)
+    // Also disables name side channel attacks (get registered names by trying to create accounts)
     // false
     USER_ONLY_ADMIN_CREATE_ACCOUNT,
-    // If true only admins can create new endpints
+    // If true only admins can create new endpoints
     // true
     STORAGE_ONLY_ADMIN_CREATE_ENDPOINT,
     ENUM_SIZE
 };
 
-struct StringConfigParam final
-{
-    ConfigString string;
-};
 
-struct NumberConfigParam final
-{
-    uint32_t number;
-};
-
-struct BoolConfigParam final
-{
-    bool boolean;
-};
-
-// Type safe storage for different config parameters - avoids template as its only little code to write
+// Type safe storage for different config parameters - avoids templates as its only little code to write
 struct InstanceConfig final
 {
     InstanceConfig();
@@ -78,9 +66,9 @@ struct InstanceConfig final
 
     // Returns the config string for the given value
     // Will NEVER be nullptr
-    [[nodiscard]] const char* getString(StringParamKey key) const;
-    [[nodiscard]] uint32_t getNumber(NumberParamKey key) const;
-    [[nodiscard]] bool getBool(BoolParamKey key) const;
+    [[nodiscard]] const char* getString(StringParamKey key);
+    [[nodiscard]] uint32_t getNumber(NumberParamKey key);
+    [[nodiscard]] bool getBool(BoolParamKey key);
 
     void setString(StringParamKey key, const ConfigString& string);
     void setNumber(NumberParamKey key, uint32_t number);
@@ -92,9 +80,22 @@ struct InstanceConfig final
 
   private:
     void setupDefaults();
+    struct StringConfigParam final
+    {
+        ConfigString string;
+    };
+    struct NumberConfigParam final
+    {
+        uint32_t number;
+    };
+    struct BoolConfigParam final
+    {
+        bool boolean;
+    };
     StringConfigParam stringParams[ static_cast<int>(StringParamKey::ENUM_SIZE) ]{};
     NumberConfigParam numberParams[ static_cast<int>(NumberParamKey::ENUM_SIZE) ]{};
     BoolConfigParam boolParams[ static_cast<int>(BoolParamKey::ENUM_SIZE) ]{};
+    Spinlock configLock;
     TPUNKT_MACROS_STRUCT(InstanceConfig);
 };
 

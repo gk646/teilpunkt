@@ -11,14 +11,14 @@
 
 namespace tpunkt
 {
+
 enum class StorageStatus : uint8_t
 {
     INVALID,
     OK,
-    ERR_GENERIC,          // Generic error
+    ERR_UNSUCCESSFUL,     // Generic error
     ERR_NO_AUTH,          // Invalid authentication
     ERR_NO_ADMIN,         // Requires admin but request doesnt have it
-    ERR_NO_PERMS,         // File access denied by local filesystem
     ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };
 
@@ -38,6 +38,10 @@ struct StorageEndpointCreateInfo final
 struct StorageEndpoint
 {
     explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator, bool& success);
+    StorageEndpoint(const StorageEndpoint &) = delete;
+    StorageEndpoint &operator=(const StorageEndpoint &) = delete;
+    StorageEndpoint(StorageEndpoint &&) = default;
+    StorageEndpoint &operator=(StorageEndpoint &&) = default;
     ~StorageEndpoint();
 
     //===== File Manipulation =====//
@@ -58,6 +62,8 @@ struct StorageEndpoint
     //===== Storage Info =====//
 
     StorageStatus canBeAdded();
+
+    EndpointID getID();
 
   private:
     VirtualFilesystem virtualFilesystem;

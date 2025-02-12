@@ -11,6 +11,12 @@
 
 #define TPUNKT_MACROS_STRUCT(type) TPUNKT_MACROS_DEL_CTORS(type)
 
+#define TPUNKT_MACROS_MOVE_ONLY(type)                                                                                  \
+    type(const type&) = delete;                                                                                        \
+    type& operator=(const type&) = delete;                                                                             \
+    type(type&&) = default;                                                                                            \
+    type& operator=(type&&) = default
+
 
 #define TPUNKT_MACROS_GLOBAL_ASSIGN(var)                                                                               \
     if(global::var == nullptr)                                                                                         \
@@ -61,8 +67,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 )";                                                                                                                    \
     constexpr auto BUILD_TIMESTAMP = __DATE__ " " __TIME__;                                                            \
     (void)fprintf(stdout, STARTUP_MSG, TPUNKT_VERSION, BUILD_TIMESTAMP)
-
-
 
 
 #endif // TPUNKT_MACROS_H

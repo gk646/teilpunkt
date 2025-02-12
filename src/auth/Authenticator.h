@@ -94,7 +94,7 @@ Authenticator& GetAuthenticator();
     }
 
 
-#define TPUNKT_NO_AUTH_RET_ADD(token, retval, add)                                                                     \
+#define TPUNKT_NO_AUTH_RET_AND(token, retval, add)                                                                     \
     if(!GetAuthenticator().tokenValid(token))                                                                          \
     {                                                                                                                  \
         add;                                                                                                           \
