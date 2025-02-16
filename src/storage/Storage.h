@@ -17,26 +17,26 @@ struct Storage final
     //===== Global Functions =====//
 
     // If user is different from token-user requires admin
-    StorageStatus getRoots(const AuthToken& token, UserID user, std::vector<DirectoryInfoDTO>& roots);
+    StorageStatus getRoots(UserID user, std::vector<DirectoryInfoDTO>& roots);
 
     // If user is different from token-user requires admin
-    StorageStatus getDir(const AuthToken& token, UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
+    StorageStatus getDir(UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
 
     //===== Endpoint Management =====//
 
     using CreateInfo = const StorageEndpointCreateInfo&;
 
     // Creates a new empty endpoint
-    StorageStatus endpointCreate(const AuthToken& token, CreateInfo info);
+    StorageStatus endpointCreate(UserID user, CreateInfo info);
 
     // Creates a new endpoint by copying from the given local file source - requires admin && process needs access
-    StorageStatus endpointCreateFrom(const AuthToken& token, CreateInfo info, const char* file, bool recurse);
+    StorageStatus endpointCreateFrom(UserID user, CreateInfo info, const char* file, bool recurse);
 
     // Only valid if returns StorageStatus::OK
-    StorageStatus endpointGet(const AuthToken& token, EndpointID endpointId, StorageEndpoint*& endpoint);
+    StorageStatus endpointGet(UserID user, EndpointID endpointId, StorageEndpoint*& endpoint);
 
     // Deletes the given endpoint
-    StorageStatus endpointDelete(const AuthToken& token, EndpointID endpointId);
+    StorageStatus endpointDelete(UserID user, EndpointID endpointId);
 
   private:
     FileID getNextFile(bool isDirectory, EndpointID endPoint);

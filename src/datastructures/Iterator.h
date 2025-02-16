@@ -3,7 +3,6 @@
 #ifndef TPUNKT_ITERATOR_H
 #define TPUNKT_ITERATOR_H
 
-
 namespace tpunkt
 {
     template <typename T>

@@ -7,6 +7,14 @@
 #include <cstdint>
 #include "config.h"
 
+namespace uWS
+{
+struct HttpRequest;
+template <bool T>
+struct HttpResponse;
+struct Loop;
+} // namespace uWS
+
 namespace tpunkt
 {
 
@@ -28,7 +36,7 @@ struct Storage;
 struct VirtualDirectory;
 template <typename T>
 struct Collector;
-
+struct DataStore;
 
 //===== Fixed String =====//
 
@@ -39,10 +47,15 @@ using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
 using UserAgentString = FixedString<50>;
 using HashedIP = FixedString<16>;
 using ConfigString = FixedString<TPUNKT_STORAGE_FILE_LEN>;
-using FileName = FixedString<TPUNKT_STORAGE_FILE_LEN>;         // Max length for any single file name
+using FileName = FixedString<TPUNKT_STORAGE_FILE_LEN>; // Max length for any single file name
 using CipherKey = FixedString<TPUNKT_CRYPTO_KEY_LEN>;
 
 //===== Identifiers =====//
+
+enum TaskID : uint64_t
+{
+    INVALID = 0
+};
 
 enum class UserID : uint32_t
 {
@@ -56,7 +69,7 @@ enum class EndpointID : uint16_t
 
 struct FileID final
 {
-    uint32_t fileID;
+    uint32_t file;
     EndpointID endpoint;
     bool isDirectory;
     // 1 byte left

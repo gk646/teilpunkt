@@ -3,61 +3,82 @@
 #ifndef TPUNKT_TASKMANAGER_H
 #define TPUNKT_TASKMANAGER_H
 
+#include <atomic>
+#include <thread>
 #include <vector>
 #include "datastructures/FixedString.h"
+#include "instance/Task.h"
 
 namespace tpunkt
 {
-using TaskName = FixedString<25>;
 
-struct TaskData final
-{
-};
-
-struct Task
-{
-
-    
-    virtual bool invoke();
-
-    // Returns true if the task should be removed
-    virtual bool shouldBeRemoved() = 0;
-
-
-  private:
-    TaskName name;
-    TaskData data;
-
-    TPUNKT_MACROS_STRUCT(Task);
-};
-
-struct PeriodicTask final : Task
-{
-    uint32_t intervalMillis{};
-    uint32_t counterMillis{};
-    TPUNKT_MACROS_STRUCT(PeriodicTask);
-};
-
-struct LimitedTask final : Task
-{
-    uint32_t executions = 0;
-    TPUNKT_MACROS_STRUCT(LimitedTask);
-};
-
+// Simple tasks are taken by any thread and executed
 struct TaskManager final
 {
+    explicit TaskManager(uint32_t threadCount);
+    ~TaskManager();
 
-    bool taskAdd();
+    //===== Task Management =====//
 
-    bool taskRemove();
+    template <typename Callable>
+    TaskID taskAdd(const TaskName& name, Callable&& func)
+    {
+        // TODO make slot memory allocator - reuse from magique
+        auto* task = new SimpleTask(std::forward<Callable>(func));
+        return implTaskAdd(name, *task);
+    }
+
+    template <typename Callable>
+    TaskID taskAddPeriodic(const TaskName& name, Callable&& func, uint32_t intervalMicros, uint32_t times)
+    {
+        auto task = new PeriodicTask(intervalMicros, times, std::forward<Callable>(func));
+        return implTaskAdd(name, *task);
+    }
+
+    bool taskRemove(TaskID task);
+
+    //===== Thread Management =====//
+
+    // Returns true if new thread was added
+    bool threadAdd();
+
+    // Returns true if any thread was removed
+    bool threadRemove();
+
+    // Thread info
+
 
   private:
-    std::vector<Task*> tasks;
+    // Takes ownership
+    TaskID implTaskAdd(Task& task);
+
+    struct TaskData final
+    {
+        Task* task;
+        TaskName name;
+    };
+
+    struct ThreadStats final
+    {
+        uint64_t tasksExecutedTotal;
+        uint64_t tasksPerSec;
+    };
+
+    struct ThreadData final
+    {
+        ThreadStats stats;
+        std::thread thread;
+    };
+
+    std::vector<TaskData> tasks;
+    std::vector<ThreadData> threads;
+    uint64_t taskID;
+    std::atomic<bool> stop;
     TPUNKT_MACROS_STRUCT(TaskManager);
 };
 
-
 TaskManager& GetTaskManager();
+
 } // namespace tpunkt
 
 #endif // TPUNKT_TASKMANAGER_H

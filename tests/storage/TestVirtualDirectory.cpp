@@ -10,12 +10,12 @@ uint32_t count = 1;
 // Mocking or creating mock data
 FileID getDirFileID()
 {
-    return FileID{.fileID = count++, .endpoint = EndpointID{0}, .isDirectory = true};
+    return FileID{.file = count++, .endpoint = EndpointID{0}, .isDirectory = true};
 }
 
 FileID getFileFileID()
 {
-    return FileID{.fileID = count++, .endpoint = EndpointID{0}, .isDirectory = false};
+    return FileID{.file = count++, .endpoint = EndpointID{0}, .isDirectory = false};
 }
 
 UserID generateUserID()

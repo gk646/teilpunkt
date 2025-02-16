@@ -7,29 +7,30 @@
 
 namespace tpunkt
 {
-    struct Timestamp
-    {
-        Timestamp();
+struct Timestamp
+{
+    Timestamp();
 
-        // Returns true if this timestamp represents a time before the current moment
-        [[nodiscard]] bool inThePast() const;
+    // Returns true if this timestamp represents a time before the current moment
+    [[nodiscard]] bool isInPast() const;
 
-        void addSecs(uint64_t seconds);
-        void addMins(uint64_t minutes);
-        void addHours(uint64_t hours);
-        void addDays(uint64_t days);
+    void addMicros(uint64_t micros);
+    void addMillis(uint64_t millis);
+    void addSecs(uint64_t seconds);
+    void addMins(uint64_t minutes);
+    void addHours(uint64_t hours);
+    void addDays(uint64_t days);
 
-        void subtractTime(uint64_t seconds);
+    void subtractTime(uint64_t seconds);
 
-        // zeros the timestamp - always expires
-        void zero();
+    // zeros the timestamp - always expires
+    void zero();
 
-        static Timestamp now();
+    static Timestamp now();
 
-      private:
-        uint64_t timestamp;
-    };
-
+  private:
+    uint64_t timestamp;
+};
 
 } // namespace tpunkt
 

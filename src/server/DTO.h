@@ -26,6 +26,14 @@ struct DirectoryInfoDTO final
     uint32_t dirs;  // Count of directories visible to user
 };
 
+
+struct DTOFileDownload final
+{
+    FileID fileID;
+    size_t begin;
+    size_t end;
+};
+
 } // namespace tpunkt
 
 #endif // TPUNKT_DTO_H

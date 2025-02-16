@@ -12,6 +12,11 @@
 namespace tpunkt
 {
 
+using ResultCb = const std::function<void(bool success)>&;
+// Data may be null if not success
+// isLast is true when callback will be called for the last time - either on error or finish
+using ReadCb = const std::function<void(const unsigned char* data, size_t size, bool success, bool isLast)>&;
+
 struct ReadHandle final
 {
     size_t position = 0;     // Current read/write position
@@ -50,11 +55,6 @@ struct WriteHandle final
 //      - Read/Writes are only consistent if close is called for every init
 struct DataStore
 {
-    using ResultCb = const std::function<void(bool success)>&;
-    // Data may be null if not success
-    // isLast is true when callback will be called for the last time - either on error or finish
-    using ReadCb = const std::function<void(const unsigned char* data, size_t size, bool success, bool isLast)>&;
-
     virtual ~DataStore() = default;
 
     virtual bool createFile(uint32_t fileID, ResultCb callback) = 0;

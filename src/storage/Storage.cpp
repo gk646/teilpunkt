@@ -115,7 +115,7 @@ FileID Storage::getNextFile(const bool isDirectory, const EndpointID endPoint)
     {
         LOG_CRITICAL("Cannot create new file");
     }
-    return FileID{.fileID = fileID++, .endpoint = endPoint, .isDirectory = isDirectory};
+    return FileID{.file = fileID++, .endpoint = endPoint, .isDirectory = isDirectory};
 }
 
 EndpointID Storage::getEndpointID(const bool increment)

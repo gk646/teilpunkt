@@ -40,7 +40,6 @@ namespace tpunkt
 
 } // namespace tpunkt
 
-
 #define LOG_DEBUG(msg, ...) GetLogger().log(LogLevel::DEBUG, msg, ##__VA_ARGS__)
 #define LOG_INFO(msg, ...) GetLogger().log(LogLevel::INFO, msg, ##__VA_ARGS__)
 #define LOG_WARNING(msg, ...) GetLogger().log(LogLevel::WARNING, msg, ##__VA_ARGS__)

@@ -15,8 +15,15 @@ namespace tpunkt
 
 struct ServerEndpoint
 {
-    static bool isClientAuthenticated(uWS::HttpRequest* req);
-    static void rejectRequest(uWS::HttpResponse<true>* res, int status);
+    //===== Helper =====//
+
+    // Returns request is authenticated
+    static bool AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+
+    // Returns true if the request was already handled - internally calls all listeners and events for requests
+    static bool HandleRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+
+    static void RejectRequest(uWS::HttpResponse<true>* res, int code, const char* reason);
 };
 
 struct LoginEndpoint final : ServerEndpoint

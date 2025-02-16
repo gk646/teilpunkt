@@ -7,7 +7,6 @@
 
 namespace tpunkt
 {
-
     // Zeroes the given memory in its destructor - makes cleaning up objects clean and non-fallible
     template <typename T>
     struct SecureEraser final
