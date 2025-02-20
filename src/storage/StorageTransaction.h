@@ -34,9 +34,9 @@ struct StorageTransaction
     uWS::Loop* loop = nullptr;
 
   private:
-    WrappedKey key;   // Copied key
-    FileID file;
-    DataStore* store; // Always valid
+    WrappedKey key;             // Copied key
+    FileID file{};
+    DataStore* store = nullptr; // Always valid
     bool isCommited = false;
     bool isAborted = false;
     bool finished = false;

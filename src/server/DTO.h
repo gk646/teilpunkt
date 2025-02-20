@@ -9,7 +9,7 @@
 namespace tpunkt
 {
 
-struct DirectoryEntryDTO
+struct DTODirectoryEntry
 {
     FileName name;
     FileID file{};
@@ -18,14 +18,17 @@ struct DirectoryEntryDTO
     UserName owner;
 };
 
-struct DirectoryInfoDTO final
+struct DTODirectoryInfo final
 {
     FileName name;
     FileID dir{};
-    uint32_t files; // Count of files visible to user
-    uint32_t dirs;  // Count of directories visible to user
+    uint32_t files = 0; // Count of files visible to user
+    uint32_t dirs = 0;  // Count of directories visible to user
 };
 
+struct DTOFileInfo final
+{
+};
 
 struct DTOFileDownload final
 {

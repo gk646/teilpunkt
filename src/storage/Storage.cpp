@@ -36,7 +36,6 @@ StorageStatus Storage::endpointCreate(const AuthToken& token, CreateInfo info)
     return StorageStatus::OK;
 }
 
-
 StorageStatus Storage::endpointCreateFrom(const AuthToken& token, CreateInfo info, const char* file, bool recurse)
 {
     if(GetAuthenticator().getIsAdmin(token, token.getUser()) != AuthStatus::OK)
@@ -102,7 +101,6 @@ StorageStatus Storage::endpointDelete(const AuthToken& token, const EndpointID e
     LOG_EVENT(UserAction, StorageDeleteEndpoint, FAIL_NOT_FOUND);
     return StorageStatus::ERR_NO_SUCH_ENDPOINT;
 }
-
 
 FileID Storage::getNextFile(const bool isDirectory, const EndpointID endPoint)
 {

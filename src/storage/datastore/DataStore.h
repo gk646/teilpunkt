@@ -55,6 +55,7 @@ struct WriteHandle final
 //      - Read/Writes are only consistent if close is called for every init
 struct DataStore
 {
+    explicit DataStore(EndpointID endpoint);
     virtual ~DataStore() = default;
 
     virtual bool createFile(uint32_t fileID, ResultCb callback) = 0;
@@ -86,7 +87,6 @@ struct DataStore
     explicit DataStore(EndpointID endpoint, bool& success);
     SyncedBuffer buffers[ TPUNKT_STORAGE_DATASTORE_MAX_READERS ]{}; // Cant use vector as expanding needs sync
     FixedString<64> dir;                                            // Directory of the datastore
-    EndpointID endpoint;
 };
 
 } // namespace tpunkt

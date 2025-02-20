@@ -4,6 +4,7 @@
 
 namespace tpunkt
 {
+
 VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
     : info(info.name, info.maxSize, 0U, info.id, info.parent, info.creator)
 {

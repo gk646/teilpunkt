@@ -5,9 +5,12 @@
 
 namespace tpunkt
 {
-    struct VirtualFilesystemCache final
-    {
-    };
+
+// Saves a quick access position of a file or directory
+// Cache entry is invalidated on: deletion, move
+struct VirtualFilesystemCache final
+{
+};
 
 } // namespace tpunkt
 

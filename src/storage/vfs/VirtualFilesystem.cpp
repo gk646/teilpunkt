@@ -5,25 +5,40 @@
 namespace tpunkt
 {
 
-    VirtualFilesystem::VirtualFilesystem(const FilesystemCreateInfo& info)
-        : root(DirectoryCreationInfo{.name = info.name,
-                                     .maxSize = info.maxSize,
-                                     .parent = nullptr,
-                                     .id = info.rootID,
-                                     .creator = info.creator}),
-          id(info.endpointID)
-    {
-    }
+VirtualFilesystem::VirtualFilesystem(const FilesystemCreateInfo& info)
+    : root(DirectoryCreationInfo{
+          .name = info.name, .maxSize = info.maxSize, .parent = nullptr, .id = info.rootID, .creator = info.creator}),
+      id(info.endpointID)
+{
+}
 
-    bool VirtualFilesystem::createFile(FileID dir, const FileCreationInfo& info)
-    {
-    }
+bool VirtualFilesystem::fileCreate(User user, FileID dir, const FileCreationInfo& info, FileID file)
+{
 
-    bool VirtualFilesystem::fileExists(FileID file)
-    {
-    }
+}
 
-    bool VirtualFilesystem::canCreateFile(UserID user, const FileCreationInfo& info)
-    {
-    }
+VirtualFile* VirtualFilesystem::fileGet(FileID file)
+{
+}
+
+VirtualFile* VirtualFilesystem::fileGetInDir(FileID file, FileID dir)
+{
+}
+
+bool VirtualFilesystem::fileDelete()
+{
+}
+
+VirtualDirectory* VirtualFilesystem::dirGet()
+{
+}
+
+bool VirtualFilesystem::dirDelete()
+{
+}
+
+bool VirtualFilesystem::dirCreate()
+{
+}
+
 } // namespace tpunkt

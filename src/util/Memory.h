@@ -35,4 +35,20 @@
 #define TPUNKT_SECUREFREE(ptr) sodium_free(ptr);
 
 
+#define TPUNKT_MMAP(ptr, size, prot, flags)                                                                            \
+    static_cast<decltype(ptr)>(mmap(nullptr, size, prot, flags, -1, 0));                                               \
+    if(ptr == MAP_FAILED)                                                                                              \
+    {                                                                                                                  \
+        LOG_FATAL("Error allocation with mmap");                                                                       \
+    }
+
+
+#define TPUNKT_MUNMAP(ptr, size)                                                                                       \
+    const auto result = munmap(ptr, size);                                                                             \
+    if(result == -1)                                                                                                   \
+    {                                                                                                                  \
+        LOG_FATAL("Error freeing with munmap");                                                                        \
+    }
+
+
 #endif // TPUNKT_MEMORY_H

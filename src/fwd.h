@@ -21,7 +21,6 @@ namespace tpunkt
 //===== Types =====//
 
 struct User;
-struct File;
 struct Credentials;
 struct AuthToken;
 struct Authenticator;
@@ -37,6 +36,12 @@ struct VirtualDirectory;
 template <typename T>
 struct Collector;
 struct DataStore;
+struct ReadTransaction;
+struct StorageTransaction;
+struct CreateTransaction;
+struct DTOFileInfo;
+struct DTOFileDownload;
+struct BlockStorage;
 
 //===== Fixed String =====//
 

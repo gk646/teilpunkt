@@ -6,11 +6,13 @@
 #include <cstdint>
 #include "datastructures/FixedString.h"
 #include "storage/datastore/DataStore.h"
-#include "storage/datastore/StorageTransaction.h"
+#include "storage/StorageTransaction.h"
 #include "storage/vfs/VirtualFilesystem.h"
 
 namespace tpunkt
 {
+
+//===== Error Handling =====//
 
 enum class StorageStatus : uint8_t
 {
@@ -23,7 +25,7 @@ enum class StorageStatus : uint8_t
 };
 
 const char* StorageErrString(StorageStatus status);
-int StorageErrCode(StorageStatus status);
+int StorageHTTPErrCode(StorageStatus status);
 
 enum class StorageEndpointType : uint8_t
 {
@@ -38,44 +40,26 @@ struct StorageEndpointCreateInfo final
     StorageEndpointType type{};
 };
 
+// Datastore stores its files in /endpoints/{id}
 struct StorageEndpoint
 {
     explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator, bool& success);
-    StorageEndpoint(const StorageEndpoint&) = delete;
-    StorageEndpoint& operator=(const StorageEndpoint&) = delete;
-    StorageEndpoint(StorageEndpoint&&) = default;
-    StorageEndpoint& operator=(StorageEndpoint&&) = default;
+    TPUNKT_MACROS_MOVE_ONLY(StorageEndpoint);
     ~StorageEndpoint();
 
     //===== File Manipulation =====//
 
-    StorageStatus fileAdd(UserID user, FileID dir, const FileCreationInfo& info, StorageTransaction& action);
+    StorageStatus fileAdd(UserID user, FileID dir, const FileCreationInfo& info, CreateTransaction& action);
     StorageStatus fileRemove();
     StorageStatus fileWrite();
     StorageStatus fileRename();
-    StorageStatus fileGet(UserID user, FileID file, size_t begin, size_t end, ReadTransaction& action)
-    {
-        // Check if file exists - handle correct locking
-        virtualFilesystem.fileExists(file);
+    StorageStatus fileGet(UserID user, FileID file, size_t begin, size_t end, ReadTransaction& action);
 
-        // Track actions - allow to view active actions per user
+    //===== Virtual File System =====//
 
-        // allow multiple reads - a closeWrite that doesn't revert closes all reads and then writes
+    StorageStatus vfsFileGet(User user, DTOFileInfo& info);
 
-
-        // Retrieve users key
-        WrappedKey key;
-
-        action = ReadTransaction();
-        ReadHandle handle;
-        if(!dataStore->initRead(file.file, begin, end, handle))
-        {
-            return StorageStatus::ERR_UNSUCCESSFUL;
-        }
-
-
-
-    }
+    //===== Dir Manipulation =====//
 
     StorageStatus dirAdd();
     StorageStatus dirRemove();
@@ -93,11 +77,11 @@ struct StorageEndpoint
 
   private:
     VirtualFilesystem virtualFilesystem;
-    DataStore* dataStore = nullptr;
+    FixedString<64> dir; // Relative directory of the endpoint on disk
     FileName name;
+    DataStore* dataStore = nullptr;
     EndpointID id;
     StorageEndpointType type{};
-    FixedString<32> dir; // Physical directory of the endpoint
 };
 
 } // namespace tpunkt

@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "datastructures/FixedString.h"
-#include "storage/datastore/stores/LocalFileSystem.h"
+#include "storage/datastore/LocalFileSystem.h"
 #include "util/Logging.h"
 #include "util/Strings.h"
 
@@ -18,10 +18,10 @@ static constexpr int MAX_DIGITS = 14;
     callback(nullptr, 0, false, true);                                                                                 \
     return false
 
-
 namespace tpunkt
 {
-FileSystemDataStore::FileSystemDataStore(const EndpointID endpoint, bool& success)
+
+LocalFileSystemDatastore::LocalFileSystemDatastore(const EndpointID endpoint, bool& success)
     : DataStore(endpoint, success), dirfd(open(dir.c_str(), O_RDONLY | O_DIRECTORY))
 {
     if(dirfd == -1)
@@ -31,7 +31,7 @@ FileSystemDataStore::FileSystemDataStore(const EndpointID endpoint, bool& succes
     }
 }
 
-FileSystemDataStore::~FileSystemDataStore()
+LocalFileSystemDatastore::~LocalFileSystemDatastore()
 {
     if(dirfd != -1)
     {
@@ -40,7 +40,7 @@ FileSystemDataStore::~FileSystemDataStore()
     }
 }
 
-bool FileSystemDataStore::createFile(const uint32_t fileID, ResultCb callback)
+bool LocalFileSystemDatastore::createFile(const uint32_t fileID, ResultCb callback)
 {
     char buf[ MAX_DIGITS ];
     if(!NumberToString(buf, MAX_DIGITS, fileID))
@@ -64,7 +64,7 @@ bool FileSystemDataStore::createFile(const uint32_t fileID, ResultCb callback)
     return true;
 }
 
-bool FileSystemDataStore::deleteFile(const uint32_t fileID, ResultCb callback)
+bool LocalFileSystemDatastore::deleteFile(const uint32_t fileID, ResultCb callback)
 {
     char buf[ MAX_DIGITS ];
     if(!NumberToString(buf, MAX_DIGITS, fileID))
@@ -83,7 +83,7 @@ bool FileSystemDataStore::deleteFile(const uint32_t fileID, ResultCb callback)
     return true;
 }
 
-bool FileSystemDataStore::initRead(const uint32_t fileID, const size_t begin, const size_t end, ReadHandle& handle)
+bool LocalFileSystemDatastore::initRead(const uint32_t fileID, const size_t begin, const size_t end, ReadHandle& handle)
 {
     if(end != 0 && begin >= end)
     {
@@ -138,7 +138,7 @@ bool FileSystemDataStore::initRead(const uint32_t fileID, const size_t begin, co
     return true;
 }
 
-bool FileSystemDataStore::readFile(ReadHandle& handle, const size_t chunkSize, ReadCb callback)
+bool LocalFileSystemDatastore::readFile(ReadHandle& handle, const size_t chunkSize, ReadCb callback)
 {
     if(!handle.isValid())
     {
@@ -174,7 +174,7 @@ bool FileSystemDataStore::readFile(ReadHandle& handle, const size_t chunkSize, R
     return true;
 }
 
-bool FileSystemDataStore::closeRead(ReadHandle& handle, ResultCb callback)
+bool LocalFileSystemDatastore::closeRead(ReadHandle& handle, ResultCb callback)
 {
     if(!handle.isValid())
     {
@@ -202,7 +202,7 @@ bool FileSystemDataStore::closeRead(ReadHandle& handle, ResultCb callback)
     return success;
 }
 
-bool FileSystemDataStore::initWrite(const uint32_t fileID, WriteHandle& handle)
+bool LocalFileSystemDatastore::initWrite(const uint32_t fileID, WriteHandle& handle)
 {
     char buf[ MAX_DIGITS ];
     if(!NumberToString(buf, MAX_DIGITS, fileID))
@@ -235,8 +235,8 @@ bool FileSystemDataStore::initWrite(const uint32_t fileID, WriteHandle& handle)
     return true;
 }
 
-bool FileSystemDataStore::writeFile(WriteHandle& handle, const bool isLast, const unsigned char* data,
-                                    const size_t size, ResultCb callback)
+bool LocalFileSystemDatastore::writeFile(WriteHandle& handle, const bool isLast, const unsigned char* data,
+                                         const size_t size, ResultCb callback)
 {
     if(!handle.isValid())
     {
@@ -271,7 +271,7 @@ bool FileSystemDataStore::writeFile(WriteHandle& handle, const bool isLast, cons
     return true;
 }
 
-bool FileSystemDataStore::closeWrite(WriteHandle& handle, const bool revert, ResultCb callback)
+bool LocalFileSystemDatastore::closeWrite(WriteHandle& handle, const bool revert, ResultCb callback)
 {
     if(!handle.isValid())
     {
@@ -345,6 +345,5 @@ bool FileSystemDataStore::closeWrite(WriteHandle& handle, const bool revert, Res
     callback(success);
     return success;
 }
-
 
 } // namespace tpunkt

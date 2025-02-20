@@ -35,10 +35,10 @@ bool WriteHandle::isDone() const
     return done;
 }
 
-DataStore::DataStore(const EndpointID endpoint) : endpoint(endpoint)
+DataStore::DataStore(EndpointID endpoint)
 {
-    const int endpointNum = static_cast<int>(endpoint);
-    if(snprintf(dir.data(), dir.capacity(), "%s/%d/%s", TPUNKT_STORAGE_ENDPOINT_DIR, endpointNum,
+    const auto endpointID = static_cast<int>(endpoint);
+    if(snprintf(dir.data(), dir.capacity(), "%s/%d/%s", TPUNKT_STORAGE_ENDPOINT_DIR, endpointID,
                 TPUNKT_STORAGE_DATASTORE_DIR) < 0)
     {
         LOG_CRITICAL("Failed to format datastore directory name");

@@ -75,14 +75,14 @@ struct Buffer final
     }
 };
 
+static_assert(std::atomic<bool>::is_always_lock_free, "Atomic lock not lock free");
 
 struct SyncedBuffer final
 {
     explicit SyncedBuffer(const size_t baseCapacity = 64) : buffer(baseCapacity)
     {
     }
-    SyncedBuffer(const SyncedBuffer&) = delete;
-    SyncedBuffer& operator=(const SyncedBuffer&) = delete;
+    TPUNKT_MACROS_MOVE_ONLY(SyncedBuffer);
 
     // Tries to lock the buffer - returns true on success
     bool lock()

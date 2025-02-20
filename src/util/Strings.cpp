@@ -5,7 +5,6 @@
 
 namespace tpunkt
 {
-
     bool NumberToString(char* buf, const size_t len, const uint32_t num)
     {
         if((buf == nullptr) || len == 0) [[unlikely]]

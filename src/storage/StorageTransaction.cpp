@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache License 2.0
 
-#include "storage/datastore/StorageTransaction.h"
+#include "storage/StorageTransaction.h"
 
 namespace tpunkt
 {
@@ -24,8 +24,5 @@ void StorageTransaction::abort()
 {
     isCommited = false;
 }
-
-
-
 
 } // namespace tpunkt

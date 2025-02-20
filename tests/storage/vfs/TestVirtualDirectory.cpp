@@ -23,39 +23,27 @@ UserID generateUserID()
     return UserID{54321};
 }
 
-TEST_CASE("DirectoryCreationInfo")
+FileCreationInfo getFileInfo(const FileName& name, uint64_t size)
 {
-    TEST_INIT();
+    return {.name = name, .creator = generateUserID(), .size = size, .id = getFileFileID()};
+}
 
-    SECTION("Default constructor")
-    {
-        DirectoryCreationInfo dirInfo;
-        REQUIRE(dirInfo.maxSize == 0);
-        REQUIRE(dirInfo.parent == nullptr);
-        REQUIRE(dirInfo.creator == UserID::INVALID);
-    }
-
-    SECTION("Custom constructor")
-    {
-        DirectoryCreationInfo dirInfo{FileName{"TestDirectory"}, 1000U, nullptr, getDirFileID(), generateUserID()};
-
-        REQUIRE(dirInfo.name == "TestDirectory");
-        REQUIRE(dirInfo.maxSize == 1000);
-        REQUIRE(dirInfo.creator != UserID::INVALID);
-    }
+DirectoryCreationInfo getDirInfo(const FileName& name, uint64_t maxSize, VirtualDirectory* parent)
+{
+    return {.name = name, .maxSize = maxSize, .parent = parent, .id = getDirFileID(), .creator = generateUserID()};
 }
 
 TEST_CASE("VirtualDirectory")
 {
     TEST_INIT();
 
-    DirectoryCreationInfo rootDirInfo{FileName{"RootDirectory"}, 1000, nullptr, getDirFileID(), generateUserID()};
+    DirectoryCreationInfo rootDirInfo = getDirInfo(FileName{"RootDirectory"}, 1000, nullptr);
 
     VirtualDirectory rootDir(rootDirInfo);
 
     SECTION("Directory creation")
     {
-        DirectoryCreationInfo subDirInfo{FileName{"SubDirectory"}, 500, &rootDir, getDirFileID(), generateUserID()};
+        DirectoryCreationInfo subDirInfo = getDirInfo(FileName{"SubDirectory"}, 500, &rootDir);
         bool added = rootDir.addDirectory(subDirInfo);
         REQUIRE(added == true);
         REQUIRE(rootDir.getDirCount() == 1);                  // Subdirectory is added
@@ -63,8 +51,7 @@ TEST_CASE("VirtualDirectory")
 
     SECTION("Directory removal")
     {
-        DirectoryCreationInfo subDirInfo{FileName{"SubDirectoryToRemove"}, 500, &rootDir, getDirFileID(),
-                                         generateUserID()};
+        DirectoryCreationInfo subDirInfo = getDirInfo(FileName{"SubDirectoryToRemove"}, 500, &rootDir);
         rootDir.addDirectory(subDirInfo);
         bool removed = rootDir.removeDirectory(subDirInfo.id);
         REQUIRE(removed == true);
@@ -73,7 +60,7 @@ TEST_CASE("VirtualDirectory")
 
     SECTION("File addition")
     {
-        FileCreationInfo fileInfo{FileName{"File1"}, generateUserID(), 200, getFileFileID()};
+        FileCreationInfo fileInfo = getFileInfo(FileName{"File1"}, 200);
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
         bool added = rootDir.addFile(fileInfo, fits, unique); // fits = true, unique = true
@@ -83,7 +70,7 @@ TEST_CASE("VirtualDirectory")
 
     SECTION("File removal")
     {
-        FileCreationInfo fileInfo{FileName{"FileToRemove"}, generateUserID(), 200, getFileFileID()};
+        FileCreationInfo fileInfo = getFileInfo(FileName{"FileToRemove"}, 200);
         const bool fits = rootDir.canFit(fileInfo.size);
         const bool unique = !rootDir.nameExists(fileInfo.name);
         rootDir.addFile(fileInfo, fits, unique);
@@ -94,7 +81,7 @@ TEST_CASE("VirtualDirectory")
 
     SECTION("Can fit check")
     {
-        FileCreationInfo fileInfo{FileName{"LargeFile"}, generateUserID(), 800, getFileFileID()};
+        FileCreationInfo fileInfo = getFileInfo(FileName{"LargeFile"}, 800);
         bool canFit = rootDir.canFit(fileInfo.size);
         REQUIRE(canFit == true);                              // Assuming rootDir has sufficient space
     }

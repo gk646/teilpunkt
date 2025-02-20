@@ -8,10 +8,10 @@
 namespace tpunkt
 {
 
-struct FileSystemDataStore final : DataStore
+struct LocalFileSystemDatastore final : DataStore
 {
-    explicit FileSystemDataStore(EndpointID endpoint, bool& success);
-    ~FileSystemDataStore() override;
+    explicit LocalFileSystemDatastore(EndpointID endpoint, bool& success);
+    ~LocalFileSystemDatastore() override;
 
     bool createFile(uint32_t fileID, ResultCb callback) override;
 

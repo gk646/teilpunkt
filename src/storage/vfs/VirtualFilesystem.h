@@ -29,11 +29,30 @@ struct VirtualFilesystem
 
     ~VirtualFilesystem();
 
-    bool createFile(FileID dir, const FileCreationInfo& info);
+    //===== File Basic =====//
 
-    bool fileExists(FileID file);
+    // Full lookup
+    VirtualFile* fileGet(FileID file);
 
-    bool canCreateFile(UserID user, const FileCreationInfo& info);
+    // Only searches in given dir
+    VirtualFile* fileGetInDir(FileID file, FileID dir);
+
+    bool fileCreate(User user, FileID dir, const FileCreationInfo& info, FileID file);
+
+    bool fileDelete(User user, FileID dir);
+
+    //===== File Action =====//
+
+    // True if permitted
+    bool fileAddReader(UserID user);
+
+    bool fileRemoveReader(UserID user);
+
+    VirtualDirectory* dirGet();
+
+    bool dirDelete();
+
+    bool dirCreate();
 
   private:
     VirtualDirectory root;
@@ -43,6 +62,5 @@ struct VirtualFilesystem
 };
 
 } // namespace tpunkt
-
 
 #endif // TPUNKT_VIRTUAL_FILESYSTEM_H

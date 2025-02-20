@@ -17,10 +17,10 @@ struct Storage final
     //===== Global Functions =====//
 
     // If user is different from token-user requires admin
-    StorageStatus getRoots(UserID user, std::vector<DirectoryInfoDTO>& roots);
+    StorageStatus getRoots(UserID user, std::vector<DTODirectoryInfo>& roots);
 
     // If user is different from token-user requires admin
-    StorageStatus getDir(UserID user, FileID dir, std::vector<DirectoryEntryDTO>& entries);
+    StorageStatus getDir(UserID user, FileID dir, std::vector<DTODirectoryEntry>& entries);
 
     //===== Endpoint Management =====//
 

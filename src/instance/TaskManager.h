@@ -47,7 +47,6 @@ struct TaskManager final
 
     // Thread info
 
-
   private:
     // Takes ownership
     TaskID implTaskAdd(Task& task);

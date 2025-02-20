@@ -11,6 +11,4 @@ namespace tpunkt
         return access( path, F_OK ) == 0;
     }
 
-
-
 } // namespace tpunkt

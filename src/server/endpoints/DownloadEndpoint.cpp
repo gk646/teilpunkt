@@ -3,6 +3,7 @@
 #include <uWebSocket/src/HttpResponse.h>
 #include "server/Endpoints.h"
 #include "storage/Storage.h"
+#include "storage/StorageTransaction.h"
 
 namespace tpunkt
 {
@@ -38,7 +39,7 @@ void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* re
         const auto ret = GetStorage().endpointGet(user, file.endpoint, endpoint);
         if(ret != StorageStatus::OK)
         {
-            RejectRequest(res, StorageErrCode(ret), StorageErrString(ret));
+            RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
             return;
         }
     }
@@ -49,7 +50,7 @@ void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* re
         const auto ret = endpoint->fileGet(user, file, begin, end, *state);
         if(endpoint == nullptr || ret != StorageStatus::OK)
         {
-            RejectRequest(res, StorageErrCode(ret), StorageErrString(ret));
+            RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
             return;
         }
     }
