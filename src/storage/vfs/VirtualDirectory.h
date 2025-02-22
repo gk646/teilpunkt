@@ -41,9 +41,6 @@ struct DirectoryStats final
 // Currently built using vectors - not cache and fragmentation friendly - done for simplicity - can be changed
 struct VirtualDirectory final
 {
-    using FileIndex = BlockWarehouseIndex;
-    using DirectoryIndex = BlockWarehouseIndex;
-
     explicit VirtualDirectory(const DirectoryCreationInfo& info);
     VirtualDirectory& operator=(VirtualDirectory&&) = default;
     VirtualDirectory(VirtualDirectory&&) = default;
@@ -105,8 +102,11 @@ struct VirtualDirectory final
     DirectoryInfo info;
     DirectoryStats stats;
 
-    FileIndex files;
-    DirectoryIndex subdirectories;
+    using FileList = StaticBlock<VirtualFile, 4>;
+    using DirList = StaticBlock<VirtualDirectory, 4>;
+
+    FileList* files = nullptr;
+    DirList* subDirs = nullptr;
 };
 
 } // namespace tpunkt

@@ -5,44 +5,44 @@
 
 namespace tpunkt
 {
-    template <typename T>
-    struct Iterator final
+template <typename T>
+struct Iterator final
+{
+    explicit Iterator(T* initPtr) : ptr(initPtr)
     {
-        explicit Iterator(T* initPtr) : ptr(initPtr)
-        {
-        }
+    }
 
-        T& operator*()
-        {
-            return *ptr;
-        }
+    T& operator*()
+    {
+        return *ptr;
+    }
 
-        Iterator& operator++()
-        {
-            ++ptr;
-            return *this;
-        }
+    Iterator& operator++()
+    {
+        ++ptr;
+        return *this;
+    }
 
-        Iterator operator++(int)
-        {
-            Iterator temp = *this;
-            ++(*this);
-            return temp;
-        }
+    Iterator operator++(int)
+    {
+        Iterator temp = *this;
+        ++(*this);
+        return temp;
+    }
 
-        bool operator==(const Iterator& other) const
-        {
-            return ptr == other.ptr;
-        }
+    bool operator==(const Iterator& other) const
+    {
+        return ptr == other.ptr;
+    }
 
-        bool operator!=(const Iterator& other) const
-        {
-            return ptr != other.ptr;
-        }
+    bool operator!=(const Iterator& other) const
+    {
+        return ptr != other.ptr;
+    }
 
-      private:
-        T* ptr;
-    };
+  private:
+    T* ptr;
+};
 
 } // namespace tpunkt
 

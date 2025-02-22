@@ -8,44 +8,41 @@
 namespace tpunkt
 {
 
-StorageStatus Storage::endpointCreate(const AuthToken& token, CreateInfo info)
+StorageStatus Storage::endpointCreate(const UserID user, CreateInfo info)
 {
     SpinlockGuard lock{storageLock};
-
-    TPUNKT_NO_AUTH_RET_AND(token, StorageStatus::ERR_NO_AUTH,
-                           LOG_EVENT(UserAction, StorageCreateEndpoint, FAIL_INVALID_TOKEN));
     const auto adminOnly = GetInstanceConfig().getBool(BoolParamKey::STORAGE_ONLY_ADMIN_CREATE_ENDPOINT);
-    if(adminOnly && GetAuthenticator().getIsAdmin(token, token.getUser()) != AuthStatus::OK)
+    if(adminOnly && GetAuthenticator().getIsAdmin(user) != AuthStatus::OK)
     {
-        LOG_EVENT(UserAction, StorageCreateEndpoint, FAIL_NO_ADMIN);
+        LOG_EVENT(UserAction, EndpointCreate, FAIL_NO_ADMIN);
         return StorageStatus::ERR_NO_ADMIN;
     }
 
     // I like this option - its simple and doesn't need move - and cleanup is handled in destructor
     bool success = true;
-    endpoints.emplace_back(info, getEndpointID(false), token.getUser(), success);
+    endpoints.emplace_back(info, getEndpointID(false), user, success);
     if(!success)
     {
         endpoints.pop_back();
-        LOG_EVENT(UserAction, StorageCreateEndpoint, WARN_OPERATION_FAILED);
+        LOG_EVENT(UserAction, EndpointCreate, WARN_OPERATION_FAILED);
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
     (void)getEndpointID(true);
 
-    LOG_EVENT(UserAction, StorageCreateEndpoint, SUCCESS);
+    LOG_EVENT(UserAction, EndpointCreate, SUCCESS);
     return StorageStatus::OK;
 }
 
-StorageStatus Storage::endpointCreateFrom(const AuthToken& token, CreateInfo info, const char* file, bool recurse)
+StorageStatus Storage::endpointCreateFrom(const UserID user, CreateInfo info, const char* file, bool recurse)
 {
-    if(GetAuthenticator().getIsAdmin(token, token.getUser()) != AuthStatus::OK)
+    if(GetAuthenticator().getIsAdmin(user) != AuthStatus::OK)
     {
-        LOG_EVENT(UserAction, StorageCreateEndpointFrom, FAIL_NO_ADMIN);
+        LOG_EVENT(UserAction, EndpointCreateFrom, FAIL_NO_ADMIN);
         return StorageStatus::ERR_NO_ADMIN;
     }
 
     // Locks internally
-    const auto status = endpointCreate(token, info);
+    const auto status = endpointCreate(user, info);
     if(status != StorageStatus::OK)
     {
         // Even already logged
@@ -56,49 +53,41 @@ StorageStatus Storage::endpointCreateFrom(const AuthToken& token, CreateInfo inf
 
 
     // TODO
-    LOG_EVENT(UserAction, StorageCreateEndpointFrom, SUCCESS);
+    LOG_EVENT(UserAction, EndpointCreateFrom, SUCCESS);
     return StorageStatus::OK;
 }
 
-StorageStatus Storage::endpointGet(const AuthToken& token, const EndpointID endpointId, StorageEndpoint*& endpoint)
+StorageStatus Storage::endpointGet(UserID user, const EndpointID endpointId, StorageEndpoint*& endpoint)
 {
     SpinlockGuard lock{storageLock};
-
-    TPUNKT_NO_AUTH_RET_AND(token, StorageStatus::ERR_NO_AUTH,
-                           LOG_EVENT(UserAction, StorageGetEndpoint, FAIL_INVALID_TOKEN));
-
     for(auto& ept : endpoints)
     {
         if(ept.getID() == endpointId)
         {
             endpoint = &ept;
-            LOG_EVENT(UserAction, StorageGetEndpoint, SUCCESS);
+            LOG_EVENT(UserAction, EndpointGet, SUCCESS);
             return StorageStatus::OK;
         }
     }
 
-    LOG_EVENT(UserAction, StorageGetEndpoint, FAIL_NOT_FOUND);
+    LOG_EVENT(UserAction, EndpointGet, FAIL_NOT_FOUND);
     return StorageStatus::ERR_NO_SUCH_ENDPOINT;
 }
 
-StorageStatus Storage::endpointDelete(const AuthToken& token, const EndpointID endpointId)
+StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
 {
     SpinlockGuard lock{storageLock};
-    TPUNKT_NO_AUTH_RET_AND(token, StorageStatus::ERR_NO_AUTH,
-                           LOG_EVENT(UserAction, StorageDeleteEndpoint, FAIL_INVALID_TOKEN));
-
-
     for(auto& ept : endpoints)
     {
         if(ept.getID() == endpointId)
         {
             ept = std::move(endpoints.back());
-            LOG_EVENT(UserAction, StorageDeleteEndpoint, SUCCESS);
+            LOG_EVENT(UserAction, EndpointDelete, SUCCESS);
             return StorageStatus::OK;
         }
     }
 
-    LOG_EVENT(UserAction, StorageDeleteEndpoint, FAIL_NOT_FOUND);
+    LOG_EVENT(UserAction, EndpointDelete, FAIL_NOT_FOUND);
     return StorageStatus::ERR_NO_SUCH_ENDPOINT;
 }
 

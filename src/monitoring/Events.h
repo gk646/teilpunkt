@@ -38,15 +38,16 @@ enum class EventAction : uint8_t
     // Token
     TokenInvalidate,
     // Storage
-    StorageCreateEndpoint,
-    StorageCreateEndpointFrom,
-    StorageGetEndpoint,
-    StorageDeleteEndpoint,
+    EndpointCreate,
+    EndpointCreateFrom,
+    EndpointGet,
+    EndpointDelete,
     // Virtual File System
     FilesystemAddFile,
     FilesystemRemoveFile,
     FilesystemAddDirectory,
     FilesystemAdd
+    // Endpoint
 };
 
 enum class EventStatus : uint8_t
@@ -59,6 +60,7 @@ enum class EventStatus : uint8_t
     FAIL_INVALID_TOKEN,
     FAIL_CONFIG_RESTRICTED, // Prevented due to instance config
     FAIL_NO_ADMIN,          // Not complete due to missing admin
+    FAIL_NO_UAC,            // Denied cause of UAC
     FAIL_USERNAME_EXISTS,
     FAIL_NOT_FOUND,
     WARNINGS,               //----------------

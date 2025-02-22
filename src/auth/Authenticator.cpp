@@ -201,11 +201,11 @@ AuthStatus Authenticator::tokenInvalidate(AuthToken& consumed)
     SecureEraser eraser{consumed};
     if(!sessionStore.removeToken(consumed))
     {
-        LOG_EVENT(InternalCode, TokenInvalidate, FAIL_INVALID_TOKEN);
+        LOG_EVENT(ServerAction, TokenInvalidate, FAIL_INVALID_TOKEN);
         LOG_CRITICAL("Failed to invalidate token");
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
-    LOG_EVENT(InternalCode, TokenInvalidate, SUCCESS);
+    LOG_EVENT(ServerAction, TokenInvalidate, SUCCESS);
     return AuthStatus::OK;
 }
 

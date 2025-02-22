@@ -41,6 +41,12 @@ struct StorageTransaction;
 struct CreateTransaction;
 struct DTOFileInfo;
 struct DTOFileDownload;
+struct FileCreationInfo;
+
+template<typename T, size_t blockSize>
+struct StaticBlock;
+
+template<typename T, size_t blockSize>
 struct BlockStorage;
 
 //===== Fixed String =====//

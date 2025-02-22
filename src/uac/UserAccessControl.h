@@ -9,45 +9,56 @@
 
 namespace tpunkt
 {
-    enum class UACStatus : uint8_t
-    {
-        INVALID,
-        OK,
-        ERR_NO_ACCESS,
-    };
+enum class UACStatus : uint8_t
+{
+    INVALID,
+    OK,
+    ERR_NO_ACCESS,
+};
 
-    // All operations are atomic
-    // Permissions are automatically inherited implicitly for all child files/dirs - until explicitly change
-    struct UserAccessControl final
-    {
-        //===== Lookup =====//
+// All operations are atomic
+// Permissions are automatically inherited implicitly for all child files/dirs - until explicitly changed
+struct UserAccessControl final
+{
+    UserAccessControl();
+    ~UserAccessControl();
 
-        UACStatus lookupFile(UserID user, PermissionFlag perm, FileID file);
+    //===== Lookup =====//
 
-        //===== Rules =====//
+    UACStatus userCanCreate(UserID user, FileID dir, const FileCreationInfo& info);
+    UACStatus userCanWrite(UserID user, FileID file, uint64_t newSize);
 
-        UACStatus ruleAdd(GroupID group, PermissionFlag perm, FileID file);
-        UACStatus ruleAdd(UserID user, PermissionFlag perm, FileID file);
+    // Generic action
+    UACStatus userCanAction(UserID user, FileID file, PermissionFlag flag);
 
-        //===== Groups =====//
+    //===== Rules =====//
 
-        UACStatus groupContains(GroupID group, UserID user);
+    UACStatus ruleAddFile(GroupID group, PermissionFlag perm, FileID file);
+    UACStatus ruleAddDir(GroupID group, PermissionFlag perm, FileID dir);
+    UACStatus ruleAddFile(UserID user, PermissionFlag perm, FileID file);
+    UACStatus ruleAddDir(UserID user, PermissionFlag perm, FileID dir);
 
-        UACStatus groupAdd(GroupID group, UserID user);
+    //===== Groups =====//
 
-        UACStatus groupRemove(GroupID group, UserID user);
+    UACStatus groupContains(GroupID group, UserID user);
 
-        //===== Data =====//
+    UACStatus groupAdd(GroupID group, UserID user);
 
-        UACStatus getUserLimits(UserID user, UserLimits);
+    UACStatus groupRemove(GroupID group, UserID user);
 
-        UACStatus getUserGroups(UserID user, Collector<GroupID>& collector);
+    //===== Limits =====//
 
-      private:
-        Spinlock uacLock;
-    };
+    UACStatus limitSetUser(UserID user, const UserLimits& limits);
 
-    UserAccessControl& GetUAC();
+    UACStatus getUserLimits(UserID user, UserLimits& limits);
+
+    UACStatus getUserGroups(UserID user, Collector<GroupID>& collector);
+
+  private:
+    Spinlock uacLock;
+};
+
+UserAccessControl& GetUAC();
 
 } // namespace tpunkt
 

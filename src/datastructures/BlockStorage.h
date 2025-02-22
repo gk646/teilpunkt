@@ -3,7 +3,7 @@
 #ifndef TPUNKT_BLOCKSTORAGE_H
 #define TPUNKT_BLOCKSTORAGE_H
 
-#include <assert.h>
+#include <cassert>
 #include <cstdint>
 #include <fcntl.h>
 #include <vector>
@@ -15,11 +15,24 @@
 namespace tpunkt
 {
 
+// This should be the best approach for laying out memory for the file system
+// Properties:
+//      - Pointer Stability (vital for caching - can cache pointer to blocks)
+//      - Free list / Filling up holes if blocks free up
+//      - Avoids dynamic structure per file
+//      - No fragmentation
+//      - No indirection level on access
+//
+// Cons:
+//      - Potentially need to iterate and jump memory -> but should be cached or close together (continuous)
+//      - Total size needs to be known upfront (otherwise always needs additional indirection ? - but at runtime)
+
 using BlockIndex = uint32_t;
 
 template <typename T, size_t blockSize>
 struct StaticBlock final
 {
+    using BlockStore = BlockStorage<T, blockSize>;
 
     [[nodiscard]] bool hasNext() const
     {
@@ -41,6 +54,17 @@ struct StaticBlock final
         return {arr + size};
     }
 
+    void add(BlockStore* store, const T& value);
+    void add(BlockStore* store, T&& value);
+
+    // If returns true stops
+    using IterateFunc = bool (*)(T&);
+    void iterate(BlockStore* store, IterateFunc func);
+
+    // If returns true deletes the current element
+    template <typename CompareFunc>
+    bool remove(BlockStore* store, CompareFunc compare);
+
   private:
     static constexpr uint32_t NO_NEXT = UINT32_MAX;
     T arr[ blockSize ];
@@ -48,7 +72,6 @@ struct StaticBlock final
     uint8_t size = 0;
     friend BlockStorage;
 };
-
 
 template <typename T, size_t blockSize>
 struct BlockStorage final
@@ -76,9 +99,8 @@ struct BlockStorage final
         return blockData[ size++ ];
     }
 
-    void blockAdd(BlockIndex index, T&& value)
+    void blockAdd(StaticBlock& block, T&& value)
     {
-        auto& block = blockData[ index ];
         auto* last = &getLast(block);
         if(last->isFull()) [[unlikely]]
         {
@@ -102,7 +124,7 @@ struct BlockStorage final
         last->arr[ size++ ] = value;
     }
 
-    bool blockRemove(const T& value)
+    bool blockRemove(StaticBlock& index, const T& value)
     {
     }
 
@@ -111,6 +133,10 @@ struct BlockStorage final
         return size >= blocks;
     }
 
+    [[nodiscard]] bool isCloseToFull() const
+    {
+        return size >= (blocks * 0.9F);
+    }
 
   private:
     StaticBlock& getLast(StaticBlock& begin)
@@ -128,6 +154,71 @@ struct BlockStorage final
     size_t blocks = 0;
 };
 
+
+template <typename T, size_t blockSize>
+void StaticBlock<T, blockSize>::add(BlockStore* store, const T& value)
+{
+    store->blockAdd(*this, value);
+}
+
+template <typename T, size_t blockSize>
+void StaticBlock<T, blockSize>::add(BlockStore* store, T&& value)
+{
+    store->blockAdd(*this, std::move(value));
+}
+
+template <typename T, size_t blockSize>
+void StaticBlock<T, blockSize>::iterate(BlockStore* store, const IterateFunc func)
+{
+    StaticBlock* start = &this;
+    while(true)
+    {
+        for(uint8_t i = 0; i < start->size; ++i)
+        {
+            if(!func(start->arr[ i ]))
+            {
+                return;
+            }
+        }
+
+        if(start->hasNext())
+        {
+            start = store->blockData[ start->next ];
+        }
+        else
+        {
+            return;
+        }
+    }
+}
+
+template <typename T, size_t blockSize>
+template <typename CompareFunc>
+bool StaticBlock<T, blockSize>::remove(BlockStore* store, CompareFunc compare)
+{
+    StaticBlock* start = &this;
+    bool removed = false;
+    while(true)
+    {
+        for(uint8_t i = 0; i < start->size; ++i)
+        {
+            if(!func(start->arr[ i ]))
+            {
+                start->arr[ i ] = std::move(start->arr[ start->size - 1 ]);
+                --start->size;
+            }
+        }
+
+        if(start->hasNext())
+        {
+            start = store->blockData[ start->next ];
+        }
+        else
+        {
+            break;
+        }
+    }
+}
 
 } // namespace tpunkt
 

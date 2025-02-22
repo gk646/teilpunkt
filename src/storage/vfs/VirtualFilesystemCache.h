@@ -10,6 +10,7 @@ namespace tpunkt
 // Cache entry is invalidated on: deletion, move
 struct VirtualFilesystemCache final
 {
+
 };
 
 } // namespace tpunkt

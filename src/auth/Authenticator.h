@@ -71,7 +71,7 @@ struct Authenticator final
     AuthStatus getWrappedKey(const AuthToken& token, FileID file, SecureWrapper<WrappedKey>& out);
 
     // Returns OK if true
-    AuthStatus getIsAdmin(const AuthToken& token, UserID user);
+    AuthStatus getIsAdmin( UserID user);
 
     //===== Admin  =====//
 
@@ -86,20 +86,6 @@ struct Authenticator final
 };
 
 Authenticator& GetAuthenticator();
-
-#define TPUNKT_NO_AUTH_RET(token, retval)                                                                              \
-    if(!GetAuthenticator().tokenValid(token))                                                                          \
-    {                                                                                                                  \
-        return retval;                                                                                                 \
-    }
-
-
-#define TPUNKT_NO_AUTH_RET_AND(token, retval, add)                                                                     \
-    if(!GetAuthenticator().tokenValid(token))                                                                          \
-    {                                                                                                                  \
-        add;                                                                                                           \
-        return retval;                                                                                                 \
-    }
 
 } // namespace tpunkt
 

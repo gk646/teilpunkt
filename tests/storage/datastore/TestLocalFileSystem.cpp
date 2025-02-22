@@ -2,7 +2,7 @@
 
 #include <catch_amalgamated.hpp>
 #include <filesystem>
-#include "storage/datastore/stores/LocalFileSystem.h"
+#include "storage/datastore/LocalFileSystem.h"
 #include "TestCommons.h"
 
 using namespace tpunkt;
@@ -15,7 +15,8 @@ TEST_CASE("Local File System")
 {
     fs::create_directories("./endpoints/1/datastore"); // Create directories
     TEST_INIT();
-    DataStore* store = new LocalFileSystemDatastore(EndpointID{1});
+    bool success = true;
+    DataStore* store = new LocalFileSystemDatastore(EndpointID{1}, success);
 
     SECTION("File Creation")
     {

@@ -8,6 +8,7 @@
 #include "storage/datastore/LocalFileSystem.h"
 #include "storage/StorageEndpoint.h"
 #include "storage/StorageTransaction.h"
+#include "uac/UserAccessControl.h"
 #include "util/Logging.h"
 
 namespace tpunkt
@@ -50,9 +51,16 @@ StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, Endpoint
     }
 }
 
-StorageStatus StorageEndpoint::fileAdd(UserID user, FileID dir, const FileCreationInfo& info,
-                                       CreateTransaction& action)
+StorageStatus StorageEndpoint::fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateTransaction& action)
 {
+    if(GetUAC().userCanCreate(user, dir, info) != UACStatus::OK)
+    {
+        LOG_EVENT(UserAction, FilesystemAddFile, FAIL_NO_UAC);
+        return StorageStatus::ERR_NO_UAC_PERM;
+    }
+
+    virtualFilesystem.fileCreate(user,dir,)
+
 
 }
 

@@ -27,6 +27,9 @@
 // Max concurrent readers per datastore
 #define TPUNKT_STORAGE_DATASTORE_MAX_READERS 25
 
+// Default limit for the count of files and directories EACH across all endpoints
+#define TPUNKT_STORAGE_MAX_DEFAULT_FILE_DIR_LIMIT 50'000
+
 //===== Server =====//
 
 #define TPUNKT_SERVER_CHUNK_SIZE 32000

@@ -19,7 +19,7 @@ enum class StorageStatus : uint8_t
     INVALID,
     OK,
     ERR_UNSUCCESSFUL,     // Generic error
-    ERR_NO_AUTH,          // Invalid authentication
+    ERR_NO_UAC_PERM,      // No allowed by uac
     ERR_NO_ADMIN,         // Requires admin but request doesnt have it
     ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };
@@ -49,7 +49,7 @@ struct StorageEndpoint
 
     //===== File Manipulation =====//
 
-    StorageStatus fileAdd(UserID user, FileID dir, const FileCreationInfo& info, CreateTransaction& action);
+    StorageStatus fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateTransaction& action);
     StorageStatus fileRemove();
     StorageStatus fileWrite();
     StorageStatus fileRename();
