@@ -3,12 +3,9 @@
 #ifndef TPUNKT_BLOCKSTORAGE_H
 #define TPUNKT_BLOCKSTORAGE_H
 
-#include <cassert>
 #include <cstdint>
-#include <fcntl.h>
 #include <vector>
 #include <sys/mman.h>
-#include "datastructures/Iterator.h"
 #include "util/Logging.h"
 #include "util/Memory.h"
 
@@ -19,206 +16,178 @@ namespace tpunkt
 // Properties:
 //      - Pointer Stability (vital for caching - can cache pointer to blocks)
 //      - Free list / Filling up holes if blocks free up
-//      - Avoids dynamic structure per file
+//      - Avoids dynamic structure in each file/directory (fragmentation, cache locality)
 //      - No fragmentation
-//      - No indirection level on access
+//      - Only one indirection level on access
 //
 // Cons:
 //      - Potentially need to iterate and jump memory -> but should be cached or close together (continuous)
 //      - Total size needs to be known upfront (otherwise always needs additional indirection ? - but at runtime)
+//        We cant realloc() cause used by many threads at any time
 
-using BlockIndex = uint32_t;
+// One could say that through the nature of increasing size for later allocations: higher size == later created
+// This would mean that some information about a file leaks by knowing the id (side channel) - but through the freelist
+// you never know if it was freed and reused or is still the original id (in theory)
 
-template <typename T, size_t blockSize>
-struct StaticBlock final
+template <typename T>
+struct BlockStorage final
 {
-    using BlockStore = BlockStorage<T, blockSize>;
+    explicit BlockStorage(const size_t capacity) : capacity(capacity)
+    {
+        const auto totalSize = capacity * sizeof(T);
+        data = TPUNKT_MMAP(data, totalSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS);
+    }
+
+    ~BlockStorage()
+    {
+        const auto totalSize = capacity * sizeof(T);
+        TPUNKT_MUNMAP(data, totalSize);
+    }
+
+    T* operator[](const uint32_t idx)
+    {
+        return data[ idx ];
+    }
+
+    T* alloc(uint32_t& idx)
+    {
+        if(isFull())
+        {
+            LOG_FATAL("No space");
+        }
+
+        if(freeList.empty())
+        {
+            idx = size++;
+        }
+        else
+        {
+            idx = freeList.back();
+            freeList.pop_back();
+        }
+        return data[ idx ];
+    }
+
+    void free(T* ptr)
+    {
+        free((uint32_t)(ptr - data));
+    }
+
+    void free(const uint32_t idx)
+    {
+        freeList.push_back(idx);
+    }
+
+    [[nodiscard]] bool isFull() const
+    {
+        return size >= capacity;
+    }
+
+    [[nodiscard]] bool isCloseToFull() const
+    {
+        return size >= (capacity * 0.9F);
+    }
+
+  private:
+    std::vector<uint32_t> freeList;
+    T* data = nullptr;
+    size_t size = 0;
+    const size_t capacity = 0;
+};
+
+
+template <typename T>
+struct BlockNode final
+{
+    template <typename... Args>
+    explicit BlockNode(Args args) : val(std::forward<Args>(args)...)
+    {
+    }
+
+    uint32_t getNext() const
+    {
+        return next;
+    }
 
     [[nodiscard]] bool hasNext() const
     {
         return next != NO_NEXT;
     }
 
-    [[nodiscard]] bool isFull() const
+    void setNext(const uint32_t idx)
     {
-        return size == blockSize;
+        if(hasNext())
+        {
+            LOG_ERROR("Node already has next");
+        }
+        else
+        {
+            next = idx;
+        }
     }
 
-    Iterator<T> begin()
+    T& get()
     {
-        return {arr};
+        return val;
     }
 
-    Iterator<T> end()
+    const T& get() const
     {
-        return {arr + size};
+        return val;
     }
-
-    void add(BlockStore* store, const T& value);
-    void add(BlockStore* store, T&& value);
-
-    // If returns true stops
-    using IterateFunc = bool (*)(T&);
-    void iterate(BlockStore* store, IterateFunc func);
-
-    // If returns true deletes the current element
-    template <typename CompareFunc>
-    bool remove(BlockStore* store, CompareFunc compare);
 
   private:
-    static constexpr uint32_t NO_NEXT = UINT32_MAX;
-    T arr[ blockSize ];
+    T val;
     uint32_t next = NO_NEXT;
-    uint8_t size = 0;
-    friend BlockStorage;
+    static constexpr uint32_t NO_NEXT = UINT32_MAX;
 };
 
-template <typename T, size_t blockSize>
-struct BlockStorage final
+template <typename T>
+struct BlockIterator final
 {
-    using StaticBlock = StaticBlock<T, blockSize>;
-
-    explicit BlockStorage(const size_t blocks) : blocks(blocks)
+    BlockIterator(BlockNode<T>* start, BlockStorage<BlockNode<T>>* storage) : ptr(start), storage(storage)
     {
-        const auto totalSize = blocks * sizeof(T);
-        blockData = TPUNKT_MMAP(blockData, totalSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS);
     }
 
-    ~BlockStorage()
+    T& operator*()
     {
-        const auto totalSize = blocks * sizeof(T);
-        TPUNKT_MUNMAP(blockData, totalSize);
+        return ptr->get();
     }
 
-    BlockIndex blockGetNew()
+    BlockIterator& operator++()
     {
-        if(isFull())
+        if(ptr->hasNext()) [[likely]]
         {
-            LOG_FATAL("No space");
+            ptr = storage[ ptr->getNext() ];
         }
-        return blockData[ size++ ];
-    }
-
-    void blockAdd(StaticBlock& block, T&& value)
-    {
-        auto* last = &getLast(block);
-        if(last->isFull()) [[unlikely]]
+        else
         {
-            assert(last->hasNext());
-            last->next = blockGetNew();
-            last = blockData[ last->next ];
+            ptr = nullptr;
         }
-        last->arr[ size++ ] = std::move(value);
+        return *this;
     }
 
-    void blockAdd(BlockIndex index, const T& value)
+    BlockIterator operator++(int)
     {
-        auto& block = blockData[ index ];
-        auto* last = &getLast(block);
-        if(last->isFull()) [[unlikely]]
-        {
-            assert(last->hasNext());
-            last->next = blockGetNew();
-            last = blockData[ last->next ];
-        }
-        last->arr[ size++ ] = value;
+        BlockIterator temp = *this;
+        ++(*this);
+        return temp;
     }
 
-    bool blockRemove(StaticBlock& index, const T& value)
+    bool operator==(const BlockIterator& other) const
     {
+        return ptr == other.ptr;
     }
 
-    [[nodiscard]] bool isFull() const
+    bool operator!=(const BlockIterator& other) const
     {
-        return size >= blocks;
-    }
-
-    [[nodiscard]] bool isCloseToFull() const
-    {
-        return size >= (blocks * 0.9F);
+        return ptr != other.ptr;
     }
 
   private:
-    StaticBlock& getLast(StaticBlock& begin)
-    {
-        StaticBlock* start = &begin;
-        while(start->hasNext())
-        {
-            start = blockData[ start->next ];
-        }
-        return *start;
-    }
-
-    StaticBlock* blockData;
-    size_t size = 0;
-    size_t blocks = 0;
+    BlockNode<T>* ptr = nullptr;
+    BlockStorage<BlockNode<T>>* storage = nullptr;
 };
-
-
-template <typename T, size_t blockSize>
-void StaticBlock<T, blockSize>::add(BlockStore* store, const T& value)
-{
-    store->blockAdd(*this, value);
-}
-
-template <typename T, size_t blockSize>
-void StaticBlock<T, blockSize>::add(BlockStore* store, T&& value)
-{
-    store->blockAdd(*this, std::move(value));
-}
-
-template <typename T, size_t blockSize>
-void StaticBlock<T, blockSize>::iterate(BlockStore* store, const IterateFunc func)
-{
-    StaticBlock* start = &this;
-    while(true)
-    {
-        for(uint8_t i = 0; i < start->size; ++i)
-        {
-            if(!func(start->arr[ i ]))
-            {
-                return;
-            }
-        }
-
-        if(start->hasNext())
-        {
-            start = store->blockData[ start->next ];
-        }
-        else
-        {
-            return;
-        }
-    }
-}
-
-template <typename T, size_t blockSize>
-template <typename CompareFunc>
-bool StaticBlock<T, blockSize>::remove(BlockStore* store, CompareFunc compare)
-{
-    StaticBlock* start = &this;
-    bool removed = false;
-    while(true)
-    {
-        for(uint8_t i = 0; i < start->size; ++i)
-        {
-            if(!func(start->arr[ i ]))
-            {
-                start->arr[ i ] = std::move(start->arr[ start->size - 1 ]);
-                --start->size;
-            }
-        }
-
-        if(start->hasNext())
-        {
-            start = store->blockData[ start->next ];
-        }
-        else
-        {
-            break;
-        }
-    }
-}
 
 } // namespace tpunkt
 

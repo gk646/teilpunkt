@@ -25,7 +25,6 @@ struct StreamCipher final
     bool headUsed = false;
 };
 
-
 } // namespace tpunkt
 
 #endif // TPUNKT_STREAM_CIPHER_H

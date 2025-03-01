@@ -5,6 +5,7 @@
 
 namespace tpunkt
 {
+
 template <typename T>
 struct Iterator final
 {

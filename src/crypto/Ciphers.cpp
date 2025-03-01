@@ -54,4 +54,5 @@ bool tpunkt::StreamCipher::encrypt(const unsigned char* input, const size_t inLe
 bool tpunkt::StreamCipher::decrypt(const unsigned char* input, size_t inLen, unsigned char* out, size_t outLen,
                                    bool isLast)
 {
+//TODO finish decrpytion
 }

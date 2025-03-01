@@ -9,19 +9,19 @@
 namespace tpunkt
 {
     // Holds state related to TPM - checks availability of TPM or device key and provides them
-    struct CryptoManager
+    struct CryptoContext
     {
-        CryptoManager();
-        ~CryptoManager();
+        CryptoContext();
+        ~CryptoContext();
 
         void encrypt(void* data, size_t len);
         void decrypt(void* data, size_t len);
 
       private:
-        TPUNKT_MACROS_STRUCT(CryptoManager);
+        TPUNKT_MACROS_STRUCT(CryptoContext);
     };
 
-    CryptoManager& GetCryptoManager();
+    CryptoContext& CryptoContext();
 
 } // namespace tpunkt
 

@@ -43,10 +43,7 @@ struct DTOFileInfo;
 struct DTOFileDownload;
 struct FileCreationInfo;
 
-template<typename T, size_t blockSize>
-struct StaticBlock;
-
-template<typename T, size_t blockSize>
+template <typename T>
 struct BlockStorage;
 
 //===== Fixed String =====//
