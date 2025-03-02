@@ -9,11 +9,13 @@
 
 namespace tpunkt
 {
+
 enum class UACStatus : uint8_t
 {
     INVALID,
     OK,
     ERR_NO_ACCESS,
+    ERR_INVALID_ARGS, // wrong arguments given
 };
 
 // All operations are atomic
@@ -25,7 +27,6 @@ struct UserAccessControl final
 
     //===== Lookup =====//
 
-    UACStatus userCanCreate(UserID user, FileID dir, const FileCreationInfo& info);
     UACStatus userCanWrite(UserID user, FileID file, uint64_t newSize);
 
     // Generic action
@@ -45,6 +46,12 @@ struct UserAccessControl final
     UACStatus groupAdd(GroupID group, UserID user);
 
     UACStatus groupRemove(GroupID group, UserID user);
+
+    //===== Groups =====//
+
+    UACStatus actionAdd(UserID user);
+
+    UACStatus actionRemove(UserID user);
 
     //===== Limits =====//
 

@@ -100,11 +100,11 @@ template <typename T>
 struct BlockNode final
 {
     template <typename... Args>
-    explicit BlockNode(Args args) : val(std::forward<Args>(args)...)
+    explicit BlockNode(Args&&... args) : val(std::forward<Args>(args)...)
     {
     }
 
-    uint32_t getNext() const
+    [[nodiscard]] uint32_t getNext() const
     {
         return next;
     }
@@ -145,8 +145,13 @@ struct BlockNode final
 template <typename T>
 struct BlockIterator final
 {
-    BlockIterator(BlockNode<T>* start, BlockStorage<BlockNode<T>>* storage) : ptr(start), storage(storage)
+    BlockIterator(BlockNode<T>* start, const BlockStorage<BlockNode<T>>* storage) : ptr(start), storage(storage)
     {
+    }
+
+    static BlockIterator End()
+    {
+        return BlockIterator{nullptr, nullptr};
     }
 
     T& operator*()
@@ -186,7 +191,7 @@ struct BlockIterator final
 
   private:
     BlockNode<T>* ptr = nullptr;
-    BlockStorage<BlockNode<T>>* storage = nullptr;
+    const BlockStorage<BlockNode<T>>* storage = nullptr;
 };
 
 } // namespace tpunkt

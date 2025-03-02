@@ -19,7 +19,7 @@ set_target_properties(usockets PROPERTIES
 # Ensure uSockets is built before linking
 add_dependencies(usockets build_usockets)
 
-
+add_subdirectory(external/ankerl ankerl)
 
 target_link_libraries(teilpunkt PRIVATE
         uv               # libuv
@@ -27,4 +27,5 @@ target_link_libraries(teilpunkt PRIVATE
         sodium           # libsodium
         OpenSSL::SSL     # OpenSSL
         ${CMAKE_CURRENT_SOURCE_DIR}/external/uWebSocket/uSockets/uSockets.a # uSockets
+        unordered_dense          # ankerl
 )

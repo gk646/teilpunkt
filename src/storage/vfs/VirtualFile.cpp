@@ -4,8 +4,9 @@
 
 namespace tpunkt
 {
-    VirtualFile::VirtualFile(const FileCreationInfo& info) : info(info.name, info.creator, info.size, info.id)
-    {
-    }
+
+VirtualFile::VirtualFile(const FileCreationInfo& info) : info(info.name, info.creator, 0, info.id)
+{
+}
 
 } // namespace tpunkt

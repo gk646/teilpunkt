@@ -20,7 +20,6 @@ namespace tpunkt
         server.post("/api/login", LoginEndpoint::handle);
         server.post("/api/upload", UploadEndpoint::handle);
         server.get("/api/download", DownloadEndpoint::handle);
-        server.ws()
         TPUNKT_MACROS_GLOBAL_ASSIGN(Server);
     }
 

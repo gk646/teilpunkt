@@ -11,8 +11,22 @@ static InstanceConfig* InstanceConfig;
 
 InstanceConfig::InstanceConfig()
 {
-    setupDefaults();
     TPUNKT_MACROS_GLOBAL_ASSIGN(InstanceConfig);
+    for(uint8_t i = 1; i < (uint8_t)StringParamKey::ENUM_SIZE; ++i)
+    {
+        const auto key = StringParamKey{i};
+        setString(key, ConfigString(getDefault(key)));
+    }
+    for(uint8_t i = 1; i < (uint8_t)NumberParamKey::ENUM_SIZE; ++i)
+    {
+        const auto key = NumberParamKey{i};
+        setNumber(key, getDefault(key));
+    }
+    for(uint8_t i = 1; i < (uint8_t)BoolParamKey::ENUM_SIZE; ++i)
+    {
+        const auto key = BoolParamKey{i};
+        setBool(key, getDefault(key));
+    }
 }
 
 InstanceConfig::~InstanceConfig()
@@ -101,6 +115,8 @@ uint32_t InstanceConfig::getDefault(const NumberParamKey key)
             return 24 * 60 * 60; // 1 day in seconds
         case NumberParamKey::API_REQUESTS_PER_USER_PER_MIN:
             return 40;
+        case NumberParamKey::STORAGE_MAX_TOTAL_FILES_OR_DIRS:
+            return 50'000;
         case NumberParamKey::INVALID:
         case NumberParamKey::ENUM_SIZE:
             break;

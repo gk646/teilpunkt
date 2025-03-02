@@ -10,6 +10,7 @@
 #include "storage/StorageTransaction.h"
 #include "uac/UserAccessControl.h"
 #include "util/Logging.h"
+#include "util/Strings.h"
 
 namespace tpunkt
 {
@@ -51,24 +52,42 @@ StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, Endpoint
     }
 }
 
-StorageStatus StorageEndpoint::fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateTransaction& action)
+StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, const FileCreationInfo& info,
+                                          CreateFileTransaction& action)
 {
-    if(GetUAC().userCanCreate(user, dir, info) != UACStatus::OK)
+    if(GetUAC().userCanAction(user, dir, PermissionFlag::CREATE) != UACStatus::OK)
     {
-        LOG_EVENT(UserAction, FilesystemAddFile, FAIL_NO_UAC);
+        LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_NO_UAC);
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
-    virtualFilesystem.fileCreate(user,dir,)
+    VirtualDirectory* parent = virtualFilesystem.getDir(dir);
 
+    if(parent == nullptr)
+    {
+        LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_NO_SUCH_FILE);
+        return StorageStatus::ERR_NO_SUCH_FILE;
+    }
 
+    CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
+
+    if(parent->nameExists(info.name) || !IsValidFilename(info.name))
+    {
+        LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_INVALID_ARGUMENTS);
+        return StorageStatus::ERR_INVALID_FILE_NAME;
+    }
+
+    new(&action) CreateFileTransaction{*dataStore, *parent, virtualFilesystem, info};
+
+    LOG_EVENT(UserAction, FilesystemCreateFile, SUCCESS);
+    return StorageStatus::OK;
 }
 
 
-StorageStatus StorageEndpoint::fileGet(UserID user, FileID file, size_t begin, size_t end)
+StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action)
 {
     // Check if file exists - handle correct locking
-    virtualFilesystem.fileExists(file);
+    // virtualFilesystem.fileExists(file);
 
     // Track actions - allow to view active actions per user
 
@@ -77,13 +96,14 @@ StorageStatus StorageEndpoint::fileGet(UserID user, FileID file, size_t begin, s
     // Retrieve users key
     WrappedKey key;
 
-    action = ReadTransaction();
+    // action = ReadTransaction();
     ReadHandle handle;
     if(!dataStore->initRead(file.file, begin, end, handle))
     {
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
-    return;
+
+    return StorageStatus::OK;
 }
 
 

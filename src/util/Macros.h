@@ -14,8 +14,8 @@
 #define TPUNKT_MACROS_MOVE_ONLY(type)                                                                                  \
     type(const type&) = delete;                                                                                        \
     type& operator=(const type&) = delete;                                                                             \
-    type(type&&) = default;                                                                                            \
-    type& operator=(type&&) = default
+    type(type&&) noexcept = default;                                                                                   \
+    type& operator=(type&&) noexcept = default
 
 
 #define TPUNKT_MACROS_GLOBAL_ASSIGN(var)                                                                               \

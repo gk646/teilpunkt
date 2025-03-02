@@ -30,14 +30,15 @@ TaskManager::TaskManager(const uint32_t threadCount)
     TPUNKT_MACROS_GLOBAL_ASSIGN(TaskManager);
     for(uint32_t i = 0; i < threadCount; ++i)
     {
-        std::thread thread{taskThread};
-        threads.emplace_back();
+        //std::thread thread{taskThread};
+        //threads.emplace_back();
     }
 }
 
 TaskManager::~TaskManager()
 {
     TPUNKT_MACROS_GLOBAL_RESET(TaskManager);
+
 }
 
 TaskManager& GetTaskManager()

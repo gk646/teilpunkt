@@ -1,43 +1,62 @@
 // SPDX-License-Identifier: Apache License 2.0
 
+#include <cerrno>
+#include <cstring>
+#include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include "crypto/Ciphers.h"
+#include "instance/InstanceInfo.h"
 #include "util/FileIO.h"
+#include "util/Logging.h"
 
 namespace tpunkt
 {
 
-    static bool FileExists( const char* path )
+File::File(const char* path)
+{
+    fd = openat(GetInstanceInfo().getRoot(), path, O_CREAT | O_RDWR, TPUNKT_INSTANCE_FILE_MODE);
+    if(fd == -1) [[unlikely]]
     {
-        return access( path, F_OK ) == 0;
+        LOG_ERROR("Creating file failed: %s", strerror(errno));
+        return;
     }
+}
 
-FileReader::FileReader(const char* path) {
+File::~File()
+{
+    if(fd != -1)
+    {
+        close(fd);
+    }
+}
 
-       fd = openat(dirfd, buf, O_CREAT | O_RDWR, TPUNKT_INSTANCE_FILE_MODE);
-        if(fd == -1) [[unlikely]]
+int64_t File::size() const
+{
+    if(fd != -1) [[likely]]
+    {
+        struct stat statbuf{};
+        if(fstat(fd, &statbuf) == 0) [[likely]]
         {
-            LOG_ERROR("Creating file failed: %s", strerror(errno));
-            return;
+            return statbuf.st_size;
         }
+        return -1;
     }
+    return -1;
+}
 
+size_t File::write(const unsigned char* data, size_t size)
+{
+}
 
-FileReader::~FileReader(){
+size_t File::read(unsigned char* data, size_t size)
+{
+}
 
-
-    }
-
-size_t FileReader::write(const unsigned char* data, size_t size){
-    nonce = randombytes_buf();
-        crypto_secretbox_easy
-    }
-
-
-size_t FileReader::read(unsigned char* data, size_t size){
-
-    //TODO finish secret box calls
-    //TODO refactor into ciphers
-    }
+bool File::Exists(const char* path)
+{
+    return access(path, F_OK) == 0;
+}
 
 
 } // namespace tpunkt

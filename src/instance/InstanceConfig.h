@@ -41,6 +41,9 @@ enum class NumberParamKey : uint8_t
     // Max allowed number of requests to the server per user per minute
     // 40
     API_REQUESTS_PER_USER_PER_MIN,
+    // Max amount of files and directories (each) the storage can hold across all endpoints
+    // 50'000
+    STORAGE_MAX_TOTAL_FILES_OR_DIRS,
     ENUM_SIZE
 };
 
@@ -74,12 +77,12 @@ struct InstanceConfig final
     void setNumber(NumberParamKey key, uint32_t number);
     void setBool(BoolParamKey key, bool boolean);
 
+
+  private:
     [[nodiscard]] const char* getDefault(StringParamKey key);
     [[nodiscard]] uint32_t getDefault(NumberParamKey key);
     [[nodiscard]] bool getDefault(BoolParamKey key);
 
-  private:
-    void setupDefaults();
     struct StringConfigParam final
     {
         ConfigString string;

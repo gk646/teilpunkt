@@ -3,36 +3,47 @@
 #ifndef TPUNKT_FILEIO_H
 #define TPUNKT_FILEIO_H
 
+#include <cstdint>
 #include "util/Macros.h"
 
 namespace tpunkt
 {
 
-    struct File final
-    {
-        File(const char* path);
-        ~File();
+struct File final
+{
+    explicit File(const char* path);
+    ~File();
 
-        size_t size() const;
+    // -1 on error
+    [[nodiscard]] int64_t size() const;
 
-        size_t write(const unsigned char* data, size_t size);
-        size_t read(unsigned char* data, size_t size);
+    size_t write(const unsigned char* data, size_t size);
+    size_t read(unsigned char* data, size_t size);
 
-      private:
-        int fd = -1;
-        uint32_t nonce = 0;
-        TPUNKT_MACROS_STRUCT( File );
-    };
+    static bool Exists(const char* path);
 
-
-    struct FileStream final
-    {
+  private:
+    int fd = -1;
+    uint32_t nonce = 0;
+    TPUNKT_MACROS_STRUCT(File);
+};
 
 
-      private:
-        const char* path;
-        TPUNKT_MACROS_STRUCT( FileStream );
-    };
+struct FileStream final
+{
+
+    explicit FileStream(const char* path);
+    ~FileStream();
+
+    [[nodiscard]] size_t size() const;
+
+    size_t write(const unsigned char* data, size_t size);
+    size_t read(unsigned char* data, size_t size);
+
+  private:
+    const char* path;
+    TPUNKT_MACROS_STRUCT(FileStream);
+};
 
 
 } // namespace tpunkt

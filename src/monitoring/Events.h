@@ -37,17 +37,16 @@ enum class EventAction : uint8_t
     SessionGetSessions,
     // Token
     TokenInvalidate,
-    // Storage
+    // Endpoint
     EndpointCreate,
     EndpointCreateFrom,
     EndpointGet,
     EndpointDelete,
     // Virtual File System
-    FilesystemAddFile,
+    FilesystemCreateFile,
+    FilesystemWriteFile,
     FilesystemRemoveFile,
     FilesystemAddDirectory,
-    FilesystemAdd
-    // Endpoint
 };
 
 enum class EventStatus : uint8_t
@@ -62,7 +61,9 @@ enum class EventStatus : uint8_t
     FAIL_NO_ADMIN,          // Not complete due to missing admin
     FAIL_NO_UAC,            // Denied cause of UAC
     FAIL_USERNAME_EXISTS,
-    FAIL_NOT_FOUND,
+    FAIL_NO_SUCH_ENDPOINT,
+    FAIL_NO_SUCH_FILE,
+    FAIL_INVALID_ARGUMENTS, // Failed cause arguments had wrong values
     WARNINGS,               //----------------
     // Warnings
     WARN_OPERATION_FAILED, // Internal operation failed

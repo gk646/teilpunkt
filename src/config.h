@@ -9,7 +9,7 @@
 
 #define TPUNKT_CRYPTO_KEY_LEN 32
 
-#define TPUNKT_INSTANCE_SECRET_MAX_LEN 64
+#define TPUNKT_INSTANCE_SECRET_MAX_LEN 32
 
 //===== Authentication =====//
 

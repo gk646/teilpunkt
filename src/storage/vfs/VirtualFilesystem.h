@@ -3,8 +3,7 @@
 #ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
-#include "datastructures/FixedString.h"
-#include "datastructures/Spinlock.h"
+#include <deque>
 #include "storage/vfs/VirtualDirectory.h"
 #include "storage/vfs/VirtualFile.h"
 #include "storage/vfs/VirtualFilesystemCache.h"
@@ -12,53 +11,35 @@
 namespace tpunkt
 {
 
-struct FilesystemCreateInfo final
-{
-    FileName name;
-    uint64_t maxSize = 0; // Max size in bytes
-    FileID rootID;
-    uint8_t endpointID = 0;
-    UserID creator{};
-};
-
 // File names must be unique per directory - case-sensitive
 struct VirtualFilesystem
 {
-    explicit VirtualFilesystem(const FilesystemCreateInfo& info);
+    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
     TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
-
     ~VirtualFilesystem();
 
-    //===== File Basic =====//
+    //===== Lookup =====//
 
     // Full lookup
-    VirtualFile* fileGet(FileID file);
+    VirtualFile* getFile(FileID file);
+    VirtualDirectory* getDir(FileID dir);
 
-    // Only searches in given dir
-    VirtualFile* fileGetInDir(FileID file, FileID dir);
+    // Returns the directory this file is in
+    VirtualDirectory* getFileDir(FileID file);
 
-    bool fileCreate(User user, FileID dir, const FileCreationInfo& info, FileID file);
-
-    bool fileDelete(User user, FileID dir);
-
-    //===== File Action =====//
+    //===== Reader =====//
 
     // True if permitted
-    bool fileAddReader(UserID user);
-
-    bool fileRemoveReader(UserID user);
-
-    VirtualDirectory* dirGet();
-
-    bool dirDelete();
-
-    bool dirCreate();
+    bool fileAddReader(FileID file);
+    bool fileRemoveReader(FileID file);
+    bool fileAddWriter(FileID file);
+    bool fileRemoveWriter(FileID file);
 
   private:
-    VirtualDirectory root;
+    std::deque<BlockNode<VirtualDirectory>*> dirCache;
+    BlockNode<VirtualDirectory>* root = nullptr;
     VirtualFilesystemCache cache;
     Spinlock systemLock;
-    uint8_t id;
 };
 
 } // namespace tpunkt

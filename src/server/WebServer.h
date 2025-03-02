@@ -3,7 +3,7 @@
 #ifndef TPUNKT_WEBSERVER_H
 #define TPUNKT_WEBSERVER_H
 
-#include <uWebSocket/src/App.h>
+#include <App.h>
 #include "server/StaticFileStorage.h"
 
 namespace tpunkt

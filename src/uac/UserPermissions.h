@@ -7,20 +7,26 @@
 
 namespace tpunkt
 {
-    enum class PermissionFlag : uint8_t
-    {
-        READ = 0b001,
-        WRITE = 0b010,
-        DELETE = 0b100,
-        // Combined flags
-        ALL = 0b0111,
-    };
+
+enum class PermissionFlag : uint8_t
+{
+    INVALID = 0,
+    READ = 1 << 1,
+    DELETE = 1 << 3,
+    CREATE = 1 << 4,
+};
 
 
-    struct UserLimits final
-    {
+struct UserLimits final
+{
+    uint32_t ownedFiles = 0;
+    uint32_t ownedDirs = 0;
+    uint64_t combinedFileSize = 0;
+    uint64_t maxSingleFileSize = 0;
 
-    };
+    // Actions
+    uint32_t activeActions = 0;
+};
 
 } // namespace tpunkt
 

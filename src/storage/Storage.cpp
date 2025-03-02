@@ -8,6 +8,25 @@
 namespace tpunkt
 {
 
+namespace
+{
+
+StorageEndpoint* GetEndpoint(const EndpointID eid, std::vector<StorageEndpoint>& endpoints)
+{
+    for(auto& ept : endpoints)
+    {
+        if(ept.getID() == eid)
+        {
+            return &ept;
+        }
+    }
+    return nullptr;
+}
+
+
+} // namespace
+
+
 StorageStatus Storage::endpointCreate(const UserID user, CreateInfo info)
 {
     SpinlockGuard lock{storageLock};
@@ -20,14 +39,14 @@ StorageStatus Storage::endpointCreate(const UserID user, CreateInfo info)
 
     // I like this option - its simple and doesn't need move - and cleanup is handled in destructor
     bool success = true;
-    endpoints.emplace_back(info, getEndpointID(false), user, success);
+    endpoints.emplace_back(info, EndpointID{endpoint}, user, success);
     if(!success)
     {
         endpoints.pop_back();
         LOG_EVENT(UserAction, EndpointCreate, WARN_OPERATION_FAILED);
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
-    (void)getEndpointID(true);
+    endpoint++;
 
     LOG_EVENT(UserAction, EndpointCreate, SUCCESS);
     return StorageStatus::OK;
@@ -51,27 +70,23 @@ StorageStatus Storage::endpointCreateFrom(const UserID user, CreateInfo info, co
 
     SpinlockGuard lock{storageLock};
 
-
     // TODO
     LOG_EVENT(UserAction, EndpointCreateFrom, SUCCESS);
     return StorageStatus::OK;
 }
 
-StorageStatus Storage::endpointGet(UserID user, const EndpointID endpointId, StorageEndpoint*& endpoint)
+StorageStatus Storage::endpointGet(UserID user, const EndpointID endpointId, StorageEndpoint*& ept)
 {
     SpinlockGuard lock{storageLock};
-    for(auto& ept : endpoints)
+    auto* endpoint = GetEndpoint(endpointId, endpoints);
+    if(endpoint == nullptr) [[unlikely]]
     {
-        if(ept.getID() == endpointId)
-        {
-            endpoint = &ept;
-            LOG_EVENT(UserAction, EndpointGet, SUCCESS);
-            return StorageStatus::OK;
-        }
+        LOG_EVENT(UserAction, EndpointGet, FAIL_NO_SUCH_ENDPOINT);
+        return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
-
-    LOG_EVENT(UserAction, EndpointGet, FAIL_NOT_FOUND);
-    return StorageStatus::ERR_NO_SUCH_ENDPOINT;
+    ept = endpoint;
+    LOG_EVENT(UserAction, EndpointGet, SUCCESS);
+    return StorageStatus::OK;
 }
 
 StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
@@ -79,7 +94,7 @@ StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
     SpinlockGuard lock{storageLock};
     for(auto& ept : endpoints)
     {
-        if(ept.getID() == endpointId)
+        if(ept.getID() == endpointId && ept.canBeRemoved())
         {
             ept = std::move(endpoints.back());
             LOG_EVENT(UserAction, EndpointDelete, SUCCESS);
@@ -87,11 +102,14 @@ StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
         }
     }
 
-    LOG_EVENT(UserAction, EndpointDelete, FAIL_NOT_FOUND);
+    LOG_EVENT(UserAction, EndpointDelete, FAIL_NO_SUCH_ENDPOINT);
     return StorageStatus::ERR_NO_SUCH_ENDPOINT;
 }
 
-FileID Storage::getNextFile(const bool isDirectory, const EndpointID endPoint)
+//TODO use block storeage
+
+/*
+FileID getNextFile(const bool isDirectory, const EndpointID endPoint)
 {
     SpinlockGuard lock{storageLock};
     if(fileID >= (UINT32_MAX - 100))
@@ -121,5 +139,8 @@ EndpointID Storage::getEndpointID(const bool increment)
     }
     return EndpointID{endpoint};
 }
+
+*/
+
 
 } // namespace tpunkt

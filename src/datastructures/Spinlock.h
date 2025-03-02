@@ -8,21 +8,23 @@
 
 namespace tpunkt
 {
-struct SpinlockGuard;
 
 struct Spinlock
 {
     Spinlock();
+    Spinlock(const Spinlock&) = delete;
+    Spinlock& operator=(const Spinlock&) = delete;
+    Spinlock(Spinlock&&) noexcept;
+    Spinlock& operator=(Spinlock&&) noexcept;
 
     [[nodiscard]] bool isLocked() const;
 
   private:
     void lock();
     void unlock();
-    std::atomic_flag flag = ATOMIC_FLAG_INIT;
+    std::atomic<bool> flag;
     bool hasGuard = false;
-    TPUNKT_MACROS_MOVE_ONLY(Spinlock);
-    friend SpinlockGuard;
+    friend struct SpinlockGuard;
 };
 
 struct SpinlockGuard final
@@ -43,49 +45,48 @@ struct CooperativeSpinlock final
     [[nodiscard]] bool isLocked() const;
 
   private:
-    void lockReader();
-    void unlockReader();
-    void lockWriter();
-    void unlockWriter();
+    void coopAdd();
+    void coopRemove();
+    void exclusiveAdd();
+    void exclusiveRemove();
 
-    TPUNKT_MACROS_MOVE_ONLY(CooperativeSpinlock);
-    std::atomic<int> readerCount{0};
-    std::atomic<bool> writerFlag{false};
-    std::atomic<bool> writerWaiting{false};
+    std::atomic<int> coopCount{0};
+    std::atomic<bool> exclusive{false};
+    std::atomic<bool> exclusiveWaiting{false};
     friend struct CooperativeSpinlockGuard;
 };
 
 struct CooperativeSpinlockGuard final
 {
-    explicit CooperativeSpinlockGuard(CooperativeSpinlock& spinlock, const bool writeMode)
-        : lock(spinlock), isWriteMode(writeMode)
+    explicit CooperativeSpinlockGuard(CooperativeSpinlock& spinlock, const bool exclusive)
+        : lock(&spinlock), exclusive(exclusive)
     {
-        if(writeMode)
+        if(exclusive)
         {
-            lock.lockWriter();
+            lock->exclusiveAdd();
         }
         else
         {
-            lock.lockReader();
+            lock->coopAdd();
         }
     }
+    TPUNKT_MACROS_MOVE_ONLY(CooperativeSpinlockGuard);
 
     ~CooperativeSpinlockGuard()
     {
-        if(isWriteMode)
+        if(exclusive)
         {
-            lock.unlockWriter();
+            lock->exclusiveRemove();
         }
         else
         {
-            lock.unlockReader();
+            lock->coopRemove();
         }
     }
 
   private:
-    CooperativeSpinlock& lock;
-    bool isWriteMode;
-    TPUNKT_MACROS_STRUCT(CooperativeSpinlockGuard);
+    CooperativeSpinlock* lock = nullptr; // Always valid
+    bool exclusive = false;
 };
 
 } // namespace tpunkt

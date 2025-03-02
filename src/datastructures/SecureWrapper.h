@@ -5,7 +5,7 @@
 
 #include <utility>
 #include "util/Macros.h"
-#include "crypto/CryptoManager.h"
+#include "crypto/CryptoContext.h"
 
 namespace tpunkt
 {
@@ -20,12 +20,12 @@ namespace tpunkt
 
             explicit WrapperReader(WrapperType& originalWrapper) : wrapper(originalWrapper)
             {
-                GetCryptoManager().decrypt(static_cast<void*>(&wrapper.val), sizeof(T));
+                GetCryptoContext().decrypt(static_cast<void*>(&wrapper.val), sizeof(T));
             }
 
             ~WrapperReader()
             {
-                GetCryptoManager().encrypt(static_cast<void*>(&wrapper.val), sizeof(T));
+                GetCryptoContext().encrypt(static_cast<void*>(&wrapper.val), sizeof(T));
             }
 
             T& get()
@@ -45,7 +45,7 @@ namespace tpunkt
 
         SecureWrapper() : val()
         {
-            GetCryptoManager().encrypt(&val, sizeof(T));
+            GetCryptoContext().encrypt(&val, sizeof(T));
         }
 
         // No destructor - does neither decrypt nor zero the contents - might be reused
@@ -53,7 +53,7 @@ namespace tpunkt
         template <typename... Args>
         explicit SecureWrapper(Args&&... args) : val(std::forward<Args>(args)...)
         {
-            GetCryptoManager().encrypt(&val, sizeof(T));
+            GetCryptoContext().encrypt(&val, sizeof(T));
         }
 
         WrapperReader<false> get()

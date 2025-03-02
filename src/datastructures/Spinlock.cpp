@@ -1,44 +1,52 @@
 // SPDX-License-Identifier: Apache License 2.0
 
-#include <sched.h>
+
 #include "datastructures/Spinlock.h"
-#include "util/Logging.h"
 
 namespace tpunkt
 {
-    Spinlock::Spinlock()
-    {
-        flag.clear(std::memory_order_release);
-    }
+Spinlock::Spinlock() : flag(false)
+{
+}
 
-    bool Spinlock::isLocked() const
-    {
-        return flag.test(std::memory_order_acquire);
-    }
+Spinlock::Spinlock(Spinlock&& other) noexcept
+{
+}
 
-    void Spinlock::lock()
-    {
-        while(flag.test_and_set(std::memory_order_acquire))
-        {
-            sched_yield();
-        }
-    }
+Spinlock& Spinlock::operator=(Spinlock&& other ) noexcept
+{
+}
 
-    void Spinlock::unlock()
-    {
-        flag.clear(std::memory_order_release);
-    }
+bool Spinlock::isLocked() const
+{
+    return flag.load(std::memory_order_acquire);
+}
 
-    SpinlockGuard::SpinlockGuard(Spinlock& spinlock) : lock(spinlock)
+void Spinlock::lock()
+{
+    while(flag.exchange(true, std::memory_order_acquire))
     {
-
-        lock.lock();
-        lock.hasGuard = true;
+        sched_yield();
     }
+}
 
-    SpinlockGuard::~SpinlockGuard()
-    {
-        lock.hasGuard = false;
-        lock.unlock();
-    }
+void Spinlock::unlock()
+{
+    flag.store(false, std::memory_order_release);
+}
+
+SpinlockGuard::SpinlockGuard(Spinlock& spinlock) : lock(spinlock)
+{
+
+    lock.lock();
+    lock.hasGuard = true;
+}
+
+SpinlockGuard::~SpinlockGuard()
+{
+    lock.hasGuard = false;
+    lock.unlock();
+}
+
+
 } // namespace tpunkt

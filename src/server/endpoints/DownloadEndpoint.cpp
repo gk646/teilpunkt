@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache License 2.0
 
-#include <uWebSocket/src/HttpResponse.h>
+#include <HttpResponse.h>
 #include "server/Endpoints.h"
 #include "storage/Storage.h"
 #include "storage/StorageTransaction.h"

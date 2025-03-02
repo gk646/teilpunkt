@@ -5,15 +5,21 @@
 namespace tpunkt
 {
 
-UACStatus UserAccessControl::userCanCreate(UserID user, FileID dir, const FileCreationInfo& info)
+UACStatus UserAccessControl::userCanWrite(UserID user, FileID file, uint64_t newSize)
 {
+    SpinlockGuard guard{uacLock};
+
+
+    return UACStatus::OK;
+}
+UACStatus UserAccessControl::userCanAction(UserID user, FileID file, PermissionFlag flag)
+{
+    SpinlockGuard guard{uacLock};
     // TODO
     // here we need access to the root that contains this file/dir - so we can deduce permissionts
     // otherwise its an expensive lookup
-}
 
-UACStatus UserAccessControl::userCanWrite(UserID user, FileID file, uint64_t newSize)
-{
+    return UACStatus::OK;
 }
 
 

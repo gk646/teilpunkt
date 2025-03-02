@@ -32,9 +32,8 @@ endif ()
 
 target_include_directories(teilpunkt PRIVATE
         src
-        external
+        external/uWebSocket/src
         external/uWebSocket/uSockets/src
-
 )
 
 # ------------------------------

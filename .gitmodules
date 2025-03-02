@@ -1,3 +1,6 @@
 [submodule "static/external/uWebSocket"]
 	path = external/uWebSocket
 	url = https://github.com/uNetworking/uWebSockets
+[submodule "external/ankerl"]
+	path = external/ankerl
+	url = https://github.com/martinus/unordered_dense.git

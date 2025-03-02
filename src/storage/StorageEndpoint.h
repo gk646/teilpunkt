@@ -21,6 +21,8 @@ enum class StorageStatus : uint8_t
     ERR_UNSUCCESSFUL,     // Generic error
     ERR_NO_UAC_PERM,      // No allowed by uac
     ERR_NO_ADMIN,         // Requires admin but request doesnt have it
+    ERR_NO_SUCH_FILE,     // Specified files not found
+    ERR_INVALID_FILE_NAME,
     ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };
 
@@ -49,15 +51,16 @@ struct StorageEndpoint
 
     //===== File Manipulation =====//
 
-    StorageStatus fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateTransaction& action);
+    StorageStatus fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateFileTransaction& action);
     StorageStatus fileRemove();
     StorageStatus fileWrite();
     StorageStatus fileRename();
-    StorageStatus fileGet(UserID user, FileID file, size_t begin, size_t end, ReadTransaction& action);
+    StorageStatus fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
 
-    //===== Virtual File System =====//
+    //===== File Info =====//
 
-    StorageStatus vfsFileGet(User user, DTOFileInfo& info);
+    StorageStatus infoFile(User user, DTOFileInfo& info);
+    StorageStatus infoDir(User user, DTODirectoryInfo& info);
 
     //===== Dir Manipulation =====//
 
@@ -71,9 +74,9 @@ struct StorageEndpoint
 
     //===== Storage Info =====//
 
-    StorageStatus canBeAdded();
+    [[nodiscard]] EndpointID getID() const;
 
-    EndpointID getID();
+    [[nodiscard]] bool canBeRemoved() const;
 
   private:
     VirtualFilesystem virtualFilesystem;

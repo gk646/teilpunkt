@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache License 2.0
 
+#include "storage/Storage.h"
 #include "storage/vfs/VirtualDirectory.h"
 
 namespace tpunkt
@@ -10,19 +11,34 @@ VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
 {
 }
 
-VirtualDirectory* VirtualDirectory::searchDir(const FileID dirid)
+VirtualFile* VirtualDirectory::searchFile(const FileID file) const
 {
-    for(auto& dir : subdirectories)
+    if(startFile == nullptr || file.isDirectory()) [[unlikely]]
     {
-        if(dir.info.id == dirid)
+        return nullptr;
+    }
+}
+
+VirtualDirectory* VirtualDirectory::searchDir(const FileID dir) const
+{
+    if(startDir == nullptr || dir.isDirectory()) [[unlikely]]
+    {
+        return nullptr;
+    }
+
+    BlockIterator it{startDir, &GetStorage().getDirStore()};
+    const auto end = BlockIterator<VirtualDirectory>::End();
+    for(; it != end; ++it)
+    {
+        if(it.operator*().info.id == dir) [[unlikely]]
         {
-            return &dir;
+            return &*it;
         }
     }
     return nullptr;
 }
 
-bool VirtualDirectory::addFile(const FileCreationInfo& info, const bool fits, const bool unique)
+bool VirtualDirectory::addFile(const FileCreationInfo& info)
 {
     if(fits && unique)
     {

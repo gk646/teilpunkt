@@ -3,19 +3,18 @@
 #ifndef TPUNKT_STORAGE_TRANSACTION_H
 #define TPUNKT_STORAGE_TRANSACTION_H
 
-#include "crypto/WrappedKey.h"
 #include "fwd.h"
 #include "storage/datastore/DataStore.h"
 #include "util/Macros.h"
+#include "vfs/VirtualFile.h"
 
 namespace tpunkt
 {
 
 struct StorageTransaction
 {
-    explicit StorageTransaction(DataStore& store, const WrappedKey& key);
-    explicit StorageTransaction() = default;
-    virtual ~StorageTransaction();
+    explicit StorageTransaction(DataStore& store);
+    virtual ~StorageTransaction() = default;
 
     // Commit the operation
     void commit();
@@ -33,39 +32,56 @@ struct StorageTransaction
     uWS::HttpResponse<true>* response = nullptr;
     uWS::Loop* loop = nullptr;
 
+  protected:
+    DataStore* datastore = nullptr; // Always valid
+
+    [[nodiscard]] bool shouldAbort() const;
+    TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
+
   private:
-    WrappedKey key;             // Copied key
-    FileID file{};
-    DataStore* store = nullptr; // Always valid
+    bool isStarted = false;
     bool isCommited = false;
     bool isAborted = false;
     bool finished = false;
-    TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
 };
 
-struct CreateTransaction final : StorageTransaction
+struct CreateFileTransaction final : StorageTransaction
 {
-    CreateTransaction() = default;
+    explicit CreateFileTransaction(DataStore& store, VirtualDirectory& parent, VirtualFilesystem& system,
+                                   const FileCreationInfo& info);
+    ~CreateFileTransaction() override;
 
+    // Queues the create-action
+    bool create(ResultCb callback) const;
 
   private:
-    TPUNKT_MACROS_MOVE_ONLY(CreateTransaction);
+    FileCreationInfo info;
+    VirtualFilesystem* system = nullptr;
+    VirtualDirectory* parent;
+    CooperativeSpinlockGuard guard;
+    TPUNKT_MACROS_STRUCT(CreateFileTransaction);
 };
 
-struct ReadTransaction final : StorageTransaction
+struct WriteFileTransaction final : StorageTransaction
 {
-    ReadTransaction() = default;
-    ~ReadTransaction() override;
+};
+
+struct ReadFileTransaction final : StorageTransaction
+{
+    ReadFileTransaction() = default;
+    ~ReadFileTransaction() override;
 
     bool readFile(size_t chunkSize, ReadCb callback)
     {
-        store->readFile(handle, )
+        // store->readFile(handle, )
     }
 
   private:
     ReadHandle handle;
-    TPUNKT_MACROS_MOVE_ONLY(ReadTransaction);
+    TPUNKT_MACROS_MOVE_ONLY(ReadFileTransaction);
 };
+
+
 
 } // namespace tpunkt
 

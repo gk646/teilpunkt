@@ -42,28 +42,25 @@ struct DirectoryStats final
 struct VirtualDirectory final
 {
     explicit VirtualDirectory(const DirectoryCreationInfo& info);
-    VirtualDirectory& operator=(VirtualDirectory&&) = default;
-    VirtualDirectory(VirtualDirectory&&) = default;
-
-    VirtualDirectory(const VirtualDirectory&) = delete;
-    VirtualDirectory& operator=(const VirtualDirectory&) = delete;
+    ~VirtualDirectory();
+    TPUNKT_MACROS_STRUCT(VirtualDirectory);
 
     //===== Get =====//
 
-    VirtualFile* searchFile(FileID fileid);
-    VirtualDirectory* searchDir(FileID dirid);
+    // Only local search - non-recursive
+    [[nodiscard]] VirtualFile* searchFile(FileID file) const;
+    [[nodiscard]] VirtualDirectory* searchDir(FileID dir) const;
 
-    //===== Content Manipulation Main =====//
+    //=====  Manipulation =====//
 
-    // Does not check if the file fits - passed for explicitness that its manually checked first
-    bool addFile(const FileCreationInfo& info, bool fits, bool unique);
+    bool addFile(const FileCreationInfo& info);
 
     bool removeFile(FileID fileid);
 
     bool addDirectory(const DirectoryCreationInfo& info);
 
     // Only works if dir is empty
-    bool removeDirectory(FileID dirid);
+    bool removeDirectory(FileID dir);
 
     //===== Content Manipulation Misc =====//
 
@@ -93,6 +90,8 @@ struct VirtualDirectory final
     [[nodiscard]] uint32_t getTotalFileCount() const;
     [[nodiscard]] uint32_t getTotalDirCount() const;
 
+    CooperativeSpinlock lock;
+
   private:
     void propagateAddFile(uint64_t size);
     void propagateRemoveFile(uint64_t size);
@@ -102,11 +101,8 @@ struct VirtualDirectory final
     DirectoryInfo info;
     DirectoryStats stats;
 
-    using FileList = StaticBlock<VirtualFile, 4>;
-    using DirList = StaticBlock<VirtualDirectory, 4>;
-
-    FileList* files = nullptr;
-    DirList* subDirs = nullptr;
+    BlockNode<VirtualFile>* startFile = nullptr;
+    BlockNode<VirtualDirectory>* startDir = nullptr;
 };
 
 } // namespace tpunkt

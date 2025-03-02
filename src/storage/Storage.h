@@ -16,11 +16,15 @@ struct Storage final
 {
     //===== Global Functions =====//
 
-    // Requires admin
     StorageStatus getRoots(UserID user, std::vector<DTODirectoryInfo>& roots);
 
-    // Requires admin
     StorageStatus getDir(UserID user, FileID dir, std::vector<DTODirectoryEntry>& entries);
+
+    // Also works across endpoints
+    StorageStatus move(UserID user, const std::vector<FileID>& files, FileID dest);
+
+    // Also works across endpoints
+    StorageStatus copy(UserID user, const std::vector<FileID>& files, FileID dest);
 
     //===== Endpoint Management =====//
 
@@ -33,20 +37,28 @@ struct Storage final
     StorageStatus endpointCreateFrom(UserID user, CreateInfo info, const char* file, bool recurse);
 
     // Only valid if returns StorageStatus::OK
-    StorageStatus endpointGet(UserID user, EndpointID endpointId, StorageEndpoint*& endpoint);
+    StorageStatus endpointGet(UserID user, EndpointID endpointId, StorageEndpoint*& ept);
 
     // Deletes the given endpoint
     StorageStatus endpointDelete(UserID user, EndpointID endpointId);
 
-  private:
-    FileID getNextFile(bool isDirectory, EndpointID endPoint);
-    EndpointID getEndpointID(bool increment);
+    //===== Misc =====//
 
+    using FileStore = BlockStorage<BlockNode<VirtualFile>>;
+    using DirStore = BlockStorage<BlockNode<VirtualDirectory>>;
+
+    [[nodiscard]] const FileStore& getFileStore() const;
+    [[nodiscard]] const DirStore& getDirStore() const;
+
+  private:
+    FileID getNextID(bool isDirectory, EndpointID endPoint);
+
+    FileStore fileBlock;
+    DirStore dirBlock;
     std::vector<StorageEndpoint> endpoints;
     Spinlock storageLock;
     uint32_t fileID = 0;
     uint8_t endpoint = 0;
-    friend StorageTransaction;
 };
 
 Storage& GetStorage();

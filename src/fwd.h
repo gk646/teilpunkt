@@ -36,12 +36,15 @@ struct VirtualDirectory;
 template <typename T>
 struct Collector;
 struct DataStore;
-struct ReadTransaction;
+struct ReadFileTransaction;
 struct StorageTransaction;
-struct CreateTransaction;
+struct CreateFileTransaction;
 struct DTOFileInfo;
 struct DTOFileDownload;
 struct FileCreationInfo;
+struct VirtualFilesystem;
+struct VirtualFile;
+struct DTODirectoryInfo;
 
 template <typename T>
 struct BlockStorage;
@@ -57,6 +60,7 @@ using HashedIP = FixedString<16>;
 using ConfigString = FixedString<TPUNKT_STORAGE_FILE_LEN>;
 using FileName = FixedString<TPUNKT_STORAGE_FILE_LEN>; // Max length for any single file name
 using CipherKey = FixedString<TPUNKT_CRYPTO_KEY_LEN>;
+using InstanceSecret = FixedString<TPUNKT_INSTANCE_SECRET_MAX_LEN>;
 
 //===== Identifiers =====//
 
@@ -79,8 +83,14 @@ struct FileID final
 {
     uint32_t file;
     EndpointID endpoint;
-    bool isDirectory;
+    bool directory;
     // 1 byte left
+
+    [[nodiscard]] bool isDirectory() const
+    {
+        return directory;
+    }
+
     bool operator==(const FileID&) const = default;
 };
 

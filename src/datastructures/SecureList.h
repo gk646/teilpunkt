@@ -5,7 +5,7 @@
 
 #include <type_traits>
 #include <sodium/utils.h>
-#include "crypto/CryptoManager.h"
+#include "crypto/CryptoContext.h"
 #include "datastructures/Iterator.h"
 #include "util/Logging.h"
 #include "util/Macros.h"
@@ -28,13 +28,13 @@ struct SecureList final
             }
             list.hasReader = true;
             sodium_mprotect_readwrite(list.arr);
-            GetCryptoManager().decrypt(list.arr, list.elements * sizeof(T));
+            GetCryptoContext().decrypt(list.arr, list.elements * sizeof(T));
         }
 
         ~ListReader()
         {
             list.hasReader = false;
-            GetCryptoManager().encrypt(list.arr, list.elements * sizeof(T));
+            GetCryptoContext().encrypt(list.arr, list.elements * sizeof(T));
             sodium_mprotect_noaccess(list.arr);
         }
 
