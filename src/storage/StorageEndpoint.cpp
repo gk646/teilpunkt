@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include <cerrno>
 #include <cstdio>
@@ -71,7 +71,7 @@ StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, c
 
     CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
 
-    if(parent->nameExists(info.name) || !IsValidFilename(info.name))
+    if(parent->fileExists(info.name) || !IsValidFilename(info.name))
     {
         LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_INVALID_ARGUMENTS);
         return StorageStatus::ERR_INVALID_FILE_NAME;
@@ -98,7 +98,7 @@ StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, 
 
     // action = ReadTransaction();
     ReadHandle handle;
-    if(!dataStore->initRead(file.file, begin, end, handle))
+    //if(!dataStore->initRead(file.file, begin, end, handle))
     {
         return StorageStatus::ERR_UNSUCCESSFUL;
     }

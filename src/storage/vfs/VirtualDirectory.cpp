@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include "storage/Storage.h"
 #include "storage/vfs/VirtualDirectory.h"
@@ -6,110 +6,106 @@
 namespace tpunkt
 {
 
+#define DIR_ACCESS                                                                                                     \
+    stats.accessCount++;                                                                                               \
+    stats.lastAccess = Timestamp::Now();
+
+#define DIR_CHANGE                                                                                                     \
+    stats.changeCount++;                                                                                               \
+    stats.lastEdit = Timestamp::Now();
+
+
 VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
-    : info(info.name, info.maxSize, 0U, info.id, info.parent, info.creator)
+    : info(info.name, info.parent, false), limits(info.maxSize, false)
 {
 }
 
-VirtualFile* VirtualDirectory::searchFile(const FileID file) const
+VirtualFile* VirtualDirectory::searchFile(const FileID file)
 {
-    if(startFile == nullptr || file.isDirectory()) [[unlikely]]
+    DIR_ACCESS;
+    if(file.isDirectory()) [[unlikely]]
     {
         return nullptr;
     }
+    return files.get(file.getID());
 }
 
-VirtualDirectory* VirtualDirectory::searchDir(const FileID dir) const
+VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
 {
-    if(startDir == nullptr || dir.isDirectory()) [[unlikely]]
+    DIR_ACCESS
+    if(dir.isFile()) [[unlikely]]
     {
         return nullptr;
     }
 
-    BlockIterator it{startDir, &GetStorage().getDirStore()};
-    const auto end = BlockIterator<VirtualDirectory>::End();
-    for(; it != end; ++it)
-    {
-        if(it.operator*().info.id == dir) [[unlikely]]
-        {
-            return &*it;
-        }
-    }
-    return nullptr;
+    return dirs.get(dir.getID());
 }
 
-bool VirtualDirectory::addFile(const FileCreationInfo& info)
+bool VirtualDirectory::fileAdd(const FileCreationInfo& info, uint32_t& idx)
 {
-    if(fits && unique)
-    {
-        files.emplace_back(info);
-        propagateAddFile(info.size);
-        return true;
-    }
-    return false;
-}
-
-bool VirtualDirectory::removeFile(const FileID fileid)
-{
-    if(fileid.isDirectory)
+    DIR_ACCESS
+    if(fileExists(info.name)) [[unlikely]]
     {
         return false;
     }
-
-    for(auto& file : files)
-    {
-        if(file.info.id == fileid)
-        {
-            GetEventMonitor().logData<EventType::FileSystem>(EventAction::FilesystemRemoveFile, EventStatus::SUCCESS,
-                                                             FileSystemEventData{file.info.id});
-            propagateRemoveFile(file.info.size);
-            file = std::move(files.back());
-            files.pop_back();
-            return true;
-        }
-    }
-    return false;
-}
-
-bool VirtualDirectory::addDirectory(const DirectoryCreationInfo& info)
-{
-    propagateAddDir();
-    subdirectories.emplace_back(info);
+    DIR_CHANGE;
+    files.add(VirtualFile{info}, idx);
     return true;
 }
 
-bool VirtualDirectory::removeDirectory(const FileID dirid)
+bool VirtualDirectory::fileRemove(const FileID file)
 {
-    if(!dirid.isDirectory)
+    DIR_ACCESS
+    if(file.isDirectory()) [[unlikely]]
+    {
+        LOG_ERROR("Wrong call");
+        return false;
+    }
+    const auto result = files.remove(file.getID());
+    if(result)
+    {
+        DIR_CHANGE;
+    }
+    return result;
+}
+
+bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
+{
+    DIR_ACCESS
+    if(dirExists(info.name)) [[unlikely]]
     {
         return false;
     }
-
-    for(auto& dir : subdirectories)
-    {
-        if(dir.info.id == dirid)
-        {
-            if(dir.getFileCount() != 0)
-            {
-                return false; // Cant remove
-            }
-            // TODO proper move
-            propagateRemoveDir();
-            dir = std::move(subdirectories.back());
-            subdirectories.pop_back();
-            return true;
-        }
-    }
-    return false;
+    DIR_CHANGE;
+    dirs.add(VirtualDirectory{info});
+    return true;
 }
 
-bool VirtualDirectory::removeAllFiles()
+bool VirtualDirectory::dirRemove(const FileID dir)
 {
-    for(int i = 0; i < files.size(); ++i)
+    DIR_ACCESS
+    if(dir.isFile())
     {
-        removeFile(files[ i ].info.id);
+        LOG_ERROR("Wrong call");
+        return false;
     }
-    return true;
+    const auto result = dirs.remove(dir.getID());
+    if(result)
+    {
+        DIR_CHANGE;
+    }
+    return result;
+}
+
+bool VirtualDirectory::fileRemoveAll()
+{
+    DIR_ACCESS
+    const auto result = files.removeAll();
+    if(result)
+    {
+        DIR_CHANGE;
+    }
+    return result;
 }
 
 bool VirtualDirectory::canFit(const uint64_t fileSize) const
@@ -117,7 +113,7 @@ bool VirtualDirectory::canFit(const uint64_t fileSize) const
     const VirtualDirectory* current = this;
     while(current != nullptr)
     {
-        if(current->info.sizeCurrent + fileSize > current->info.sizeLimit)
+        if(current->stats.sizeCurrent + fileSize > current->limits.sizeLimit)
         {
             return false;
         }
@@ -126,109 +122,12 @@ bool VirtualDirectory::canFit(const uint64_t fileSize) const
     return true;
 }
 
-bool VirtualDirectory::nameExists(const FileName& name) const
+void VirtualDirectory::propagateChange(const DirFunc func) const
 {
-    for(const auto& file : files)
-    {
-        if(file.info.name == name)
-        {
-            return true;
-        }
-    }
-    for(const auto& dir : subdirectories)
-    {
-        if(dir.info.name == name)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-uint32_t VirtualDirectory::getFileCount() const
-{
-    return files.size();
-}
-
-uint32_t VirtualDirectory::getDirCount() const
-{
-    return subdirectories.size();
-}
-
-uint32_t VirtualDirectory::getTotalFileCount() const
-{
-    return getFileCount() + stats.subdirFileCount;
-}
-
-uint32_t VirtualDirectory::getTotalDirCount() const
-{
-    return getDirCount() + stats.subdirDirCount;
-}
-
-void VirtualDirectory::propagateAddFile(const uint64_t size)
-{
-    VirtualDirectory* current = this;
+    VirtualDirectory* current = info.parent;
     while(current != nullptr)
     {
-        if(current->info.sizeCurrent + size > current->info.sizeLimit)
-        {
-            LOG_CRITICAL("Internal Error: Directory Size Mismatch");
-            return;
-        }
-        current->info.sizeCurrent += size;
-        if(current != this) [[likely]]
-        {
-            current->stats.subdirFileCount++;
-        }
-        current = current->info.parent;
-    }
-}
-
-void VirtualDirectory::propagateRemoveFile(const uint64_t size)
-{
-    VirtualDirectory* current = this;
-    while(current != nullptr)
-    {
-        if(current->info.sizeCurrent < size) [[unlikely]]
-        {
-            LOG_CRITICAL("Internal Error: Directory Size Mismatch");
-            return;
-        }
-        current->info.sizeCurrent -= size;
-        if(current != this) [[likely]]
-        {
-            if(current->stats.subdirFileCount == 0)
-            {
-                LOG_CRITICAL("Internal Error: Subdir File Count Mismatch");
-                return;
-            }
-            current->stats.subdirFileCount--;
-        }
-        current = current->info.parent;
-    }
-}
-
-void VirtualDirectory::propagateAddDir() const
-{
-    VirtualDirectory* current = this->info.parent;
-    while(current != nullptr)
-    {
-        current->stats.subdirDirCount++;
-        current = current->info.parent;
-    }
-}
-
-void VirtualDirectory::propagateRemoveDir() const
-{
-    VirtualDirectory* current = this->info.parent;
-    while(current != nullptr)
-    {
-        if(current->stats.subdirFileCount == 0)
-        {
-            LOG_CRITICAL("Internal Error: Subdir Dir Count Mismatch");
-            return;
-        }
-        current->stats.subdirDirCount--;
+        func(*current);
         current = current->info.parent;
     }
 }

@@ -1,11 +1,10 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
 #include <deque>
 #include "storage/vfs/VirtualDirectory.h"
-#include "storage/vfs/VirtualFile.h"
 #include "storage/vfs/VirtualFilesystemCache.h"
 
 namespace tpunkt
@@ -27,18 +26,9 @@ struct VirtualFilesystem
     // Returns the directory this file is in
     VirtualDirectory* getFileDir(FileID file);
 
-    //===== Reader =====//
-
-    // True if permitted
-    bool fileAddReader(FileID file);
-    bool fileRemoveReader(FileID file);
-    bool fileAddWriter(FileID file);
-    bool fileRemoveWriter(FileID file);
-
   private:
-    std::deque<BlockNode<VirtualDirectory>*> dirCache;
-    BlockNode<VirtualDirectory>* root = nullptr;
-    VirtualFilesystemCache cache;
+    std::deque<uint32_t> dirCache;
+    uint32_t root = UINT32_MAX;
     Spinlock systemLock;
 };
 

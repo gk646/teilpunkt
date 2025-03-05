@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include <ctime>
 #include "datastructures/Timestamp.h"
@@ -17,7 +17,7 @@ uint64_t getCurrentMonotonicTime()
         LOG_CRITICAL("Failed to retrieve time");
         return 0U;
     }
-    return time.tv_nsec + (time.tv_sec * 1'000'000'000U);
+    return static_cast<uint64_t>(time.tv_nsec) + (static_cast<uint64_t>(time.tv_sec) * 1'000'000'000U);
 }
 
 } // namespace
@@ -28,7 +28,7 @@ Timestamp::Timestamp() : timestamp(getCurrentMonotonicTime())
 
 bool Timestamp::isInPast() const
 {
-    return now().timestamp > timestamp;
+    return Now().timestamp > timestamp;
 }
 
 void Timestamp::addMicros(const uint64_t micros)
@@ -71,7 +71,7 @@ void Timestamp::zero()
     timestamp = 0U;
 }
 
-Timestamp Timestamp::now()
+Timestamp Timestamp::Now()
 {
     return {};
 }

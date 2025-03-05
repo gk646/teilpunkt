@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_VIRTUAL_FILE_H
 #define TPUNKT_VIRTUAL_FILE_H
@@ -10,11 +10,11 @@
 
 namespace tpunkt
 {
+
 // Provided at creation
 struct FileCreationInfo final
 {
     FileName name;
-    FileID id;
     UserID creator;
 };
 
@@ -22,16 +22,16 @@ struct FileInfo final
 {
     FileName name;
     UserID creator = UserID::INVALID;
-    uint64_t size = 0;      // Size in bytes
-    FileID id;
 };
 
 struct FileStats final
 {
     Timestamp lastEdit;
     Timestamp creation;
-    uint32_t version{};     // How often file was changed
-    uint32_t accessCount{}; // How often file was used
+    uint32_t changeCount = 0;
+    uint32_t accessCount = 0;
+
+    uint64_t size = 0; // Size in bytes
 };
 
 struct FileHistory final

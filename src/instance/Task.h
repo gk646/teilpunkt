@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_TASK_H
 #define TPUNKT_TASK_H
@@ -32,7 +32,7 @@ template <typename Callable>
 struct PeriodicTask final : Task
 {
     explicit PeriodicTask(Callable&& func, const uint32_t intervalMicros, const uint32_t limit)
-        : Task(), func(std::move(func)), nextExecution(Timestamp::now()), intervalMicros(intervalMicros),
+        : Task(), func(std::move(func)), nextExecution(Timestamp::Now()), intervalMicros(intervalMicros),
           countLimit(limit)
     {
     }

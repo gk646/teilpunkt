@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_DTO_H
 #define TPUNKT_DTO_H
@@ -8,6 +8,32 @@
 
 namespace tpunkt
 {
+
+//===== Files =====//
+
+struct DTOFileInfo final
+{
+    FileName name;
+    uint64_t unixLastEdit = 0;
+};
+
+struct DTOFileDownload final
+{
+    FileID fileID;
+    size_t begin;
+    size_t end;
+};
+
+struct DTOFileStats final
+{
+    uint64_t unixLastEdit;
+    uint64_t unixLastAccess;
+    uint64_t unixCreation;
+
+    uint64_t sizeBytes;
+};
+
+//===== Directories =====//
 
 struct DTODirectoryEntry
 {
@@ -26,16 +52,6 @@ struct DTODirectoryInfo final
     uint32_t dirs = 0;  // Count of directories visible to user
 };
 
-struct DTOFileInfo final
-{
-};
-
-struct DTOFileDownload final
-{
-    FileID fileID;
-    size_t begin;
-    size_t end;
-};
 
 } // namespace tpunkt
 

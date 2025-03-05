@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_STORAGE_H
 #define TPUNKT_STORAGE_H
@@ -47,8 +47,8 @@ struct Storage final
     using FileStore = BlockStorage<BlockNode<VirtualFile>>;
     using DirStore = BlockStorage<BlockNode<VirtualDirectory>>;
 
-    [[nodiscard]] const FileStore& getFileStore() const;
-    [[nodiscard]] const DirStore& getDirStore() const;
+    [[nodiscard]] FileStore& getFileStore() const;
+    [[nodiscard]] DirStore& getDirStore() const;
 
   private:
     FileID getNextID(bool isDirectory, EndpointID endPoint);

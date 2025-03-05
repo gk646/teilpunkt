@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_PERMISSION_STORAGE_H
 #define TPUNKT_PERMISSION_STORAGE_H

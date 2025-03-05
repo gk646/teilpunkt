@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include "auth/Authenticator.h"
 #include "auth/AuthToken.h"

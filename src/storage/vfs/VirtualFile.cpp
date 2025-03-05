@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include "storage/vfs/VirtualFile.h"
 
 namespace tpunkt
 {
 
-VirtualFile::VirtualFile(const FileCreationInfo& info) : info(info.name, info.creator, 0, info.id)
+VirtualFile::VirtualFile(const FileCreationInfo& info) : info(info.name, info.creator)
 {
 }
 

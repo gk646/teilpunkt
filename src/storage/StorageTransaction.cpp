@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include <HttpResponse.h>
 #include "storage/StorageTransaction.h"
@@ -28,8 +28,7 @@ bool StorageTransaction::shouldAbort() const
 
 CreateFileTransaction::CreateFileTransaction(DataStore& store, VirtualDirectory& parent, VirtualFilesystem& system,
                                              const FileCreationInfo& info)
-    : StorageTransaction(store), info(info), system(&system), parent(&parent),
-      guard(CooperativeSpinlockGuard{parent.lock, true})
+    : StorageTransaction(store), info(info), system(&system), parent(&parent)
 {
 }
 
@@ -37,7 +36,7 @@ CreateFileTransaction::~CreateFileTransaction()
 {
     if(shouldAbort())
     {
-        if(!parent->removeFile(info.id))
+        if(!parent->fileRemove(idx))
         {
             LOG_WARNING("File should not be gone");
         }
@@ -62,9 +61,10 @@ CreateFileTransaction::~CreateFileTransaction()
     }
 }
 
-bool CreateFileTransaction::create(ResultCb callback) const
+bool CreateFileTransaction::create(ResultCb callback)
 {
-    if(!parent->addFile(info))
+    uint32_t idx;
+    if(!parent->fileAdd(info, idx))
     {
         return false;
     }

@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #include "instance/InstanceConfig.h"
+#include "storage/Storage.h"
 #include "storage/vfs/VirtualFilesystem.h"
 
 namespace tpunkt
 {
 
 VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info)
-    : cache(GetInstanceConfig().getNumber(NumberParamKey::STORAGE_MAX_TOTAL_FILES_OR_DIRS))
 {
 }
 
@@ -17,63 +17,64 @@ VirtualFilesystem::~VirtualFilesystem()
 
 VirtualFile* VirtualFilesystem::getFile(const FileID file)
 {
-    VirtualFile* ptr = cache.searchFile(file);
-    if(ptr != nullptr)
-    {
-        return ptr;
-    }
-
     SpinlockGuard guard{systemLock};
 
     dirCache.clear();
     dirCache.push_back(root);
+    auto& store = GetStorage().getDirStore();
 
+    VirtualFile* ptr = nullptr;
     while(!dirCache.empty()) [[likely]]
     {
-        const auto* dir = dirCache.front();
+        const auto idx = dirCache.front();
         dirCache.pop_front();
 
-        ptr = dir->get().searchFile(file);
+        auto& dir = store[ idx ]->get();
+        ptr = dir.searchFile(file);
         if(ptr != nullptr) [[unlikely]]
         {
             return ptr;
         }
-        // TODO file and dir iterator in virtual dir
-    }
 
+        for(const auto& block : dir.getDirs())
+        {
+            dirCache.push_back(block.getIdx());
+        }
+    }
 
     return nullptr;
 }
 
-VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
+VirtualDirectory* VirtualFilesystem::getDir(const FileID file)
 {
-    VirtualDirectory* ptr = cache.searchDir(dir);
-    if(ptr != nullptr)
-    {
-        return ptr;
-    }
-
+    SpinlockGuard guard{systemLock};
 
     dirCache.clear();
     dirCache.push_back(root);
+    auto& store = GetStorage().getDirStore();
 
+    VirtualDirectory* ptr = nullptr;
     while(!dirCache.empty()) [[likely]]
     {
-        const auto* currentDir = dirCache.front();
+        const auto idx = dirCache.front();
         dirCache.pop_front();
 
-        ptr = currentDir->get().searchDir(dir);
+        auto& dir = store[ idx ]->get();
+        ptr = dir.searchDir(file);
         if(ptr != nullptr) [[unlikely]]
         {
             return ptr;
         }
+
+        for(const auto& block : dir.getDirs())
+        {
+            dirCache.push_back(block.getIdx());
+        }
     }
+
     return nullptr;
 }
 
-VirtualDirectory* VirtualFilesystem::getFileDir(FileID file)
-{
-}
 
 
 } // namespace tpunkt

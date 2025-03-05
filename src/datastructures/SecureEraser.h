@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_SECURE_ERASER_H
 #define TPUNKT_SECURE_ERASER_H

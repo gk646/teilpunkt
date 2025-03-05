@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_TIMESTAMP_H
 #define TPUNKT_TIMESTAMP_H
@@ -26,7 +26,7 @@ struct Timestamp
     // zeros the timestamp - always expires
     void zero();
 
-    static Timestamp now();
+    static Timestamp Now();
 
   private:
     uint64_t timestamp;

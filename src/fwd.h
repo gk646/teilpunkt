@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_FWD_H
 #define TPUNKT_FWD_H
@@ -45,9 +45,13 @@ struct FileCreationInfo;
 struct VirtualFilesystem;
 struct VirtualFile;
 struct DTODirectoryInfo;
+struct DTOFileStats;
 
 template <typename T>
 struct BlockStorage;
+
+template <typename T>
+struct BlockNode;
 
 //===== Fixed String =====//
 
@@ -81,17 +85,31 @@ enum class EndpointID : uint16_t
 
 struct FileID final
 {
-    uint32_t file;
-    EndpointID endpoint;
-    bool directory;
-    // 1 byte left
+    FileID() = default;
+    FileID(uint32_t file, EndpointID endpointId,) = default;
 
     [[nodiscard]] bool isDirectory() const
     {
         return directory;
     }
 
+    [[nodiscard]] bool isFile() const
+    {
+        return !directory;
+    }
+
+    [[nodiscard]] uint32_t getID() const
+    {
+        return file;
+    }
+
     bool operator==(const FileID&) const = default;
+
+  private:
+    uint32_t file;
+    EndpointID endpoint;
+    bool directory;
+    // 1 byte left
 };
 
 enum class GroupID : uint16_t

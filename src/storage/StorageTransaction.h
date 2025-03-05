@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Apache License 2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 #ifndef TPUNKT_STORAGE_TRANSACTION_H
 #define TPUNKT_STORAGE_TRANSACTION_H
@@ -52,13 +52,13 @@ struct CreateFileTransaction final : StorageTransaction
     ~CreateFileTransaction() override;
 
     // Queues the create-action
-    bool create(ResultCb callback) const;
+    bool create(ResultCb callback);
 
   private:
     FileCreationInfo info;
     VirtualFilesystem* system = nullptr;
     VirtualDirectory* parent;
-    CooperativeSpinlockGuard guard;
+    FileID file;
     TPUNKT_MACROS_STRUCT(CreateFileTransaction);
 };
 
@@ -80,7 +80,6 @@ struct ReadFileTransaction final : StorageTransaction
     ReadHandle handle;
     TPUNKT_MACROS_MOVE_ONLY(ReadFileTransaction);
 };
-
 
 
 } // namespace tpunkt
