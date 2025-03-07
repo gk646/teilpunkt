@@ -34,7 +34,7 @@ void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* re
     UserID user{};
     FileID file{}; // From request
     StorageEndpoint* endpoint = nullptr;
-
+/*
     {
         const auto ret = GetStorage().endpointGet(user, file.endpoint, endpoint);
         if(ret != StorageStatus::OK)
@@ -118,6 +118,7 @@ void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* re
 
     // Start streaming
     sendChunk();
+    */
 }
 
 } // namespace tpunkt

@@ -56,7 +56,7 @@ struct VirtualDirectory final
 {
     explicit VirtualDirectory(const DirectoryCreationInfo& info);
     ~VirtualDirectory();
-    TPUNKT_MACROS_STRUCT(VirtualDirectory);
+    TPUNKT_MACROS_MOVE_ONLY(VirtualDirectory);
 
     //===== Get =====//
 
@@ -64,7 +64,7 @@ struct VirtualDirectory final
     [[nodiscard]] VirtualFile* searchFile(FileID file);
     [[nodiscard]] VirtualDirectory* searchDir(FileID dir);
 
-    const BlockList<const VirtualDirectory>& getDirs();
+    const BlockList<VirtualDirectory>& getDirs() const;
 
     //===== Contents =====//
 
@@ -73,7 +73,7 @@ struct VirtualDirectory final
     bool fileRemoveAll();
     [[nodiscard]] bool fileExists(const FileName& name) const;
 
-    bool dirAdd(const DirectoryCreationInfo& info);
+    bool dirAdd(const DirectoryCreationInfo& info, uint32_t& idx);
     bool dirRemove(FileID dir); // Only works if dir is empty
     bool dirRemoveAll();
     [[nodiscard]] bool dirExists(const FileName& name) const;

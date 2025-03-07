@@ -19,15 +19,9 @@ struct StorageTransaction
     // Commit the operation
     void commit();
 
-    // Immediately try to abort
-    void abort();
-
-    [[nodiscard]] bool isFinished() const;
+    [[nodiscard]] bool getIsFinished() const;
     // Once set cannot be reset
     void setFinished();
-
-    [[nodiscard]] bool isPaused() const;
-    void setPaused(bool val);
 
     uWS::HttpResponse<true>* response = nullptr;
     uWS::Loop* loop = nullptr;
@@ -38,26 +32,28 @@ struct StorageTransaction
     [[nodiscard]] bool shouldAbort() const;
     TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
 
-  private:
+  protected:
     bool isStarted = false;
+
+  private:
     bool isCommited = false;
-    bool isAborted = false;
-    bool finished = false;
+    bool isFinished = false;
 };
 
 struct CreateFileTransaction final : StorageTransaction
 {
     explicit CreateFileTransaction(DataStore& store, VirtualDirectory& parent, VirtualFilesystem& system,
-                                   const FileCreationInfo& info);
+                                   const FileCreationInfo& info, FileID dir);
     ~CreateFileTransaction() override;
 
     // Queues the create-action
-    bool create(ResultCb callback);
+    bool start(ResultCb callback);
 
   private:
     FileCreationInfo info;
     VirtualFilesystem* system = nullptr;
     VirtualDirectory* parent;
+    FileID dir;
     FileID file;
     TPUNKT_MACROS_STRUCT(CreateFileTransaction);
 };

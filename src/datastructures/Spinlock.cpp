@@ -1,20 +1,18 @@
-
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "datastructures/Spinlock.h"
 
 namespace tpunkt
 {
-Spinlock::Spinlock() : flag(false)
-{
-}
 
-Spinlock::Spinlock(Spinlock&& other) noexcept
+Spinlock& Spinlock::operator=(Spinlock&& other) noexcept
 {
-}
-
-Spinlock& Spinlock::operator=(Spinlock&& other ) noexcept
-{
+    if(this != &other)
+    {
+        flag.store(other.flag.load(std::memory_order_relaxed), std::memory_order_relaxed);
+        other.flag.store(false, std::memory_order_relaxed);
+    }
+    return *this;
 }
 
 bool Spinlock::isLocked() const
@@ -39,14 +37,11 @@ SpinlockGuard::SpinlockGuard(Spinlock& spinlock) : lock(spinlock)
 {
 
     lock.lock();
-    lock.hasGuard = true;
 }
 
 SpinlockGuard::~SpinlockGuard()
 {
-    lock.hasGuard = false;
     lock.unlock();
 }
-
 
 } // namespace tpunkt

@@ -15,19 +15,15 @@
 namespace tpunkt
 {
 
-StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator, bool& success)
+StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator)
     : virtualFilesystem({})
 {
-    if(!success)
-    {
-        return;
-    }
+    FixedString<64> dir;
 
     // Create the global storage endpoint dir - might exist
     if(mkdir(TPUNKT_STORAGE_ENDPOINT_DIR, TPUNKT_INSTANCE_FILE_MODE) != 0 || errno != EEXIST)
     {
         LOG_ERROR("Failed to create endpoint directory:%s", strerror(errno));
-        success = false;
         return;
     }
 
@@ -37,14 +33,13 @@ StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, Endpoint
     if(mkdir(dir.c_str(), TPUNKT_INSTANCE_FILE_MODE) != 0 || errno != EEXIST)
     {
         LOG_ERROR("Failed to create endpoint directory:%s", strerror(errno));
-        success = false;
         return;
     }
 
     switch(info.type)
     {
         case StorageEndpointType::LOCAL_FILE_SYSTEM:
-            dataStore = new LocalFileSystemDatastore(eid, success);
+            dataStore = new LocalFileSystemDatastore(eid);
             break;
         case StorageEndpointType::REMOTE_FILE_SYSTEM:
             LOG_CRITICAL("Not supported");
@@ -77,7 +72,7 @@ StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, c
         return StorageStatus::ERR_INVALID_FILE_NAME;
     }
 
-    new(&action) CreateFileTransaction{*dataStore, *parent, virtualFilesystem, info};
+    new(&action) CreateFileTransaction{*dataStore, *parent, virtualFilesystem, info, dir};
 
     LOG_EVENT(UserAction, FilesystemCreateFile, SUCCESS);
     return StorageStatus::OK;
@@ -98,7 +93,7 @@ StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, 
 
     // action = ReadTransaction();
     ReadHandle handle;
-    //if(!dataStore->initRead(file.file, begin, end, handle))
+    // if(!dataStore->initRead(file.file, begin, end, handle))
     {
         return StorageStatus::ERR_UNSUCCESSFUL;
     }

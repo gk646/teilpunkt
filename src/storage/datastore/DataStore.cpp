@@ -46,7 +46,7 @@ DataStore::DataStore(EndpointID endpoint)
 
     if(mkdir(dir.data(), TPUNKT_INSTANCE_FILE_MODE) != 0 && errno != EEXIST)
     {
-        LOG_CRITICAL("Failed to create datastore directory");
+        LOG_CRITICAL("Failed to create datastore directory: %s", strerror(errno));
     }
 }
 

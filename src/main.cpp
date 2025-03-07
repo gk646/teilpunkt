@@ -38,7 +38,7 @@ int32_t main()
     {
         tpunkt::Logger logger{};
         {
-            tpunkt::CryptoManager crypto{};
+            tpunkt::CryptoContext crypto{};
             tpunkt::InstanceConfig config{};
             tpunkt::Authenticator auth{};
             tpunkt::EventMonitor monitor{};

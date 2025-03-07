@@ -50,12 +50,12 @@ struct BlockStorage final
 
     BlockNode<T>* operator[](const uint32_t idx)
     {
-        return data[ idx ];
+        return &data[ idx ];
     }
 
-    const BlockNode<T>* operator[](const uint32_t idx) const
+    BlockNode<const T>* operator[](const uint32_t idx) const
     {
-        return data[ idx ];
+        return &data[ idx ];
     }
 
     void alloc(uint32_t& idx)
@@ -150,10 +150,10 @@ struct BlockNode final
 template <typename T>
 struct BlockIterator final
 {
-    using NodeType = BlockNode<T>;
-    using PointerType = std::conditional_t<std::is_const_v<T>, const NodeType*, NodeType*>;
+    using PointerType = std::conditional_t<std::is_const_v<T>, const BlockNode<const T>*, BlockNode<T>*>;
+    using StoreType = std::conditional_t<std::is_const_v<T>, const BlockStorage<const T>*, BlockStorage<T>*>;
 
-    BlockIterator(PointerType start, const BlockStorage<BlockNode<T>>* storage) : ptr(start), storage(storage)
+    BlockIterator(PointerType start,StoreType  storage) : ptr(start), storage(storage)
     {
     }
 
@@ -162,12 +162,12 @@ struct BlockIterator final
         return BlockIterator{nullptr, nullptr};
     }
 
-    BlockNode<T>& operator*()
+     BlockNode<T>& operator*()
     {
         return *ptr;
     }
 
-    const BlockNode<T>& operator*() const
+    const BlockNode<const T>& operator*() const
     {
         return *ptr;
     }
@@ -181,7 +181,8 @@ struct BlockIterator final
     {
         if(ptr->hasNext()) [[likely]]
         {
-            ptr = &(*storage)[ ptr->getNext() ];
+            auto& store = *storage;
+            ptr = store[ ptr->getNext() ];
         }
         else
         {
@@ -209,7 +210,7 @@ struct BlockIterator final
 
   private:
     PointerType ptr = nullptr;
-    const BlockStorage<BlockNode<T>>* storage = nullptr;
+    StoreType storage = nullptr;
 };
 
 template <typename T>
@@ -223,11 +224,27 @@ struct BlockList final
         {
             return BlockIterator<T>{nullptr, nullptr};
         }
-        auto& store = getStore();
-        return BlockIterator<T>{store[ start ], store};
+        auto& store = GetStore();
+        auto elem = store[ start ];
+        return BlockIterator<T>{elem, &store};
     }
 
     BlockIterator<T> end()
+    {
+        return BlockIterator<T>{nullptr, nullptr};
+    }
+
+    BlockIterator<T> begin() const
+    {
+        if(elems == 0) [[unlikely]]
+        {
+            return BlockIterator<T>{nullptr, nullptr};
+        }
+        auto& store = GetStore();
+        return BlockIterator<T>{store[ start ], &store};
+    }
+
+    BlockIterator<T> end() const
     {
         return BlockIterator<T>{nullptr, nullptr};
     }
@@ -237,16 +254,17 @@ struct BlockList final
         return elems;
     }
 
-    void add(const T& val, uint32_t& idx)
+    template <typename... Args>
+    void add(uint32_t& idx, Args&&... args)
     {
-        auto& fileStore = getStore();
+        auto& fileStore = GetStore();
 
         uint32_t nextid = UINT32_MAX;
         fileStore.alloc(nextid);
         idx = nextid;
 
         auto* newBlock = fileStore[ nextid ];
-        newBlock->get() = val;
+        new(&newBlock->get()) T{std::forward<Args>(args)...};
 
         if(last == UINT32_MAX) [[unlikely]] // Empty
         {
@@ -269,7 +287,7 @@ struct BlockList final
             return false;
         }
 
-        auto& fileStore = getStore();
+        auto& fileStore = GetStore();
 
         BlockNode<T>* prevPtr = nullptr;
         uint32_t prev = start;
@@ -322,7 +340,7 @@ struct BlockList final
             return false;
         }
 
-        auto& fileStore = getStore();
+        auto& fileStore = GetStore();
         uint32_t it = start;
         while(it != UINT32_MAX)
         {
@@ -343,7 +361,7 @@ struct BlockList final
             return nullptr;
         }
 
-        auto& fileStore = getStore();
+        auto& fileStore = GetStore();
         uint32_t it = start;
         while(it != UINT32_MAX)
         {
@@ -365,7 +383,7 @@ struct BlockList final
         {
             return;
         }
-        auto& fileStore = getStore();
+        auto& fileStore = GetStore();
         uint32_t it = start;
         while(it != UINT32_MAX)
         {
@@ -376,7 +394,7 @@ struct BlockList final
     }
 
   private:
-    BlockStorage<BlockNode<T>>& getStore();
+    static BlockStorage<T>& GetStore();
 
     uint32_t elems = 0;
     uint32_t start = UINT32_MAX;

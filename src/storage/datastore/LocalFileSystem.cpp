@@ -21,13 +21,12 @@ static constexpr int MAX_DIGITS = 14;
 namespace tpunkt
 {
 
-LocalFileSystemDatastore::LocalFileSystemDatastore(const EndpointID endpoint, bool& success)
-    : DataStore(endpoint, success), dirfd(open(dir.c_str(), O_RDONLY | O_DIRECTORY))
+LocalFileSystemDatastore::LocalFileSystemDatastore(const EndpointID endpoint)
+    : DataStore(endpoint), dirfd(open(dir.c_str(), O_RDONLY | O_DIRECTORY))
 {
     if(dirfd == -1)
     {
-        LOG_ERROR("Opening Datastore base directory failed");
-        success = false;
+        LOG_ERROR("Opening Datastore base directory failed: %s", strerror(errno));
     }
 }
 

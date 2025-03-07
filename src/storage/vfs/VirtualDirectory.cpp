@@ -27,7 +27,7 @@ VirtualFile* VirtualDirectory::searchFile(const FileID file)
     {
         return nullptr;
     }
-    return files.get(file.getID());
+    return files.get(file.getBlock());
 }
 
 VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
@@ -38,7 +38,7 @@ VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
         return nullptr;
     }
 
-    return dirs.get(dir.getID());
+    return dirs.get(dir.getBlock());
 }
 
 bool VirtualDirectory::fileAdd(const FileCreationInfo& info, uint32_t& idx)
@@ -49,7 +49,7 @@ bool VirtualDirectory::fileAdd(const FileCreationInfo& info, uint32_t& idx)
         return false;
     }
     DIR_CHANGE;
-    files.add(VirtualFile{info}, idx);
+    files.add(idx, info);
     return true;
 }
 
@@ -61,7 +61,7 @@ bool VirtualDirectory::fileRemove(const FileID file)
         LOG_ERROR("Wrong call");
         return false;
     }
-    const auto result = files.remove(file.getID());
+    const auto result = files.remove(file.getBlock());
     if(result)
     {
         DIR_CHANGE;
@@ -69,7 +69,7 @@ bool VirtualDirectory::fileRemove(const FileID file)
     return result;
 }
 
-bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
+bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info, uint32_t& idx)
 {
     DIR_ACCESS
     if(dirExists(info.name)) [[unlikely]]
@@ -77,7 +77,7 @@ bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
         return false;
     }
     DIR_CHANGE;
-    dirs.add(VirtualDirectory{info});
+    dirs.add(idx, info);
     return true;
 }
 
@@ -89,7 +89,7 @@ bool VirtualDirectory::dirRemove(const FileID dir)
         LOG_ERROR("Wrong call");
         return false;
     }
-    const auto result = dirs.remove(dir.getID());
+    const auto result = dirs.remove(dir.getBlock());
     if(result)
     {
         DIR_CHANGE;

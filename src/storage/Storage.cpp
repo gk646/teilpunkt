@@ -11,23 +11,21 @@ namespace tpunkt
 namespace
 {
 
-StorageEndpoint* GetEndpoint(const EndpointID eid, std::vector<StorageEndpoint>& endpoints)
+StorageEndpoint* GetEndpoint(const EndpointID eid, BlockList<StorageEndpoint>& endpoints)
 {
-    for(auto& ept : endpoints)
+    for(auto& endpoint : endpoints)
     {
-        if(ept.getID() == eid)
+        if(endpoint.getIdx() == static_cast<uint32_t>(eid))
         {
-            return &ept;
+            return &endpoint.get();
         }
     }
     return nullptr;
 }
 
-
 } // namespace
 
-
-StorageStatus Storage::endpointCreate(const UserID user, CreateInfo info)
+StorageStatus Storage::endpointCreate(const UserID user, const StorageEndpointCreateInfo& info)
 {
     SpinlockGuard lock{storageLock};
     const auto adminOnly = GetInstanceConfig().getBool(BoolParamKey::STORAGE_ONLY_ADMIN_CREATE_ENDPOINT);
@@ -37,16 +35,8 @@ StorageStatus Storage::endpointCreate(const UserID user, CreateInfo info)
         return StorageStatus::ERR_NO_ADMIN;
     }
 
-    // I like this option - its simple and doesn't need move - and cleanup is handled in destructor
-    bool success = true;
-    endpoints.emplace_back(info, EndpointID{endpoint}, user, success);
-    if(!success)
-    {
-        endpoints.pop_back();
-        LOG_EVENT(UserAction, EndpointCreate, WARN_OPERATION_FAILED);
-        return StorageStatus::ERR_UNSUCCESSFUL;
-    }
-    endpoint++;
+    uint32_t idx = 0;
+    endpoints.add(idx, info, EndpointID{idx}, user);
 
     LOG_EVENT(UserAction, EndpointCreate, SUCCESS);
     return StorageStatus::OK;
@@ -94,9 +84,9 @@ StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
     SpinlockGuard lock{storageLock};
     for(auto& ept : endpoints)
     {
-        if(ept.getID() == endpointId && ept.canBeRemoved())
+        if(ept.getIdx() == static_cast<uint32_t>(endpointId) && ept.get().canBeRemoved())
         {
-            ept = std::move(endpoints.back());
+            (void)endpoints.remove(static_cast<uint32_t>(endpointId));
             LOG_EVENT(UserAction, EndpointDelete, SUCCESS);
             return StorageStatus::OK;
         }
@@ -106,7 +96,7 @@ StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
     return StorageStatus::ERR_NO_SUCH_ENDPOINT;
 }
 
-//TODO use block storeage
+// TODO use block storage
 
 /*
 FileID getNextFile(const bool isDirectory, const EndpointID endPoint)
@@ -142,5 +132,29 @@ EndpointID Storage::getEndpointID(const bool increment)
 
 */
 
+
+template <typename T>
+BlockStorage<T>& BlockList<T>::GetStore()
+{
+    if constexpr(std::is_same_v<T, VirtualFile>)
+    {
+        return GetStorage().getFileStore();
+    }
+    else if constexpr(std::is_same_v<T, VirtualDirectory>)
+    {
+        return GetStorage().getDirStore();
+    } else if constexpr(std::is_same_v<T, StorageEndpoint>)
+    {
+        return GetStorage().getEndpointStore();
+    }
+    else
+    {
+        static_assert(std::is_same_v<int, VirtualFile>, "Wrong type");
+    }
+}
+
+
+template BlockStorage<VirtualFile>& BlockList<VirtualFile>::GetStore();
+template BlockStorage<VirtualDirectory>& BlockList<VirtualDirectory>::GetStore();
 
 } // namespace tpunkt

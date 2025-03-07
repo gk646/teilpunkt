@@ -42,6 +42,7 @@ struct FileHistory final
 struct VirtualFile final
 {
     explicit VirtualFile(const FileCreationInfo& info);
+    TPUNKT_MACROS_MOVE_ONLY(VirtualFile);
 
   private:
     FileInfo info;
@@ -50,7 +51,6 @@ struct VirtualFile final
     CooperativeSpinlock lock;
     friend Storage;
     friend VirtualDirectory;
-    TPUNKT_MACROS_STRUCT(VirtualFile);
 };
 
 } // namespace tpunkt

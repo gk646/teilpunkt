@@ -44,24 +44,21 @@ struct Storage final
 
     //===== Misc =====//
 
-    using FileStore = BlockStorage<BlockNode<VirtualFile>>;
-    using DirStore = BlockStorage<BlockNode<VirtualDirectory>>;
-
-    [[nodiscard]] FileStore& getFileStore() const;
-    [[nodiscard]] DirStore& getDirStore() const;
+    [[nodiscard]] BlockStorage<VirtualFile>& getFileStore() const;
+    [[nodiscard]] BlockStorage<VirtualDirectory>& getDirStore() const;
+    [[nodiscard]] BlockStorage<StorageEndpoint>& getEndpointStore() const;
 
   private:
-    FileID getNextID(bool isDirectory, EndpointID endPoint);
+    BlockStorage<VirtualFile> fileStore;
+    BlockStorage<VirtualDirectory> dirStore;
+    BlockStorage<StorageEndpoint> endpointStore;
 
-    FileStore fileBlock;
-    DirStore dirBlock;
-    std::vector<StorageEndpoint> endpoints;
+    BlockList<StorageEndpoint> endpoints;
     Spinlock storageLock;
-    uint32_t fileID = 0;
-    uint8_t endpoint = 0;
 };
 
 Storage& GetStorage();
+
 
 } // namespace tpunkt
 

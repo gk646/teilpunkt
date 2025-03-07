@@ -43,19 +43,19 @@ struct StorageEndpointCreateInfo final
 };
 
 // Datastore stores its files in /endpoints/{id}
-struct StorageEndpoint
+struct StorageEndpoint final
 {
-    explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator, bool& success);
+    explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator);
     TPUNKT_MACROS_MOVE_ONLY(StorageEndpoint);
     ~StorageEndpoint();
 
     //===== File Manipulation =====//
 
     StorageStatus fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateFileTransaction& action);
-    StorageStatus fileRemove();
-    StorageStatus fileWrite();
-    StorageStatus fileRename();
+    StorageStatus fileWrite(UserID user, FileID file, WriteFileTransaction& action);
     StorageStatus fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
+    StorageStatus fileRemove(UserID user, FileID file);
+    StorageStatus fileRename(UserID user, FileID file, const FileName& newName);
 
     //===== File Info =====//
 
@@ -74,16 +74,15 @@ struct StorageEndpoint
 
     //===== Storage Info =====//
 
-    [[nodiscard]] EndpointID getID() const;
-
     [[nodiscard]] bool canBeRemoved() const;
+
+    static bool CreateDirs();
 
   private:
     VirtualFilesystem virtualFilesystem;
-    FixedString<64> dir; // Relative directory of the endpoint on disk
     FileName name;
     DataStore* dataStore = nullptr;
-    EndpointID id;
+    UserID creator;
     StorageEndpointType type{};
 };
 

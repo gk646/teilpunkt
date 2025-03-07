@@ -16,59 +16,88 @@ void StorageTransaction::commit()
     isCommited = true;
 }
 
-void StorageTransaction::abort()
+bool StorageTransaction::getIsFinished() const
 {
-    isCommited = false;
+    return isFinished;
+}
+void StorageTransaction::setFinished()
+{
+    isFinished = true;
 }
 
 bool StorageTransaction::shouldAbort() const
 {
-    return !isFinished() || isAborted;
+    return isStarted && (!isFinished || !isCommited);
 }
 
 CreateFileTransaction::CreateFileTransaction(DataStore& store, VirtualDirectory& parent, VirtualFilesystem& system,
-                                             const FileCreationInfo& info)
-    : StorageTransaction(store), info(info), system(&system), parent(&parent)
+                                             const FileCreationInfo& info, const FileID dir)
+    : StorageTransaction(store), info(info), system(&system), parent(&parent), dir(dir)
 {
 }
 
 CreateFileTransaction::~CreateFileTransaction()
 {
-    if(shouldAbort())
+    if(!isStarted)
     {
-        if(!parent->fileRemove(idx))
-        {
-            LOG_WARNING("File should not be gone");
-        }
-        auto cb = [ & ](const bool success)
-        {
-            if(!success)
-            {
-                // TODO requeue task - make sure to delete
-                LOG_ERROR("Failed to delete file - requeuing");
-            }
-            else
-            {
-                auto endFunc = [ & ] { response->end(success ? "Abort success" : "Abort failed"); };
-                loop->defer(endFunc);
-            }
-        };
-        datastore->deleteFile(info.id.file, cb);
+        LOG_ERROR("Transaction not started");
+        response->end("Transaction not started");
     }
     else
     {
-        response->end("Success");
+        if(shouldAbort())
+        {
+            (void)parent->fileRemove(file);
+
+            auto cb = [ & ](const bool success)
+            {
+                if(!success)
+                {
+                    // TODO requeue task - make sure to delete
+                    LOG_ERROR("Failed to delete file - requeuing");
+                }
+                else
+                {
+                    auto endFunc = [ & ]
+                    {
+                        response->writeStatus("500");
+                        response->end();
+                    };
+                    loop->defer(endFunc);
+                }
+            };
+
+
+            datastore->deleteFile(file.getBlock(), cb);
+        }
+        else
+        {
+            auto endFunc = [ & ]
+            {
+                response->writeStatus("200 OK");
+                response->end();
+            };
+            loop->defer(endFunc);
+        }
     }
 }
 
-bool CreateFileTransaction::create(ResultCb callback)
+bool CreateFileTransaction::start(ResultCb callback)
 {
+    isStarted = true;
+
     uint32_t idx;
     if(!parent->fileAdd(info, idx))
     {
         return false;
     }
-    return datastore->createFile(info.id.file, callback);
+    file = FileID{idx, dir.getEndpoint(), false};
+
+    if(!datastore->createFile(idx, callback))
+    {
+        return false;
+    }
+    return true;
 }
 
 } // namespace tpunkt
