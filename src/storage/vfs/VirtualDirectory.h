@@ -3,7 +3,8 @@
 #ifndef TPUNKT_VIRTUAL_DIRECTORY_H
 #define TPUNKT_VIRTUAL_DIRECTORY_H
 
-#include "datastructures/BlockStorage.h"
+#include <forward_list>
+#include "datastructures/BlockAllocator.h"
 #include "storage/vfs/VirtualFile.h"
 
 namespace tpunkt
@@ -23,6 +24,7 @@ struct DirectoryInfo final
     VirtualDirectory* parent = nullptr; // Only null if it's the root of an endpoint
     bool isHidden = false;
     uint32_t idx = UINT32_MAX;
+    FileID id;
 };
 
 struct DirectoryLimits final
@@ -48,6 +50,9 @@ struct DirectoryStats final
     uint32_t accessCount = 0;     // How often directory was accessed
     uint32_t changeCount = 0;     // How often directory was accessed
 
+    uint32_t fileCount = 0;
+    uint32_t dirCount = 0;
+
     uint32_t subdirFileCount = 0; // Files in all subdirectories only
     uint32_t subdirDirCount = 0;  // Dirs in all subdirectories only
 };
@@ -64,22 +69,22 @@ struct VirtualDirectory final
     [[nodiscard]] VirtualFile* searchFile(FileID file);
     [[nodiscard]] VirtualDirectory* searchDir(FileID dir);
 
-    const BlockList<VirtualDirectory>& getDirs() const;
-
     //===== Contents =====//
 
-    bool fileAdd(const FileCreationInfo& info, uint32_t& idx);
+    bool fileAdd(const FileCreationInfo& info);
     bool fileRemove(FileID fileid);
     bool fileRemoveAll();
     [[nodiscard]] bool fileExists(const FileName& name) const;
 
-    bool dirAdd(const DirectoryCreationInfo& info, uint32_t& idx);
+    bool dirAdd(const DirectoryCreationInfo& info);
     bool dirRemove(FileID dir); // Only works if dir is empty
     bool dirRemoveAll();
     [[nodiscard]] bool dirExists(const FileName& name) const;
 
+    std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getFiles();
+
     // Returns true if a file with the given size fits into this directory - needs to check all parents
-    [[nodiscard]] bool canFit(uint64_t fileSize) const;
+    [[nodiscard]] bool canFit(uint64_t fileSize);
 
     //===== Self =====//
 
@@ -102,8 +107,8 @@ struct VirtualDirectory final
     DirectoryPerms perms;
     DirectoryLimits limits;
 
-    BlockList<VirtualFile> files;
-    BlockList<VirtualDirectory> dirs;
+    std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>> files;
+    std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>> dirs;
 };
 
 } // namespace tpunkt

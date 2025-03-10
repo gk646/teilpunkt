@@ -20,25 +20,23 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
     SpinlockGuard guard{systemLock};
 
     dirCache.clear();
-    dirCache.push_back(root);
-    auto& store = GetStorage().getDirStore();
+    dirCache.push_back(&root);
 
     VirtualFile* ptr = nullptr;
     while(!dirCache.empty()) [[likely]]
     {
-        const auto idx = dirCache.front();
+        auto* curr = dirCache.front();
         dirCache.pop_front();
 
-        auto& dir = store[ idx ]->get();
-        ptr = dir.searchFile(file);
+        ptr = curr->searchFile(file);
         if(ptr != nullptr) [[unlikely]]
         {
             return ptr;
         }
 
-        for(const auto& block : dir.getDirs())
+        for(auto& dir : curr->getFiles())
         {
-            dirCache.push_back(block.getIdx());
+            dirCache.push_back(&dir);
         }
     }
 
@@ -74,7 +72,6 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID file)
 
     return nullptr;
 }
-
 
 
 } // namespace tpunkt

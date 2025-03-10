@@ -7,6 +7,7 @@ namespace tpunkt
 {
 
 #define DIR_ACCESS                                                                                                     \
+    CooperativeSpinlockGuard guard{lock, false};                                                                       \
     stats.accessCount++;                                                                                               \
     stats.lastAccess = Timestamp::Now();
 
@@ -27,7 +28,11 @@ VirtualFile* VirtualDirectory::searchFile(const FileID file)
     {
         return nullptr;
     }
-    return files.get(file.getBlock());
+    for(auto& savedFile : files)
+    {
+        return &savedFile;
+    }
+    return nullptr;
 }
 
 VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
@@ -38,78 +43,103 @@ VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
         return nullptr;
     }
 
-    return dirs.get(dir.getBlock());
+    for(auto& savedDir : dirs)
+    {
+        return &savedDir;
+    }
+    return nullptr;
 }
 
-bool VirtualDirectory::fileAdd(const FileCreationInfo& info, uint32_t& idx)
+bool VirtualDirectory::fileAdd(const FileCreationInfo& info)
 {
-    DIR_ACCESS
-    if(fileExists(info.name)) [[unlikely]]
     {
-        return false;
+        DIR_ACCESS
+        if(fileExists(info.name)) [[unlikely]]
+        {
+            return false;
+        }
     }
+    CooperativeSpinlockGuard guard{lock, true};
     DIR_CHANGE;
-    files.add(idx, info);
+    stats.fileCount++;
+    files.emplace_front(info);
     return true;
 }
 
+
 bool VirtualDirectory::fileRemove(const FileID file)
 {
-    DIR_ACCESS
-    if(file.isDirectory()) [[unlikely]]
     {
-        LOG_ERROR("Wrong call");
-        return false;
+        DIR_ACCESS
+        if(file.isDirectory()) [[unlikely]]
+        {
+            LOG_ERROR("Wrong call");
+            return false;
+        }
     }
-    const auto result = files.remove(file.getBlock());
+    CooperativeSpinlockGuard guard{lock, true};
+    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.info.id == file; }) > 0;
     if(result)
     {
-        DIR_CHANGE;
+        DIR_CHANGE
     }
     return result;
 }
 
-bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info, uint32_t& idx)
+bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
 {
-    DIR_ACCESS
-    if(dirExists(info.name)) [[unlikely]]
     {
-        return false;
+        DIR_ACCESS
+        if(dirExists(info.name)) [[unlikely]]
+        {
+            return false;
+        }
     }
+    CooperativeSpinlockGuard guard{lock, true};
     DIR_CHANGE;
-    dirs.add(idx, info);
+    stats.dirCount++;
+    dirs.emplace_front(info);
     return true;
 }
 
 bool VirtualDirectory::dirRemove(const FileID dir)
 {
-    DIR_ACCESS
-    if(dir.isFile())
     {
-        LOG_ERROR("Wrong call");
-        return false;
+        DIR_ACCESS
+        if(dir.isFile())
+        {
+            LOG_ERROR("Wrong call");
+            return false;
+        }
     }
-    const auto result = dirs.remove(dir.getBlock());
+    CooperativeSpinlockGuard guard{lock, true};
+    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.info.id == dir; }) > 0;
     if(result)
     {
-        DIR_CHANGE;
+        DIR_CHANGE
     }
     return result;
 }
 
 bool VirtualDirectory::fileRemoveAll()
 {
-    DIR_ACCESS
-    const auto result = files.removeAll();
-    if(result)
+    bool changed = false;
     {
+        DIR_ACCESS
+        changed = stats.fileCount > 0;
+    }
+    if(changed)
+    {
+        CooperativeSpinlockGuard guard{lock, true};
+        files.clear();
         DIR_CHANGE;
     }
-    return result;
+    return changed;
 }
 
-bool VirtualDirectory::canFit(const uint64_t fileSize) const
+bool VirtualDirectory::canFit(const uint64_t fileSize)
 {
+    DIR_ACCESS
     const VirtualDirectory* current = this;
     while(current != nullptr)
     {

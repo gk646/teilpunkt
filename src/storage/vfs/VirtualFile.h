@@ -22,6 +22,7 @@ struct FileInfo final
 {
     FileName name;
     UserID creator = UserID::INVALID;
+    FileID id;
 };
 
 struct FileStats final

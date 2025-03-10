@@ -42,18 +42,7 @@ struct Storage final
     // Deletes the given endpoint
     StorageStatus endpointDelete(UserID user, EndpointID endpointId);
 
-    //===== Misc =====//
-
-    [[nodiscard]] BlockStorage<VirtualFile>& getFileStore() const;
-    [[nodiscard]] BlockStorage<VirtualDirectory>& getDirStore() const;
-    [[nodiscard]] BlockStorage<StorageEndpoint>& getEndpointStore() const;
-
   private:
-    BlockStorage<VirtualFile> fileStore;
-    BlockStorage<VirtualDirectory> dirStore;
-    BlockStorage<StorageEndpoint> endpointStore;
-
-    BlockList<StorageEndpoint> endpoints;
     Spinlock storageLock;
 };
 

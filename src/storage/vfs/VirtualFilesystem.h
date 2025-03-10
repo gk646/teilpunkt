@@ -27,8 +27,8 @@ struct VirtualFilesystem
     VirtualDirectory* getFileDir(FileID file);
 
   private:
-    std::deque<uint32_t> dirCache;
-    uint32_t root = UINT32_MAX;
+    std::deque<VirtualDirectory*> dirCache;
+    VirtualDirectory root;
     Spinlock systemLock;
 };
 
