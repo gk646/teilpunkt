@@ -9,7 +9,6 @@ namespace tpunkt
     void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     {
         const auto& server = GetWebServer();
-
         auto* request = const_cast<char*>(req->getUrl().data());
         request[req->getUrl().size()] = '\0';
 

@@ -7,22 +7,48 @@
 
 namespace tpunkt
 {
-    // Zeroes the given memory in its destructor - makes cleaning up objects clean and non-fallible
-    template <typename T>
-    struct SecureEraser final
+// Zeroes the given memory in its destructor - makes cleaning up objects clean and non-fallible
+template <typename T>
+struct SecureEraser final
+{
+    explicit SecureEraser(T& obj) : object(&obj)
     {
-        explicit SecureEraser(T& obj) : object(obj)
-        {
-        }
+    }
 
-        ~SecureEraser()
-        {
-            sodium_memzero(&object, sizeof(T));
-        }
+    ~SecureEraser()
+    {
+        sodium_memzero(object, sizeof(T));
+    }
 
-      private:
-        T& object;
-    };
+  private:
+    T* object;
+};
+
+template <typename Func>
+struct AbortTransaction final
+{
+
+    explicit AbortTransaction(Func func) : func(func)
+    {
+    }
+
+    ~AbortTransaction()
+    {
+        if(aborted)
+        {
+            func();
+        }
+    }
+
+    void commit()
+    {
+        aborted = true;
+    }
+
+  private:
+    Func func;
+    bool aborted = false;
+};
 
 } // namespace tpunkt
 

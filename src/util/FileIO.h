@@ -28,7 +28,6 @@ struct File final
     TPUNKT_MACROS_STRUCT(File);
 };
 
-
 struct FileStream final
 {
 

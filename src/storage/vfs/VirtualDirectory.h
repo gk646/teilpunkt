@@ -66,8 +66,8 @@ struct VirtualDirectory final
     //===== Get =====//
 
     // Only local search - non-recursive
-    [[nodiscard]] VirtualFile* searchFile(FileID file);
-    [[nodiscard]] VirtualDirectory* searchDir(FileID dir);
+    VirtualFile* searchFile(FileID file);
+    VirtualDirectory* searchDir(FileID dir);
 
     //===== Contents =====//
 
@@ -81,35 +81,40 @@ struct VirtualDirectory final
     bool dirRemoveAll();
     [[nodiscard]] bool dirExists(const FileName& name) const;
 
-    std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getFiles();
+    std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getDirs();
 
     // Returns true if a file with the given size fits into this directory - needs to check all parents
-    [[nodiscard]] bool canFit(uint64_t fileSize);
+    [[nodiscard]] bool canFit(uint64_t fileSize) const;
 
     //===== Self =====//
 
-    bool rename(const FileName& name);
+    void rename(const FileName& name);
 
     //===== DTO =====//
 
     void dtoInfo(DTOFileInfo& info);
     void dtoStats(DTOFileStats& stats);
 
-    CooperativeSpinlock lock;
+    mutable CooperativeSpinlock lock;
 
   private:
-    using DirFunc = void (*)(VirtualDirectory& file);
+    void onAccess() const;
+    void onChange() const;
+
+    // Returns true on change
+    using DirFunc = bool (*)(VirtualDirectory& file);
     // Called for each parent up to the root
     void propagateChange(DirFunc func) const;
 
     DirectoryInfo info;
-    DirectoryStats stats;
+    mutable DirectoryStats stats;
     DirectoryPerms perms;
     DirectoryLimits limits;
 
     std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>> files;
     std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>> dirs;
 };
+
 
 } // namespace tpunkt
 

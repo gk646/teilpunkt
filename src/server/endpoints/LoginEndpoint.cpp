@@ -4,9 +4,9 @@
 
 namespace tpunkt
 {
-    void LoginEndpoint::handle(uWS::HttpResponse<true>* /**/ , uWS::HttpRequest* /**/)
-    {
 
-    }
+void LoginEndpoint::handle(uWS::HttpResponse<true>* /**/, uWS::HttpRequest* /**/)
+{
+}
 
 } // namespace tpunkt

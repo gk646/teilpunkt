@@ -9,6 +9,7 @@
 Note: This made to compile with GCC and for a Linux kernel as open source is essential for security.
 
 **Feature Highlights:**
+
 - Audit Logging with plugin API
 
 ## Authentication
@@ -87,28 +88,30 @@ These are the active (and passive) security measures used by `teilpunkt`.
     - Create, Login or Remove users
     - Change settings, etc.
 - Also handles chunked file transfer:
-  - Use of non-blocking sockets allows to have many connections even per thread
+    - Use of non-blocking sockets allows to have many connections even per thread
 
 #### Worker Threads _(1-2):_
-- Priority-based queue worker system 
-  - Only run tasks that are explicitly given to them
+
+- Priority-based queue worker system
+    - Only run tasks that are explicitly given to them
 
 #### Background Thread _(1):_
+
 - Runs an event loop to schedule set tasks
-  - Send audit logs 
-  - Invoke plugins
-  - 
+    - Send audit logs
+    - Invoke plugins
+    -
 
 This means it runs hardware concurrent on devices with 4+ cores.
 
-
 ### Instance
 
-The executable 
+The executable
 
 ### Files and Data
 
 Data is generally handled in **32kb** chunks. Specifically chunking is used for:
+
 - HTTP messages
 - Filesystem I/O
 - Encryption/Decryption

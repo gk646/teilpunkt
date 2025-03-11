@@ -40,7 +40,7 @@
 #define TPUNKT_SERVER_STATIC_FILES_LEN 25
 
 // Directory that contains all static files to preload
-#define TPUNKT_SERVER_STATIC_FILES_DIR "../static"
+#define TPUNKT_SERVER_STATIC_FILES_DIR "../frontend"
 
 // Server Port - HTTPS port
 #define TPUNKT_SERVER_PORT 8080

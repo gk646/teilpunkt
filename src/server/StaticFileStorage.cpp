@@ -11,6 +11,7 @@
 
 namespace tpunkt
 {
+
 static const char* getMimeType(const char* path)
 {
     constexpr struct
@@ -48,6 +49,7 @@ static const char* getMimeType(const char* path)
 
 static void iterateDirectory(const char* dir, int& index, StaticFile* staticFiles)
 {
+    const auto basePathLength = strlen(TPUNKT_SERVER_STATIC_FILES_DIR);
     if(index == TPUNKT_SERVER_STATIC_FILES_LEN)
     {
         LOG_CRITICAL("Too many static files");
@@ -96,8 +98,10 @@ static void iterateDirectory(const char* dir, int& index, StaticFile* staticFile
                 }
 
                 // Name
-                char* name = TPUNKT_ALLOC(name, strlen(path) - 8);
-                strncpy(name, path + 9, strlen(path) - 8);
+                const size_t nameLength = strlen(path) - basePathLength;
+                char* name = TPUNKT_ALLOC(name, nameLength + 1);
+                strncpy(name, path + basePathLength, nameLength);
+                name[nameLength] = '\0';
 
                 // Content
                 char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);

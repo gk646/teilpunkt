@@ -11,6 +11,7 @@
 
 namespace tpunkt
 {
+
 struct Buffer final
 {
     explicit Buffer(const size_t initialCapacity = 64) : cap(initialCapacity)

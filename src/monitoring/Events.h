@@ -55,6 +55,7 @@ enum class EventStatus : uint8_t
     // Info
     INFO,                   //----------------
     SUCCESS,                // Generic success
+    FAIL_SERVER_OPERATION,  // A server operation failed
     FAIL_INVALID_CREDENTIALS,
     FAIL_INVALID_TOKEN,
     FAIL_CONFIG_RESTRICTED, // Prevented due to instance config

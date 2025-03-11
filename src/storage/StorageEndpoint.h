@@ -42,6 +42,15 @@ struct StorageEndpointCreateInfo final
     StorageEndpointType type{};
 };
 
+struct StorageEndpointInfo final
+{
+    FileName name;
+    uint64_t maxSize = 0; // Max size in bytes
+    StorageEndpointType type = StorageEndpointType::LOCAL_FILE_SYSTEM;
+    UserID creator = UserID::INVALID;
+    EndpointID eid = EndpointID::INVALID;
+};
+
 // Datastore stores its files in /endpoints/{id}
 struct StorageEndpoint final
 {
@@ -74,16 +83,17 @@ struct StorageEndpoint final
 
     //===== Storage Info =====//
 
+    [[nodiscard]] const StorageEndpointInfo& getInfo() const;
+
+    // True if no active usages
     [[nodiscard]] bool canBeRemoved() const;
 
-    static bool CreateDirs();
+    static bool CreateDirs(EndpointID eid);
 
   private:
     VirtualFilesystem virtualFilesystem;
-    FileName name;
+    StorageEndpointInfo info;
     DataStore* dataStore = nullptr;
-    UserID creator;
-    StorageEndpointType type{};
 };
 
 } // namespace tpunkt

@@ -4,3 +4,6 @@
 [submodule "external/ankerl"]
 	path = external/ankerl
 	url = https://github.com/martinus/unordered_dense.git
+[submodule "external/glaze"]
+	path = external/glaze
+	url = https://github.com/stephenberry/glaze.git

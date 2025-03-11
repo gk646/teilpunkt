@@ -28,7 +28,7 @@ struct VirtualFilesystem
 
   private:
     std::deque<VirtualDirectory*> dirCache;
-    VirtualDirectory root;
+    VirtualDirectory* root = nullptr;
     Spinlock systemLock;
 };
 

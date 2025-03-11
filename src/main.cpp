@@ -2,20 +2,23 @@
 
 #include <csignal>
 #include <sodium/core.h>
-#include "util/Logging.h"
-#include "server/WebServer.h"
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
+#include "server/WebServer.h"
+#include "uac/UserAccessControl.h"
+#include "util/Logging.h"
 
 namespace
 {
-    void handle_shutdown_signal(const int signal)
+
+void handle_shutdown_signal(const int signal)
+{
+    if(signal != SIGTRAP)
     {
-        if(signal != SIGTRAP)
-        {
-            tpunkt::GetWebServer().stop();
-        }
+        tpunkt::GetWebServer().stop();
     }
+}
+
 } // namespace
 
 
@@ -42,6 +45,7 @@ int32_t main()
             tpunkt::InstanceConfig config{};
             tpunkt::Authenticator auth{};
             tpunkt::EventMonitor monitor{};
+            tpunkt::UserAccessControl uac{};
 
             tpunkt::WebServer server{};
             server.run();

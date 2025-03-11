@@ -1,9 +1,29 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <uac/UserAccessControl.h>
+#include "uac/UserAccessControl.h"
+#include "util/Logging.h"
+#include "util/Macros.h"
 
 namespace tpunkt
 {
+namespace global
+{
+UserAccessControl* UserAccessControl;
+}
+
+UserAccessControl::UserAccessControl()
+{
+    TPUNKT_MACROS_GLOBAL_ASSIGN(UserAccessControl);
+}
+UserAccessControl::~UserAccessControl()
+{
+    TPUNKT_MACROS_GLOBAL_RESET(UserAccessControl);
+}
+
+UserAccessControl& GetUAC()
+{
+    TPUNKT_MACROS_GLOBAL_GET(UserAccessControl);
+}
 
 UACStatus UserAccessControl::userCanWrite(UserID user, FileID file, uint64_t newSize)
 {
@@ -12,6 +32,7 @@ UACStatus UserAccessControl::userCanWrite(UserID user, FileID file, uint64_t new
 
     return UACStatus::OK;
 }
+
 UACStatus UserAccessControl::userCanAction(UserID user, FileID file, PermissionFlag flag)
 {
     SpinlockGuard guard{uacLock};

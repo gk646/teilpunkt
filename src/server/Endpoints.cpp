@@ -1,10 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-/*#include <httplib/httplib.h>
 #include "server/Endpoints.h"
 
-void ServerEndpoint::rejectRequest(httplib::Response& res, const httplib::StatusCode& status)
+namespace tpunkt
 {
-    res.status = status;
+bool ServerEndpoint::AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+{
+    return false;
 }
-*/
+
+bool ServerEndpoint::HandleRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+{
+    return false;
+}
+
+void ServerEndpoint::RejectRequest(uWS::HttpResponse<true>* res, int code, const char* reason)
+{
+}
+
+} // namespace tpunkt

@@ -87,7 +87,7 @@ bool CreateFileTransaction::start(ResultCb callback)
     isStarted = true;
 
     uint32_t idx;
-    if(!parent->fileAdd(info, idx))
+    if(!parent->fileAdd(info))
     {
         return false;
     }

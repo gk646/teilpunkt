@@ -229,4 +229,11 @@ AuthStatus Authenticator::getWrappedKey(const AuthToken& token, FileID handle, S
     }
 }
 
+AuthStatus Authenticator::getIsAdmin(UserID user)
+{
+    SpinlockGuard lock{authLock};
+    // TODO
+    return AuthStatus::INVALID;
+}
+
 } // namespace tpunkt

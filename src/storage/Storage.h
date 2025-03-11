@@ -40,14 +40,16 @@ struct Storage final
     StorageStatus endpointGet(UserID user, EndpointID endpointId, StorageEndpoint*& ept);
 
     // Deletes the given endpoint
-    StorageStatus endpointDelete(UserID user, EndpointID endpointId);
+    StorageStatus endpointDelete(UserID user, EndpointID endpoint);
 
   private:
+    std::forward_list<StorageEndpoint, SharedBlockAllocator<StorageEndpoint>> endpoints;
     Spinlock storageLock;
+    uint32_t endpointID = 0;
+    uint32_t filesID = 0;
 };
 
 Storage& GetStorage();
-
 
 } // namespace tpunkt
 

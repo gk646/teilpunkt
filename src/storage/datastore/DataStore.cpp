@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cerrno>
-#include <charconv>
 #include <cstdio>
 #include <sys/stat.h>
 #include "datastructures/FixedString.h"
 #include "storage/datastore/DataStore.h"
 #include "util/Logging.h"
+#include "util/Wrapper.h"
 
 namespace tpunkt
 {
@@ -37,17 +37,27 @@ bool WriteHandle::isDone() const
 
 DataStore::DataStore(EndpointID endpoint)
 {
-    const auto endpointID = static_cast<int>(endpoint);
-    if(snprintf(dir.data(), dir.capacity(), "%s/%d/%s", TPUNKT_STORAGE_ENDPOINT_DIR, endpointID,
+    const auto endpointNum = static_cast<int>(endpoint);
+    (void)snprintf(dir.data(), dir.capacity(), "%s/%d/%s", TPUNKT_STORAGE_ENDPOINT_DIR, endpointNum,
+                   TPUNKT_STORAGE_DATASTORE_DIR);
+}
+
+bool DataStore::CreateDirs(EndpointID endpoint)
+{
+    FixedString<64> dir;
+    const auto endpointNum = static_cast<int>(endpoint);
+    if(snprintf(dir.data(), dir.capacity(), "%s/%d/%s", TPUNKT_STORAGE_ENDPOINT_DIR, endpointNum,
                 TPUNKT_STORAGE_DATASTORE_DIR) < 0)
     {
         LOG_CRITICAL("Failed to format datastore directory name");
     }
 
-    if(mkdir(dir.data(), TPUNKT_INSTANCE_FILE_MODE) != 0 && errno != EEXIST)
+    if(CreateRelDir(dir.data(), true))
     {
-        LOG_CRITICAL("Failed to create datastore directory: %s", strerror(errno));
+        return false;
     }
+
+    return true;
 }
 
 } // namespace tpunkt

@@ -9,6 +9,8 @@ namespace tpunkt
 
 VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info)
 {
+    root = SharedBlockAllocator<VirtualDirectory>{}.allocate(1);
+    new(root) VirtualDirectory(info);
 }
 
 VirtualFilesystem::~VirtualFilesystem()
@@ -20,12 +22,12 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
     SpinlockGuard guard{systemLock};
 
     dirCache.clear();
-    dirCache.push_back(&root);
+    dirCache.push_back(root);
 
     VirtualFile* ptr = nullptr;
     while(!dirCache.empty()) [[likely]]
     {
-        auto* curr = dirCache.front();
+        VirtualDirectory* curr = dirCache.front();
         dirCache.pop_front();
 
         ptr = curr->searchFile(file);
@@ -34,7 +36,7 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
             return ptr;
         }
 
-        for(auto& dir : curr->getFiles())
+        for(auto& dir : curr->getDirs())
         {
             dirCache.push_back(&dir);
         }
@@ -43,30 +45,27 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
     return nullptr;
 }
 
-VirtualDirectory* VirtualFilesystem::getDir(const FileID file)
+VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
 {
     SpinlockGuard guard{systemLock};
-
     dirCache.clear();
     dirCache.push_back(root);
-    auto& store = GetStorage().getDirStore();
 
     VirtualDirectory* ptr = nullptr;
     while(!dirCache.empty()) [[likely]]
     {
-        const auto idx = dirCache.front();
+        auto* curr = dirCache.front();
         dirCache.pop_front();
 
-        auto& dir = store[ idx ]->get();
-        ptr = dir.searchDir(file);
+        ptr = curr->searchDir(dir);
         if(ptr != nullptr) [[unlikely]]
         {
             return ptr;
         }
 
-        for(const auto& block : dir.getDirs())
+        for(auto& savedDir : curr->getDirs())
         {
-            dirCache.push_back(block.getIdx());
+            dirCache.push_back(&savedDir);
         }
     }
 

@@ -34,6 +34,7 @@ target_include_directories(teilpunkt PRIVATE
         src
         external/uWebSocket/src
         external/uWebSocket/uSockets/src
+        external/glaze
 )
 
 # ------------------------------

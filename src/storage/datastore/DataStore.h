@@ -58,6 +58,8 @@ struct DataStore
     explicit DataStore(EndpointID endpoint);
     virtual ~DataStore() = default;
 
+    static bool CreateDirs(EndpointID endpoint);
+
     virtual bool createFile(uint32_t fileID, ResultCb callback) = 0;
 
     virtual bool deleteFile(uint32_t fileID, ResultCb callback) = 0;

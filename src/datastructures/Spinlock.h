@@ -41,13 +41,11 @@ struct SpinlockGuard final
 // If a writer is waiting don't allow new readers
 struct CooperativeSpinlock final
 {
-    CooperativeSpinlock();
+    CooperativeSpinlock() = default;
     CooperativeSpinlock(const CooperativeSpinlock&) = delete;
     CooperativeSpinlock& operator=(const CooperativeSpinlock&) = delete;
     CooperativeSpinlock(CooperativeSpinlock&&) = delete;
     CooperativeSpinlock& operator=(CooperativeSpinlock&&) noexcept;
-
-    [[nodiscard]] bool isLocked() const;
 
   private:
     void coopAdd();

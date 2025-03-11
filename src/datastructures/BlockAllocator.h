@@ -2,6 +2,7 @@
 #define TPUNKT_BLOCK_ALLOCATOR
 
 #include <sys/mman.h>
+#include "datastructures/Spinlock.h"
 
 namespace tpunkt
 {
@@ -28,7 +29,7 @@ struct BlockAllocator final
 {
     explicit BlockAllocator(const size_t capacity) : capacity(capacity)
     {
-        const auto totalSize = capacity * sizeof(BlockNode<T>);
+        const auto totalSize = capacity * sizeof(T);
         data = TPUNKT_MMAP(data, totalSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS);
     }
 
@@ -40,6 +41,7 @@ struct BlockAllocator final
 
     T* allocate(const size_t n)
     {
+        SpinlockGuard guard{lock};
         if(n > 1)
         {
             LOG_FATAL("Invalid size");
@@ -47,7 +49,15 @@ struct BlockAllocator final
 
         if(freeIndex == nullptr)
         {
-            return data[ size++ ];
+            if(size == capacity) [[unlikely]]
+            {
+                LOG_FATAL("No space");
+            }
+            else if(size >= static_cast<size_t>(static_cast<float>(capacity) * 0.9F)) [[unlikely]]
+            {
+                LOG_WARNING("Block Storage almost full");
+            }
+            return &data[ size++ ];
         }
 
         const auto lastFree = (T*)freeIndex;
@@ -57,22 +67,23 @@ struct BlockAllocator final
         }
         else
         {
-            freeIndex = data[ *freeIndex ];
+            freeIndex = (size_t*)&data[ *freeIndex ];
         }
         return lastFree;
     }
 
     void deallocate(T* ptr, size_t /**/)
     {
+        SpinlockGuard guard{lock};
         if(freeIndex == nullptr)
         {
-            freeIndex = static_cast<size_t*>(ptr);
+            freeIndex = (size_t*)ptr;
             *freeIndex = UINT32_MAX;
         }
         else
         {
             const auto lastFreeIndex = ptr - data;
-            freeIndex = static_cast<size_t*>(ptr);
+            freeIndex = (size_t*)ptr;
             *freeIndex = lastFreeIndex;
         }
     }
@@ -82,6 +93,7 @@ struct BlockAllocator final
     size_t* freeIndex = nullptr;
     size_t capacity = 0;
     size_t size = 0;
+    Spinlock lock;
 };
 
 
@@ -97,6 +109,12 @@ struct SharedBlockAllocator
             alloc = new BlockAllocator<T>(1000);
         }
     }
+    template <typename U>
+    explicit SharedBlockAllocator(const SharedBlockAllocator<U>& other)
+    {
+
+    }
+
 
     value_type* allocate(size_t n)
     {
@@ -109,8 +127,11 @@ struct SharedBlockAllocator
     }
 
   private:
-    static constexpr BlockAllocator<T>* alloc = nullptr;
+    static BlockAllocator<T>* alloc;
 };
+
+template <typename T>
+BlockAllocator<T>* SharedBlockAllocator<T>::alloc = nullptr;
 
 } // namespace tpunkt
 

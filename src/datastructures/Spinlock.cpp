@@ -44,4 +44,25 @@ SpinlockGuard::~SpinlockGuard()
     lock.unlock();
 }
 
+void CooperativeSpinlock::coopAdd()
+{
+    while(exclusiveWaiting || exclusive)
+    {
+    }
+    ++coopCount;
+}
+
+void CooperativeSpinlock::coopRemove()
+{
+
+}
+
+
+void CooperativeSpinlock::exclusiveAdd()
+{
+}
+void CooperativeSpinlock::exclusiveRemove()
+{
+}
+
 } // namespace tpunkt

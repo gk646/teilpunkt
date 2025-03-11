@@ -8,23 +8,6 @@
 namespace tpunkt
 {
 
-namespace
-{
-
-StorageEndpoint* GetEndpoint(const EndpointID eid, BlockList<StorageEndpoint>& endpoints)
-{
-    for(auto& endpoint : endpoints)
-    {
-        if(endpoint.getIdx() == static_cast<uint32_t>(eid))
-        {
-            return &endpoint.get();
-        }
-    }
-    return nullptr;
-}
-
-} // namespace
-
 StorageStatus Storage::endpointCreate(const UserID user, const StorageEndpointCreateInfo& info)
 {
     SpinlockGuard lock{storageLock};
@@ -35,8 +18,16 @@ StorageStatus Storage::endpointCreate(const UserID user, const StorageEndpointCr
         return StorageStatus::ERR_NO_ADMIN;
     }
 
-    uint32_t idx = 0;
-    endpoints.add(idx, info, EndpointID{idx}, user);
+    const auto eid = EndpointID{endpointID++};
+    if(StorageEndpoint::CreateDirs( eid))
+    {
+        endpoints.emplace_front(info, eid, user);
+    }
+    else
+    {
+        LOG_EVENT(UserAction, EndpointCreate, FAIL_SERVER_OPERATION);
+        return StorageStatus::ERR_UNSUCCESSFUL;
+    }
 
     LOG_EVENT(UserAction, EndpointCreate, SUCCESS);
     return StorageStatus::OK;
@@ -68,93 +59,37 @@ StorageStatus Storage::endpointCreateFrom(const UserID user, CreateInfo info, co
 StorageStatus Storage::endpointGet(UserID user, const EndpointID endpointId, StorageEndpoint*& ept)
 {
     SpinlockGuard lock{storageLock};
-    auto* endpoint = GetEndpoint(endpointId, endpoints);
-    if(endpoint == nullptr) [[unlikely]]
+
+    StorageEndpoint* endpointPtr = nullptr;
+    for(auto& savedEp : endpoints)
+    {
+        if(savedEp.getInfo().eid == endpointId)
+        {
+            endpointPtr = &savedEp;
+        }
+    }
+    if(endpointPtr == nullptr) [[unlikely]]
     {
         LOG_EVENT(UserAction, EndpointGet, FAIL_NO_SUCH_ENDPOINT);
         return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
-    ept = endpoint;
+    ept = endpointPtr;
     LOG_EVENT(UserAction, EndpointGet, SUCCESS);
     return StorageStatus::OK;
 }
 
-StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpointId)
+StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpoint)
 {
     SpinlockGuard lock{storageLock};
-    for(auto& ept : endpoints)
+    const auto res =
+        endpoints.remove_if([ & ](const StorageEndpoint& ept) { return ept.getInfo().eid == endpoint; }) > 0;
+    if(!res)
     {
-        if(ept.getIdx() == static_cast<uint32_t>(endpointId) && ept.get().canBeRemoved())
-        {
-            (void)endpoints.remove(static_cast<uint32_t>(endpointId));
-            LOG_EVENT(UserAction, EndpointDelete, SUCCESS);
-            return StorageStatus::OK;
-        }
+        LOG_EVENT(UserAction, EndpointDelete, FAIL_NO_SUCH_ENDPOINT);
+        return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
-
-    LOG_EVENT(UserAction, EndpointDelete, FAIL_NO_SUCH_ENDPOINT);
-    return StorageStatus::ERR_NO_SUCH_ENDPOINT;
+    LOG_EVENT(UserAction, EndpointDelete, SUCCESS);
+    return StorageStatus::OK;
 }
 
-// TODO use block storage
-
-/*
-FileID getNextFile(const bool isDirectory, const EndpointID endPoint)
-{
-    SpinlockGuard lock{storageLock};
-    if(fileID >= (UINT32_MAX - 100))
-    {
-        LOG_WARNING("Getting close to file limit");
-    }
-    else if(fileID == UINT32_MAX)
-    {
-        LOG_CRITICAL("Cannot create new file");
-    }
-    return FileID{.file = fileID++, .endpoint = endPoint, .isDirectory = isDirectory};
 }
-
-EndpointID Storage::getEndpointID(const bool increment)
-{
-    if(increment)
-    {
-        return EndpointID{endpoint++};
-    }
-    if(endpoint >= (UINT8_MAX - 10))
-    {
-        LOG_WARNING("Getting close to endpoint limit");
-    }
-    else if(endpoint == UINT8_MAX)
-    {
-        LOG_CRITICAL("Cannot create new endpoint");
-    }
-    return EndpointID{endpoint};
-}
-
-*/
-
-
-template <typename T>
-BlockStorage<T>& BlockList<T>::GetStore()
-{
-    if constexpr(std::is_same_v<T, VirtualFile>)
-    {
-        return GetStorage().getFileStore();
-    }
-    else if constexpr(std::is_same_v<T, VirtualDirectory>)
-    {
-        return GetStorage().getDirStore();
-    } else if constexpr(std::is_same_v<T, StorageEndpoint>)
-    {
-        return GetStorage().getEndpointStore();
-    }
-    else
-    {
-        static_assert(std::is_same_v<int, VirtualFile>, "Wrong type");
-    }
-}
-
-
-template BlockStorage<VirtualFile>& BlockList<VirtualFile>::GetStore();
-template BlockStorage<VirtualDirectory>& BlockList<VirtualDirectory>::GetStore();
-
-} // namespace tpunkt
