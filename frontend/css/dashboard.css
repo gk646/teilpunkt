@@ -1,145 +1,181 @@
-/* General Styles */
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    color: #3b3b3b;
-    height: 100vh;
+/* Dashboard specific styles */
+
+/* Overall Dashboard */
+.dashboard {
     display: flex;
     flex-direction: column;
-}
-
-/* Container */
-.dashboard-container {
-    display: grid;
-    grid-template-columns: 10% 1fr;
-    grid-template-rows: 60px auto;
-    height: 100%;
+    height: 100vh;
+    background: var(--background);
+    padding: 10px;
 }
 
 /* Header */
 .header {
-    grid-column: 1 / -1;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: var(--foreground);
+    box-shadow: 0 2px 10px var(--shadow-dark);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-radius: 8px;
 }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #4c6ef5;
+.header-right {
+    display: flex;
+    align-items: center;
 }
 
 .profile-button {
-    background: #4c6ef5;
-    color: #ffffff;
+    background: var(--primary);
+    color: var(--foreground);
     border: none;
     padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;
     font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .profile-button:hover {
-    background: #3b5ccc;
+    background: var(--secondary);
+    transform: scale(1.05);
 }
 
-/* Side Menu */
+/* Side Menu (Left) */
 .side-menu {
-    background: #ffffff;
+    background: var(--foreground);
+    width: 250px;
     padding: 20px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 5px var(--shadow-light), 0 4px 10px var(--shadow-light);
+    position: fixed;
+    top: 60px; /* below header */
+    left: 10px; /* small gap from left edge */
+    height: calc(100vh - 120px); /* shorter than full height */
     overflow-y: auto;
+    border-radius: 8px;
 }
 
-.side-menu h3 {
-    font-size: 1rem;
-    margin-bottom: 10px;
-    color: #4c6ef5;
+/* Side Menu Items */
+.side-menu ul {
+    list-style: none;
+    padding: 0;
 }
 
-.menu-item {
-    padding: 8px 10px;
+.side-menu li {
+    padding: 10px;
     margin-bottom: 5px;
+    cursor: pointer;
+    color: var(--text);
     border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.side-menu li:hover,
+.side-menu li.active {
+    background: var(--background-selected);
+    color: var(--text-active);
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 280px; /* side panel width (250) plus gap (30) */
+    margin-right: 270px; /* reserved space for a right panel */
+    margin-top: 70px;  /* header height */
+    padding: 20px;
+    overflow-y: auto;
+    height: calc(100vh - 70px);
+    background: var(--background);
+    border-radius: 8px;
+}
+
+/* Breadcrumb and Up Button */
+.breadcrumb-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--text-active);
+}
+
+.up-button {
+    background: var(--primary);
+    border: none;
+    color: var(--foreground);
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-right: 10px;
     transition: background 0.3s ease;
 }
 
-.menu-item:hover {
-    background: #e5e5e5;
-    color: #000;
+.up-button:hover {
+    background: var(--secondary);
 }
 
-/* File List */
-.file-list {
-    padding: 20px;
-    overflow-y: auto;
+.breadcrumb span {
+    cursor: pointer;
+    margin-right: 5px;
 }
 
-.file-list h2 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+.breadcrumb span:hover {
+    text-decoration: underline;
+}
+
+/* File Browser (Details View) */
+.file-browser {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--background-selected);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px; /* gap between side panel and file list */
 }
 
 .file-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: #ffffff;
-    padding: 20px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: background 0.3s ease, transform 0.2s ease;
+    padding: 10px;
+    background: var(--foreground);
+    border-bottom: 1px solid var(--background-selected);
+    transition: background 0.2s ease;
+    cursor: pointer;
+    border-radius: 0; /* rows touch seamlessly */
 }
 
 .file-item:hover {
-    background: #f3f3f3;
-    transform: translateY(-3px);
-}
-
-.file-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    background: var(--background-selected);
 }
 
 .file-icon {
-    width: 60px;
-    height: 60px;
-    background: #4c6ef5;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    border-radius: 4px;
+    margin-right: 15px;
 }
 
 .file-name {
-    font-size: 1.2rem;
-    font-weight: bold;
+    flex-grow: 1;
+    font-size: 1rem;
+    color: var(--text);
+    word-break: break-all;
 }
 
-.file-actions button {
-    background: #4c6ef5;
-    color: #ffffff;
+/* File Actions */
+.file-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.file-action {
+    background: transparent;
     border: none;
-    padding: 10px 15px;
-    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: bold;
+    padding: 5px;
+    transition: transform 0.2s ease;
 }
 
-.file-actions button:hover {
-    background: #3b5ccc;
-}
-
-.file-actions button + button {
-    margin-left: 10px;
+.file-action:hover {
+    transform: scale(1.1);
 }

@@ -19,7 +19,6 @@ namespace tpunkt
     struct Credentials final
     {
         Credentials() = default;
-
         CredentialsType type{};
         union
         {

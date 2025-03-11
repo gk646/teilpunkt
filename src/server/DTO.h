@@ -3,11 +3,20 @@
 #ifndef TPUNKT_DTO_H
 #define TPUNKT_DTO_H
 
+#include "auth/Credentials.h"
 #include "datastructures/FixedString.h"
 #include "fwd.h"
 
 namespace tpunkt
 {
+
+//===== Signup =====//
+
+struct DTOUserSignup final
+{
+    UserName name;
+    Credentials credentials;
+};
 
 //===== Files =====//
 
@@ -38,7 +47,7 @@ struct DTOFileStats final
 struct DTODirectoryEntry
 {
     FileName name;
-    FileID file{};
+    FileID file;
     uint64_t lastEdit{};
     UserName creator;
     UserName owner;
@@ -47,7 +56,7 @@ struct DTODirectoryEntry
 struct DTODirectoryInfo final
 {
     FileName name;
-    FileID dir{};
+    FileID dir;
     uint32_t files = 0; // Count of files visible to user
     uint32_t dirs = 0;  // Count of directories visible to user
 };

@@ -26,6 +26,16 @@ struct ServerEndpoint
     static void RejectRequest(uWS::HttpResponse<true>* res, int code, const char* reason);
 };
 
+#define TPUNKT_MACROS_CHECK_REQUEST                                                                                    \
+    if(HandleRequest(res, req))                                                                                        \
+    {                                                                                                                  \
+        return;                                                                                                        \
+    }                                                                                                                  \
+    if(!AuthRequest(res, req))                                                                                         \
+    {                                                                                                                  \
+        return;                                                                                                        \
+    }
+
 struct LoginEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
