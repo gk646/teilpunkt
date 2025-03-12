@@ -14,30 +14,26 @@ UserID getUserID()
     return UserID{54321};
 }
 
-FileCreationInfo getFileInfo(const FileName& name)
+VirtualFile getFileInfo(const FileName& name)
 {
-    return {.name = name, .creator = getUserID()};
-}
-
-DirectoryCreationInfo getDirInfo(const char* name, uint64_t maxSize, VirtualDirectory* parent)
-{
-    return {.name = FileName{name}, .maxSize = maxSize, .parent = parent, getUserID()};
+    return VirtualFile{{.name = name, .creator = getUserID()}};
 }
 
 
-VirtualDirectory getDir(const char* name)
+VirtualDirectory getDir(const char* name, uint64_t maxSize, VirtualDirectory* parent)
 {
-
-    return VirtualDirectory{};
+    return VirtualDirectory{{.name = FileName{name}, .maxSize = maxSize, .parent = parent, .creator=getUserID()}};
 }
+
 
 TEST_CASE("Virtual Directory")
 {
     TEST_INIT();
 
+    auto baseDir = getDir("Base Dir", 1000, nullptr);
 
     SECTION("Add File")
     {
-        VirtualDirectory dir{};
+        //baseDir.fileAdd()
     }
 }

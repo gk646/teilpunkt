@@ -10,8 +10,6 @@ namespace tpunkt
 {
     struct SessionMetaData final
     {
-
-      private:
         UserAgentString userAgent;
         HashedIP remoteAddress;
         friend SessionStorage;
@@ -30,9 +28,9 @@ namespace tpunkt
         {
             if(this != &other)
             {
-                sessionID = std::move(other.sessionID);
-                data = std::move(other.data);
-                expiration = std::move(other.expiration);
+                sessionID = other.sessionID;
+                data = other.data;
+                expiration = other.expiration;
 
                 other.sessionID.clear();
                 other.expiration.zero();
@@ -40,12 +38,11 @@ namespace tpunkt
             return *this;
         }
 
-
-      private:
+    private:
         SessionID sessionID;
         SessionMetaData data;
-        const Timestamp creation{};
-        Timestamp expiration{};
+        const Timestamp creation;
+        Timestamp expiration;
         friend SessionStorage;
     };
 

@@ -27,6 +27,11 @@ struct FixedString final
         assign(string, 0);
     }
 
+    explicit FixedString(const char* string, const size_t size)
+    {
+        assign(string, size);
+    }
+
     template <size_t oLength>
     explicit FixedString(const FixedString<oLength>& other)
     {
@@ -133,6 +138,23 @@ struct FixedString final
     }
 
   private:
+    void assign(const char* assignString, const size_t maxLen)
+    {
+        if(assignString == nullptr)
+        {
+            LOG_ERROR("Null string passed");
+            return;
+        }
+
+        auto assignLen = strlen_limited(assignString, maxLen);
+        if(assignLen > length) [[unlikely]]
+        {
+            assignLen = length;
+        }
+
+        strncpy(arr, assignString, assignLen);
+    }
+
     static size_t strlen_limited(const char* str, const size_t limit)
     {
         size_t len = 0U;
@@ -153,25 +175,8 @@ struct FixedString final
         return len;
     }
 
-    void assign(const char* assignString, const size_t maxLen)
-    {
-        if(assignString == nullptr)
-        {
-            LOG_ERROR("Null string passed");
-            return;
-        }
-
-        auto assignLen = strlen_limited(assignString, maxLen);
-        if(assignLen > length) [[unlikely]]
-        {
-            assignLen = length;
-        }
-
-        strncpy(arr, assignString, assignLen);
-    }
-
     char arr[ length + 1U ]{};
-    static_assert(length > 0U, "Cannot be empty");
+    static_assert(length > 1U, "Cannot be empty");
 };
 
 } // namespace tpunkt

@@ -8,11 +8,9 @@ namespace tpunkt
 {
 void SignupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
+    UserID user;
     TPUNKT_MACROS_CHECK_REQUEST;
 
-    res->writeStatus("400");
-    res->end("hey");
-    return;
 
     res->onData(
         [ res, req ](std::string_view data, bool last)

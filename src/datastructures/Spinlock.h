@@ -24,6 +24,7 @@ struct Spinlock
     void unlock();
     std::atomic<bool> flag{false};
     friend struct SpinlockGuard;
+    friend struct CooperativeSpinlock;
 };
 
 struct SpinlockGuard final
@@ -45,7 +46,7 @@ struct CooperativeSpinlock final
     CooperativeSpinlock(const CooperativeSpinlock&) = delete;
     CooperativeSpinlock& operator=(const CooperativeSpinlock&) = delete;
     CooperativeSpinlock(CooperativeSpinlock&&) = delete;
-    CooperativeSpinlock& operator=(CooperativeSpinlock&&) noexcept;
+    CooperativeSpinlock& operator=(CooperativeSpinlock&&) = delete;
 
   private:
     void coopAdd();
@@ -54,8 +55,9 @@ struct CooperativeSpinlock final
     void exclusiveRemove();
 
     std::atomic<int> coopCount{0};
-    std::atomic<bool> exclusive{false};
-    std::atomic<bool> exclusiveWaiting{false};
+    std::atomic<int> exclusiveCount{0};
+    Spinlock exclusive;
+    Spinlock unique;
     friend struct CooperativeSpinlockGuard;
 };
 

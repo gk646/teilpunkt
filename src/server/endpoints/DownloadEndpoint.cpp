@@ -19,106 +19,99 @@ bool sendData(uWS::HttpResponse<true>* res)
 
 void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(HandleRequest(res, req))
-    {
-        return;
-    }
+    UserID user;
+    TPUNKT_MACROS_CHECK_REQUEST;
 
-    if(!AuthRequest(res, req))
-    {
-        return;
-    }
-
+    res->getRemoteAddress();
     size_t begin{};
     size_t end{};
-    UserID user{};
     FileID file{}; // From request
     StorageEndpoint* endpoint = nullptr;
-/*
-    {
-        const auto ret = GetStorage().endpointGet(user, file.endpoint, endpoint);
-        if(ret != StorageStatus::OK)
+    /*
         {
-            RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
-            return;
-        }
-    }
-
-    // TODO use slot allocator
-    auto state = std::make_shared<ReadTransaction>(ReadTransaction{});
-    {
-        const auto ret = endpoint->fileGet(user, file, begin, end, *state);
-        if(endpoint == nullptr || ret != StorageStatus::OK)
-        {
-            RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
-            return;
-        }
-    }
-
-    state->response = res;
-    state->loop = uWS::Loop::get();
-
-
-    auto dataCallback = [ state ](const unsigned char* data, size_t length, bool success, bool isLast)
-    {
-        if(!success || state->isFinished()) // If finished we shouldn't be here
-        {
-            state->abort();
-            // Schedule termination on the event loop thread.
-            state->loop->defer([ state ]() { state->response->end("Error reading file"); });
+            const auto ret = GetStorage().endpointGet(user, file.endpoint, endpoint);
+            if(ret != StorageStatus::OK)
+            {
+                RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
+                return;
+            }
         }
 
-        if(isLast)
+        // TODO use slot allocator
+        auto state = std::make_shared<ReadTransaction>(ReadTransaction{});
         {
-            state->setFinished();
+            const auto ret = endpoint->fileGet(user, file, begin, end, *state);
+            if(endpoint == nullptr || ret != StorageStatus::OK)
+            {
+                RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
+                return;
+            }
         }
 
-        auto sendData = [ data, length, state ]()
+        state->response = res;
+        state->loop = uWS::Loop::get();
+
+
+        auto dataCallback = [ state ](const unsigned char* data, size_t length, bool success, bool isLast)
         {
-            // Attempt to send chunk
-            const auto dataChunk = std::string_view(reinterpret_cast<const char*>(data));
-            const auto [ ok, done ] = state->response->tryEnd(dataChunk, length);
-            if(done)
+            if(!success || state->isFinished()) // If finished we shouldn't be here
+            {
+                state->abort();
+                // Schedule termination on the event loop thread.
+                state->loop->defer([ state ]() { state->response->end("Error reading file"); });
+            }
+
+            if(isLast)
             {
                 state->setFinished();
             }
-            else if(!ok)
+
+            auto sendData = [ data, length, state ]()
             {
-                // Backpressure detected
-                state->setPaused(true);
+                // Attempt to send chunk
+                const auto dataChunk = std::string_view(reinterpret_cast<const char*>(data));
+                const auto [ ok, done ] = state->response->tryEnd(dataChunk, length);
+                if(done)
+                {
+                    state->setFinished();
+                }
+                else if(!ok)
+                {
+                    // Backpressure detected
+                    state->setPaused(true);
+                }
+            };
+            state->loop->defer(sendData);
+        };
+
+        auto sendChunk = [ state, dataCallback ]()
+        {
+            if(state->isFinished() || state->isPaused())
+            {
+                return;
+            }
+
+            if(!state->readFile(TPUNKT_SERVER_CHUNK_SIZE, dataCallback))
+            {
+                state->abort();
+                state->response->end("Error reading file");
             }
         };
-        state->loop->defer(sendData);
-    };
 
-    auto sendChunk = [ state, dataCallback ]()
-    {
-        if(state->isFinished() || state->isPaused())
-        {
-            return;
-        }
+        // Register writable callback
+        res->onWritable(
+            [ state, sendChunk ](size_t offset)
+            {
+                state->setPaused(false);
+                sendChunk();
+                return !state->isPaused();
+            });
 
-        if(!state->readFile(TPUNKT_SERVER_CHUNK_SIZE, dataCallback))
-        {
-            state->abort();
-            state->response->end("Error reading file");
-        }
-    };
+        res->onAborted([ state ] { state->abort(); });
 
-    // Register writable callback
-    res->onWritable(
-        [ state, sendChunk ](size_t offset)
-        {
-            state->setPaused(false);
-            sendChunk();
-            return !state->isPaused();
-        });
-
-    res->onAborted([ state ] { state->abort(); });
-
-    // Start streaming
-    sendChunk();
-    */
+        // Start streaming
+        sendChunk();
+        */
 }
 
 } // namespace tpunkt

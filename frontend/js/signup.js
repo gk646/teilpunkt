@@ -1,110 +1,122 @@
-import {clearError, showError, uint8ArrayToBase64, validatePassword, validateUsername} from './util.js';
-
+import {
+    clearAuthError,
+    clearError,
+    displayAuthError,
+    fetchWithErrorHandling,
+    showError,
+    uint8ArrayToBase64,
+    validatePassword,
+    validateUsername
+} from './util.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Cache DOM elements
     const form = document.querySelector('.login-form');
     const passkeyButton = document.getElementById('passkey-signup-btn');
     const authError = document.getElementById('auth-error');
+    const userNameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm-password');
 
-    const hashLength = 32;
-    let sodiumReady = (async () => {
+    const HASH_LENGTH = 32;
+
+    // Initialize sodium once
+    const sodiumReady = (async () => {
         await window.sodium.ready;
         return window.sodium;
     })();
 
-
-    const fetchWithErrorHandling = async (url, options) => {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText);
-        }
-        return response;
-    };
-
-    const validateConfirmPassword = () => {
-        const confirmPasswordInput = document.getElementById('confirm-password');
-        const password = document.getElementById('password').value.trim();
-        const confirmPassword = confirmPasswordInput.value.trim();
-        if (confirmPassword !== password) {
-            showError(confirmPasswordInput, 'Passwords do not match.');
+    const validateConfirmPassword = (confirmElem) => {
+        const passwordStr = passwordInput.value.trim();
+        const confirmStr = confirmElem.value.trim();
+        if (confirmStr !== passwordStr) {
+            showError(confirmElem, 'Passwords do not match.');
             return false;
-        } else {
-            clearError(confirmPasswordInput);
-            return true;
         }
+        clearError(confirmElem);
+        return true;
     };
 
-    const clearAuthError = () => {
-        authError.style.display = 'none';
-        authError.textContent = '';
-    };
-
-    // Real-time validation listeners
-    ['username', 'password', 'confirm-password'].forEach(id => {
-        document.getElementById(id).addEventListener('input', () => {
-            clearAuthError();
-            if (id === 'username') validateUsername();
-            if (id === 'password') {
-                validatePassword();
-                validateConfirmPassword();
-            }
-            if (id === 'confirm-password') validateConfirmPassword();
-        });
+    // Attach real-time validation
+    userNameInput.addEventListener('input', () => {
+        validateUsername(userNameInput);
     });
 
+    passwordInput.addEventListener('input', () => {
+        validatePassword(passwordInput);
+        validateConfirmPassword(confirmPasswordInput);
+    });
+
+    confirmPasswordInput.addEventListener('input', () => {
+        validateConfirmPassword(confirmPasswordInput);
+    });
+
+    // Handle form submission for password signup
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        clearAuthError();
+        clearAuthError(authError);
 
-        const inputs = ['username', 'password', 'confirm-password'];
-        const validators = [validateUsername, validatePassword, validateConfirmPassword];
+        const inputs = [userNameInput, passwordInput, confirmPasswordInput];
+        const validators = [
+            validateUsername,
+            validatePassword,
+            validateConfirmPassword
+        ];
 
-        let valid = true;
-        inputs.forEach((id, idx) => {
-            const inputEl = document.getElementById(id);
-            if (!inputEl.value.trim()) {
-                showError(inputEl, 'This field is required.');
-                valid = false;
+        let isValid = true;
+        // Validate all fields
+        inputs.forEach((elem, idx) => {
+            if (!elem.value.trim()) {
+                showError(elem, 'This field is required.');
+                isValid = false;
             } else {
-                if (!validators[idx]()) valid = false;
+                // For confirm password, pass the element explicitly.
+                if (validators[idx] === validateConfirmPassword) {
+                    if (!validateConfirmPassword(elem)) isValid = false;
+                } else {
+                    if (!validators[idx](elem)) isValid = false;
+                }
             }
         });
+        if (!isValid) return;
 
-        if (!valid) return;
-
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
+        // Use cached values
+        const usernameValue = userNameInput.value.trim();
+        const passwordValue = passwordInput.value.trim();
 
         await sodiumReady;
 
-        const hashedPassword = window.sodium.crypto_generichash(hashLength, window.sodium.from_string(password));
+        // Hash the password
+        const hashedPassword = window.sodium.crypto_generichash(
+            HASH_LENGTH,
+            window.sodium.from_string(passwordValue)
+        );
         const hashedPasswordBase64 = uint8ArrayToBase64(hashedPassword);
 
-        const body = `username=${username}\npassword=${hashedPasswordBase64}`;
+        const requestBody = `username=${usernameValue}\npassword=${hashedPasswordBase64}`;
 
         try {
             await fetchWithErrorHandling('/api/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',
-                    'Auth-Method': 'password',
+                    'Auth-Method': 'password'
                 },
-                body: body
+                body: requestBody
             });
             window.location.href = '/';
         } catch (error) {
+            displayAuthError(authError, "Invalid authentication. Please try again.");
             console.error('Error during signup:', error);
-            authError.style.display = 'block';
-            authError.textContent = 'Invalid authentication. Please try again.';
         }
     });
 
+    // Handle passkey signup
     passkeyButton.addEventListener('click', async () => {
-        clearAuthError();
-        if (!validateUsername()) return;
+        clearAuthError(authError);
 
-        const username = document.getElementById('username').value.trim();
+        if (!validateUsername(userNameInput)) return;
+        const usernameValue = userNameInput.value.trim();
 
         try {
             await sodiumReady;
@@ -112,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const challengeResponse = await fetchWithErrorHandling('/api/signup', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username}),
+                body: JSON.stringify({username: usernameValue})
             });
 
             const {challenge} = await challengeResponse.json();
@@ -121,11 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
                 rp: {name: 'teilpunkt'},
                 user: {
-                    id: Uint8Array.from(username, c => c.charCodeAt(0)),
-                    name: username,
-                    displayName: username,
+                    id: Uint8Array.from(usernameValue, c => c.charCodeAt(0)),
+                    name: usernameValue,
+                    displayName: usernameValue
                 },
-                pubKeyCredParams: [{type: 'public-key', alg: -7}],
+                pubKeyCredParams: [{type: 'public-key', alg: -7}]
             };
 
             const credential = await navigator.credentials.create({publicKey});
@@ -133,14 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
             await fetchWithErrorHandling('/api/signup/passkey/verify', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(credential),
+                body: JSON.stringify(credential)
             });
 
             window.location.href = '/dashboard';
         } catch (error) {
+            displayAuthError(authError, "Passkey signup failed. Please try again.");
             console.error('Error during passkey signup:', error);
-            authError.style.display = 'block';
-            authError.textContent = 'Passkey signup failed. Please try again.';
         }
     });
 });

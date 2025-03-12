@@ -22,7 +22,7 @@ size_t BlockCipher::getEncryptMinLen(const size_t ilen)
     return crypto_secretbox_MACBYTES + ilen + crypto_secretbox_NONCEBYTES;
 }
 
-bool BlockCipher::encrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen)
+bool BlockCipher::encrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen) const
 {
     if(olen < getEncryptMinLen(ilen)) [[unlikely]] // Saves nonce as well
     {
@@ -39,15 +39,16 @@ bool BlockCipher::encrypt(const unsigned char* input, const size_t ilen, unsigne
 }
 
 
-bool BlockCipher::decrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen)
+bool BlockCipher::decrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen) const
 {
-    if(olen < ilen) [[unlikely]] // Nonce and mac not written to output
+    // Nonce and mac not written to output
+    if(olen < (ilen - crypto_secretbox_MACBYTES - crypto_secretbox_NONCEBYTES)) [[unlikely]]
     {
         return false;
     }
-
+    const auto inputLen = ilen - crypto_secretbox_NONCEBYTES;
     // First bytes are the nonce
-    return crypto_secretbox_open_easy(out, input + crypto_secretbox_NONCEBYTES, ilen, input, key.u_str()) == 0;
+    return crypto_secretbox_open_easy(out, input + crypto_secretbox_NONCEBYTES, inputLen, input, key.u_str()) == 0;
 }
 
 } // namespace tpunkt
@@ -75,17 +76,10 @@ bool tpunkt::StreamCipher::encrypt(const unsigned char* input, const size_t ilen
     if(!headUsed) [[unlikely]]
     {
         (void)crypto_secretstream_xchacha20poly1305_init_push(&state, header, key.u_str());
-        if(olen > crypto_secretstream_xchacha20poly1305_HEADERBYTES)
-        {
-            memcpy(out, header, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
-            out = out + crypto_secretstream_xchacha20poly1305_HEADERBYTES;
-            olen -= crypto_secretstream_xchacha20poly1305_HEADERBYTES;
-            headUsed = true;
-        }
-        else
-        {
-            return false;
-        }
+        memcpy(out, header, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+        out = out + crypto_secretstream_xchacha20poly1305_HEADERBYTES;
+        olen -= crypto_secretstream_xchacha20poly1305_HEADERBYTES;
+        headUsed = true;
     }
 
     const auto writeSize = ilen + crypto_secretstream_xchacha20poly1305_ABYTES;
@@ -105,21 +99,23 @@ bool tpunkt::StreamCipher::encrypt(const unsigned char* input, const size_t ilen
     return true;
 }
 
-bool tpunkt::StreamCipher::decrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen,
+bool tpunkt::StreamCipher::decrypt(const unsigned char* input, size_t ilen, unsigned char* out, const size_t olen,
                                    const bool isFirst, const bool isLast)
 {
-    if(isFirst) [[unlikely]]
-    {
-        state = {};
-        if(crypto_secretstream_xchacha20poly1305_init_pull(&state, header, key.u_str()) != 0)
-        {
-            return false; // incomplete header
-        }
-    }
-
     if(olen < ilen)
     {
         return false;
+    }
+
+    if(isFirst) [[unlikely]]
+    {
+        state = {};
+        if(crypto_secretstream_xchacha20poly1305_init_pull(&state, input, key.u_str()) != 0)
+        {
+            return false; // incomplete header
+        }
+        input = input + crypto_secretstream_xchacha20poly1305_HEADERBYTES;
+        ilen -= crypto_secretstream_xchacha20poly1305_HEADERBYTES;
     }
 
     unsigned char tag;

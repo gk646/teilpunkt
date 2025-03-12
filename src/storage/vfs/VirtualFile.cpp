@@ -9,4 +9,9 @@ VirtualFile::VirtualFile(const FileCreationInfo& info) : info(info.name, info.cr
 {
 }
 
+const FileInfo& VirtualFile::getInfo() const
+{
+    return info;
+}
+
 } // namespace tpunkt

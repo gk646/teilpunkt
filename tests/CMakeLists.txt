@@ -9,6 +9,8 @@ add_executable(teilpunkt-tests ${TEST_FILES} ${SOURCE_FILES})
 target_include_directories(teilpunkt-tests PRIVATE
         ../src
         ../external/uWebSocket/uSockets/src
+        ../external/uWebSocket/src
+        ../external/ankerl/include
         catch2
         ${CMAKE_CURRENT_SOURCE_DIR}
 )

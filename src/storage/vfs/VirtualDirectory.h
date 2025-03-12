@@ -60,7 +60,6 @@ struct DirectoryStats final
 struct VirtualDirectory final
 {
     explicit VirtualDirectory(const DirectoryCreationInfo& info);
-    ~VirtualDirectory();
     TPUNKT_MACROS_MOVE_ONLY(VirtualDirectory);
 
     //===== Get =====//

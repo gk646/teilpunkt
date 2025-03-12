@@ -15,8 +15,7 @@ TEST_CASE("Local File System")
 {
     fs::create_directories("./endpoints/1/datastore"); // Create directories
     TEST_INIT();
-    bool success = true;
-    DataStore* store = new LocalFileSystemDatastore(EndpointID{1}, success);
+    DataStore* store = new LocalFileSystemDatastore(EndpointID{1});
 
     SECTION("File Creation")
     {

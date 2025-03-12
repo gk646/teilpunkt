@@ -8,7 +8,7 @@
     <title>Signup</title>
     <script type="module" src="js/theme-switcher.js" defer></script>
     <script type="module" src="js/signup.js" defer></script>
-    <script  src="js/sodium.js" defer></script>
+    <script src="js/sodium.js" defer></script>
 </head>
 <body>
 
@@ -19,45 +19,49 @@
 
 <button id="theme-toggle" title="Toggle Theme">🌞</button>
 
-<div id="auth-error" class="auth-error" style="display: none;">
-    Invalid authentication. Please try again.
-</div>
 
-<div class="login-container">
-    <form class="login-form" novalidate>
-        <h1>Join</h1>
+<div class="login-wrapper">
+    <div id="auth-error" class="auth-error">
+       An error occurred. Please try again.
+    </div>
 
-        <!-- Username -->
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
-            <div class="error-message" id="username-error"></div>
-        </div>
+    <div class="login-container">
+        <form class="login-form" novalidate>
+            <h1>Join</h1>
 
-        <div class="divider">and</div>
-
-        <!-- Password Signup -->
-        <div id="password-section">
+            <!-- Username -->
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                <div class="error-message" id="password-error"></div>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                <div class="error-message" id="username-error"></div>
             </div>
-            <div class="form-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
-                <div class="error-message" id="confirm-password-error"></div>
+
+            <div class="divider">and</div>
+
+            <!-- Password Signup -->
+            <div id="password-section">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password"
+                           placeholder="Confirm your password" required>
+                    <div class="error-message" id="confirm-password-error"></div>
+                </div>
+                <button type="submit" class="auth-btn signup-btn">Sign Up with Password</button>
             </div>
-            <button type="submit" class="auth-btn signup-btn">Sign Up with Password</button>
-        </div>
 
-        <div class="divider">or</div>
+            <div class="divider">or</div>
 
-        <!-- Passkey Signup -->
-        <button type="button" id="passkey-signup-btn" class="auth-btn passkey-btn">Sign Up with Passkey</button>
+            <!-- Passkey Signup -->
+            <button type="button" id="passkey-signup-btn" class="auth-btn passkey-btn">Sign Up with Passkey</button>
 
-        <p class="text-links signup-link">Already have an account? <a href="login.html">Log In</a></p>
-    </form>
+            <p class="text-links signup-link">Already have an account? <a href="login.html">Log In</a></p>
+        </form>
+    </div>
 </div>
 </body>
 </html>

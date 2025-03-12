@@ -45,13 +45,17 @@ struct VirtualFile final
     explicit VirtualFile(const FileCreationInfo& info);
     TPUNKT_MACROS_MOVE_ONLY(VirtualFile);
 
+
+    void rename();
+
+    const FileInfo& getInfo() const;
+
+    mutable CooperativeSpinlock lock;
+
   private:
     FileInfo info;
-    FileStats stats{};
+    mutable FileStats stats{};
     FileHistory history{};
-    CooperativeSpinlock lock;
-    friend Storage;
-    friend VirtualDirectory;
 };
 
 } // namespace tpunkt

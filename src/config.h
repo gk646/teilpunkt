@@ -13,6 +13,7 @@
 
 //===== Authentication =====//
 
+#define TPUNKT_AUTH_SESSION_ID_NAME "tp-session-id"
 
 //===== Storage =====//
 

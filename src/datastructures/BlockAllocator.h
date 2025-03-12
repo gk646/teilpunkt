@@ -3,6 +3,7 @@
 
 #include <sys/mman.h>
 #include "datastructures/Spinlock.h"
+#include "util/Logging.h"
 
 namespace tpunkt
 {
@@ -112,7 +113,6 @@ struct SharedBlockAllocator
     template <typename U>
     explicit SharedBlockAllocator(const SharedBlockAllocator<U>& other)
     {
-
     }
 
 

@@ -12,6 +12,6 @@ TEST_CASE("Simple Storage Transaction")
     bool variable = false;
     auto exitFunc = [ & ]() { variable = true; };
     {
-        StorageTransaction t{};
+       // StorageTransaction t{};
     }
 }

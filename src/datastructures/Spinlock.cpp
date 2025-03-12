@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <mutex>
 #include "datastructures/Spinlock.h"
 
 namespace tpunkt
@@ -46,23 +47,38 @@ SpinlockGuard::~SpinlockGuard()
 
 void CooperativeSpinlock::coopAdd()
 {
-    while(exclusiveWaiting || exclusive)
+    while(exclusiveCount.load(std::memory_order_acquire) > 0)
     {
+        sched_yield();
     }
-    ++coopCount;
+    {
+        SpinlockGuard guard{unique};
+        coopCount.fetch_add(1, std::memory_order_acquire);
+    }
 }
 
 void CooperativeSpinlock::coopRemove()
 {
-
+    coopCount.fetch_sub(1, std::memory_order_release);
 }
-
 
 void CooperativeSpinlock::exclusiveAdd()
 {
+    {
+        SpinlockGuard guard{unique};
+        exclusiveCount.fetch_add(1, std::memory_order_release);
+    }
+
+    while (coopCount.load(std::memory_order_acquire) > 0) {
+        sched_yield();
+    }
+    exclusive.lock();
 }
+
 void CooperativeSpinlock::exclusiveRemove()
 {
+    exclusive.unlock();
+    exclusiveCount.fetch_sub(1, std::memory_order_release);
 }
 
 } // namespace tpunkt

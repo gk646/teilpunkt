@@ -1,3 +1,5 @@
+const USERNAME_LEN = 3
+const PASSWORD_LEN = 7
 
 export const showError = (inputEl, message) => {
     inputEl.classList.add('invalid');
@@ -18,39 +20,46 @@ export const clearError = (inputEl) => {
 };
 
 export const clearAuthError = (authErrorEl) => {
-    authErrorEl.style.display = 'none';
-    authErrorEl.textContent = '';
+    authErrorEl.style.opacity = '0';
 };
 
 export const displayAuthError = (authErrorEl, message) => {
-    authErrorEl.textContent = message;
-    authErrorEl.style.display = 'block';
+    authErrorEl.style.opacity = '1';
+    authErrorEl.textContent = message
 };
 
 
 export const uint8ArrayToBase64 = (array) => window.sodium.to_base64(array);
 
 
-export const validateUsername = () => {
-    const usernameInput = document.getElementById('username');
-    const username = usernameInput.value.trim();
-    if (username.length < 3) {
-        showError(usernameInput, 'Username must be at least 3 characters.');
+export const validateUsername = (userNameElement) => {
+    const username = userNameElement.value.trim();
+    if (username.length < USERNAME_LEN) {
+        showError(userNameElement, 'Username must be at least 3 characters');
         return false;
     } else {
-        clearError(usernameInput);
+        clearError(userNameElement);
         return true;
     }
 };
 
-export const validatePassword = () => {
-    const passwordInput = document.getElementById('password');
-    const password = passwordInput.value.trim();
-    if (password.length < 7) {
-        showError(passwordInput, 'Password must be at least 7 characters.');
+export const validatePassword = (passwordElement) => {
+    const password = passwordElement.value.trim();
+    if (password.length < PASSWORD_LEN) {
+        showError(passwordElement, 'Password must be at least 7 characters');
         return false;
     } else {
-        clearError(passwordInput);
+        clearError(passwordElement);
         return true;
     }
+};
+
+
+export const fetchWithErrorHandling = async (url, options) => {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+    }
+    return response;
 };

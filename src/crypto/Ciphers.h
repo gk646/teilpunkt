@@ -16,13 +16,14 @@ struct BlockCipher final
 
     static size_t getEncryptMinLen(size_t ilen);
 
-    bool encrypt(const unsigned char* input, size_t ilen, unsigned char* out, size_t olen);
-    bool decrypt(const unsigned char* input, size_t ilen, unsigned char* out, size_t olen);
+    bool encrypt(const unsigned char* input, size_t ilen, unsigned char* out, size_t olen) const;
+    bool decrypt(const unsigned char* input, size_t ilen, unsigned char* out, size_t olen) const;
 
   private:
     CipherKey key;
 };
 
+//TODO fix header being saved aswell - creates offset - needs to be fixed in the API
 struct StreamCipher final
 {
     explicit StreamCipher(const CipherKey& key);
@@ -31,11 +32,11 @@ struct StreamCipher final
 
     bool encrypt(const unsigned char* input, size_t ilen, unsigned char* out, size_t olen, bool isLast);
     bool decrypt(const unsigned char* input, size_t ilen, unsigned char* out, size_t olen, bool isFirst, bool isLast);
+  unsigned char header[ crypto_secretstream_xchacha20poly1305_HEADERBYTES ]{};
 
   private:
     crypto_secretstream_xchacha20poly1305_state state{};
     CipherKey key;
-    unsigned char header[ crypto_secretstream_xchacha20poly1305_HEADERBYTES ]{};
     bool ready = false;
     bool headUsed = false;
 };

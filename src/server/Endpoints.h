@@ -3,6 +3,8 @@
 #ifndef TPUNKT_ENDPOINTS_H
 #define TPUNKT_ENDPOINTS_H
 
+#include "fwd.h"
+
 namespace uWS
 {
 struct HttpRequest;
@@ -18,12 +20,14 @@ struct ServerEndpoint
     //===== Helper =====//
 
     // Returns request is authenticated
-    static bool AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    static bool AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user);
 
     // Returns true if the request was already handled - internally calls all listeners and events for requests
     static bool HandleRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
     static void RejectRequest(uWS::HttpResponse<true>* res, int code, const char* reason);
+
+    static const char* GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length);
 };
 
 #define TPUNKT_MACROS_CHECK_REQUEST                                                                                    \
@@ -31,7 +35,7 @@ struct ServerEndpoint
     {                                                                                                                  \
         return;                                                                                                        \
     }                                                                                                                  \
-    if(!AuthRequest(res, req))                                                                                         \
+    if(!AuthRequest(res, req, user))                                                                                   \
     {                                                                                                                  \
         return;                                                                                                        \
     }

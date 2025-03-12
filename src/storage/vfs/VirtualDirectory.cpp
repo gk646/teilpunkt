@@ -70,11 +70,10 @@ bool VirtualDirectory::fileRemove(const FileID file)
         }
     }
     CooperativeSpinlockGuard guard{lock, true};
-    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.info.id == file; }) > 0;
+    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.getInfo().id == file; }) > 0;
     if(result)
     {
         onChange();
-        ;
     }
     return result;
 }
@@ -108,7 +107,7 @@ bool VirtualDirectory::dirRemove(const FileID dir)
         }
     }
     CooperativeSpinlockGuard guard{lock, true};
-    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.info.id == dir; }) > 0;
+    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.getInfo().id == dir; }) > 0;
     if(result)
     {
         onChange();
@@ -158,7 +157,7 @@ bool VirtualDirectory::fileExists(const FileName& name) const
     onAccess();
     for(const auto& file : files)
     {
-        if(file.info.name == name)
+        if(file.getInfo().name == name)
         {
             return true;
         }
