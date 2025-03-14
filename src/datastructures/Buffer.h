@@ -48,7 +48,7 @@ struct Buffer final
 
     void ensure(const size_t size)
     {
-        expand(size);
+        expand(size * 2);
     }
 
     [[nodiscard]] size_t capacity() const
@@ -67,7 +67,7 @@ struct Buffer final
 
     void expand(const size_t newSize)
     {
-        if(newSize >= cap)
+        if(newSize >= cap) [[likely]]
         {
             cap = newSize;
             auto* newData = TPUNKT_REALLOC(ptr, cap);

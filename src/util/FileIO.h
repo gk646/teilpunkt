@@ -31,7 +31,7 @@ struct File final
 struct FileStream final
 {
 
-    explicit FileStream(const char* path);
+    explicit FileStream(const char* path, const CipherKey& key, size_t chunkSize);
     ~FileStream();
 
     [[nodiscard]] size_t size() const;
@@ -40,7 +40,10 @@ struct FileStream final
     size_t read(unsigned char* data, size_t size);
 
   private:
+    CipherKey key;
     const char* path;
+    size_t chunkSize;
+    int fd = -1;
     TPUNKT_MACROS_STRUCT(FileStream);
 };
 

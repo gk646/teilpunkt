@@ -17,14 +17,14 @@ BlockCipher::BlockCipher(const CipherKey& key) : key(key)
 {
 }
 
-size_t BlockCipher::getEncryptMinLen(const size_t ilen)
+size_t BlockCipher::GetEncryptMinLen(const size_t ilen)
 {
     return crypto_secretbox_MACBYTES + ilen + crypto_secretbox_NONCEBYTES;
 }
 
 bool BlockCipher::encrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen) const
 {
-    if(olen < getEncryptMinLen(ilen)) [[unlikely]] // Saves nonce as well
+    if(olen < GetEncryptMinLen(ilen)) [[unlikely]] // Saves nonce as well
     {
         return false;
     }
@@ -38,7 +38,6 @@ bool BlockCipher::encrypt(const unsigned char* input, const size_t ilen, unsigne
     return crypto_secretbox_easy(out, input, ilen, nonce, key.u_str()) == 0;
 }
 
-
 bool BlockCipher::decrypt(const unsigned char* input, const size_t ilen, unsigned char* out, const size_t olen) const
 {
     // Nonce and mac not written to output
@@ -51,79 +50,113 @@ bool BlockCipher::decrypt(const unsigned char* input, const size_t ilen, unsigne
     return crypto_secretbox_open_easy(out, input + crypto_secretbox_NONCEBYTES, inputLen, input, key.u_str()) == 0;
 }
 
-} // namespace tpunkt
-
-
-tpunkt::StreamCipher::StreamCipher(const CipherKey& key) : key(key)
+StreamCipherEncrypt::StreamCipherEncrypt(const CipherKey& key, const size_t chunkSize, unsigned char* out,
+                                         const size_t olen)
+    : out(out), olen(olen), chunkSize(chunkSize)
 {
+    if(olen < crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+    {
+        LOG_FATAL("Output too small");
+    }
+    (void)crypto_secretstream_xchacha20poly1305_init_push(&state, header, key.u_str());
+    memcpy(out, header, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
+    offset += crypto_secretstream_xchacha20poly1305_HEADERBYTES;
 }
 
-size_t tpunkt::StreamCipher::getEncryptMinLen(const size_t ilen)
+size_t StreamCipherEncrypt::GetMinBufSize(const size_t ilen, const size_t chunks)
 {
     // Header applied to first one
-    return ilen + crypto_secretstream_xchacha20poly1305_ABYTES + crypto_secretstream_xchacha20poly1305_HEADERBYTES;
+    return chunks * crypto_secretstream_xchacha20poly1305_ABYTES + ilen +
+           crypto_secretstream_xchacha20poly1305_HEADERBYTES;
 }
 
-bool tpunkt::StreamCipher::encrypt(const unsigned char* input, const size_t ilen, unsigned char* out, size_t olen,
-                                   const bool isLast)
+bool StreamCipherEncrypt::encrypt(const unsigned char* input, const size_t ilen, const bool isLast)
 {
-
-    if(olen < getEncryptMinLen(ilen)) [[unlikely]]
+    if(offset + ilen + crypto_secretstream_xchacha20poly1305_ABYTES > olen) [[unlikely]]
     {
         return false;
     }
 
-    if(!headUsed) [[unlikely]]
+    if(ilen != chunkSize) [[unlikely]]
     {
-        (void)crypto_secretstream_xchacha20poly1305_init_push(&state, header, key.u_str());
-        memcpy(out, header, crypto_secretstream_xchacha20poly1305_HEADERBYTES);
-        out = out + crypto_secretstream_xchacha20poly1305_HEADERBYTES;
-        olen -= crypto_secretstream_xchacha20poly1305_HEADERBYTES;
-        headUsed = true;
+        return false;
     }
 
-    const auto writeSize = ilen + crypto_secretstream_xchacha20poly1305_ABYTES;
     unsigned long long written = 0;
     const unsigned char tag = isLast ? crypto_secretstream_xchacha20poly1305_TAG_FINAL : 0;
-    if(crypto_secretstream_xchacha20poly1305_push(&state, out, &written, input, ilen, nullptr, 0, tag) != 0)
+    unsigned char* outPtr = out + offset;
+    if(crypto_secretstream_xchacha20poly1305_push(&state, outPtr, &written, input, ilen, nullptr, 0, tag) != 0)
         [[unlikely]]
     {
         return false;
     }
 
-    if(written != writeSize) [[unlikely]]
+    if(written != chunkSize + crypto_secretstream_xchacha20poly1305_ABYTES) [[unlikely]]
     {
         return false;
     }
 
+    offset += written;
     return true;
 }
 
-bool tpunkt::StreamCipher::decrypt(const unsigned char* input, size_t ilen, unsigned char* out, const size_t olen,
-                                   const bool isFirst, const bool isLast)
+size_t StreamCipherEncrypt::getChunkSize() const
 {
-    if(olen < ilen)
+    return chunkSize;
+}
+
+size_t StreamCipherEncrypt::getWritten() const
+{
+    return offset;
+}
+
+
+StreamCipherDecrypt::StreamCipherDecrypt(const CipherKey& key, const size_t chunkSize, const unsigned char* input,
+                                         const size_t ilen)
+    : input(input), chunkSize(chunkSize), ilen(ilen)
+{
+    if(ilen < crypto_secretstream_xchacha20poly1305_HEADERBYTES) [[unlikely]]
+    {
+        LOG_FATAL("Input too small");
+    }
+    state = {};
+    if(crypto_secretstream_xchacha20poly1305_init_pull(&state, input, key.u_str()) != 0)
+    {
+        LOG_ERROR("Incomplete header");
+        return; // incomplete header
+    }
+    offset += crypto_secretstream_xchacha20poly1305_HEADERBYTES;
+}
+
+size_t StreamCipherDecrypt::GetMinBufSize(const size_t ilen, const size_t chunks)
+{
+    return ilen - (crypto_secretstream_xchacha20poly1305_ABYTES * chunks);
+}
+
+bool StreamCipherDecrypt::decrypt(unsigned char* out, const size_t olen)
+{
+    if(chunkSize > olen) [[unlikely]]
     {
         return false;
     }
 
-    if(isFirst) [[unlikely]]
+    unsigned char tag = 0;
+    unsigned long long written = 0;
+    const unsigned char* inputPtr = input + offset;
+    const unsigned long long inSize = chunkSize + crypto_secretstream_xchacha20poly1305_ABYTES;
+
+    if(crypto_secretstream_xchacha20poly1305_pull(&state, out, &written, &tag, inputPtr, inSize, nullptr, 0) != 0)
     {
-        state = {};
-        if(crypto_secretstream_xchacha20poly1305_init_pull(&state, input, key.u_str()) != 0)
-        {
-            return false; // incomplete header
-        }
-        input = input + crypto_secretstream_xchacha20poly1305_HEADERBYTES;
-        ilen -= crypto_secretstream_xchacha20poly1305_HEADERBYTES;
+        return false; // Corrupted chunk
     }
 
-    unsigned char tag;
-    unsigned long long written = 0;
-    if(crypto_secretstream_xchacha20poly1305_pull(&state, out, &written, &tag, input, ilen, nullptr, 0) != 0)
+    if(written != chunkSize) [[unlikely]]
     {
-        return false;     // Corrupted chunk
+        return false;
     }
+
+    offset += inSize;
+    const bool isLast = offset == ilen;
 
     if(tag == crypto_secretstream_xchacha20poly1305_TAG_FINAL) [[unlikely]]
     {
@@ -139,6 +172,12 @@ bool tpunkt::StreamCipher::decrypt(const unsigned char* input, size_t ilen, unsi
             return false; // end of file reached before the end of the stream
         }
     }
-
     return true;
 }
+
+size_t StreamCipherDecrypt::getChunkSize() const
+{
+    return chunkSize;
+}
+
+} // namespace tpunkt
