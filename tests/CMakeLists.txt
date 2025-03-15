@@ -11,6 +11,7 @@ target_include_directories(teilpunkt-tests PRIVATE
         ../external/uWebSocket/uSockets/src
         ../external/uWebSocket/src
         ../external/ankerl/include
+        ../external/glaze/include
         catch2
         ${CMAKE_CURRENT_SOURCE_DIR}
 )

@@ -9,44 +9,39 @@
 
 namespace tpunkt
 {
-    enum class CredentialsType : uint8_t
+enum class CredentialsType : uint8_t
+{
+    INVALID,
+    PASSWORD,
+    PASSKEY
+};
+
+struct Credentials final
+{
+    Credentials() = default;
+    CredentialsType type{};
+    UserPassword password;
+    UserPasskey passkey;
+
+    bool operator==(const Credentials& other) const
     {
-        INVALID,
-        PASSWORD,
-        PASSKEY
-    };
-
-    struct Credentials final
-    {
-        Credentials() = default;
-        CredentialsType type{};
-        union
+        if(type != other.type)
         {
-            char buf[ crypto_pwhash_STRBYTES ]{};
-            FixedString<crypto_pwhash_STRBYTES> passkey;
-            FixedString<crypto_pwhash_STRBYTES> password;
-        };
-        bool operator==(const Credentials& other) const
-        {
-            if(type != other.type)
-            {
-                return false;
-            }
-
-            if(type == CredentialsType::PASSWORD)
-            {
-                return password == other.password;
-            }
-
-            if(type == CredentialsType::PASSKEY)
-            {
-                return passkey == other.passkey;
-            }
-
-            LOG_FATAL("Invalid enum value");
             return false;
         }
-    };
+
+        if(type == CredentialsType::PASSWORD)
+        {
+            return password == other.password;
+        }
+
+        if(type == CredentialsType::PASSKEY)
+        {
+            return passkey == other.passkey;
+        }
+        LOG_FATAL("Invalid enum value");
+    }
+};
 
 } // namespace tpunkt
 

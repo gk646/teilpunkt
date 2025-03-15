@@ -25,7 +25,7 @@ struct ServerEndpoint
     // Returns true if the request was already handled - internally calls all listeners and events for requests
     static bool HandleRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
-    static void RejectRequest(uWS::HttpResponse<true>* res, int code, const char* reason);
+    static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data);
 
     static const char* GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length);
 };

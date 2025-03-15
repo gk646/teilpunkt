@@ -5,11 +5,6 @@
 #include "crypto/Ciphers.h"
 #include "datastructures/FixedString.h"
 
-#if (TPUNKT_CRYPTO_KEY_LEN != crypto_secretstream_xchacha20poly1305_KEYBYTES) ||                                       \
-    (TPUNKT_CRYPTO_KEY_LEN != crypto_secretbox_KEYBYTES)
-#error "Update length ?"
-#endif
-
 namespace tpunkt
 {
 

@@ -1,5 +1,15 @@
 const USERNAME_LEN = 3
 const PASSWORD_LEN = 7
+const HASH_LENGTH = 24 // Produces 32 length base 64
+
+// Hash the password
+export const hashPassword = (plainPassword) => {
+    let hashedPassword = window.sodium.crypto_generichash(
+        HASH_LENGTH,
+        window.sodium.from_string(plainPassword)
+    );
+    return window.sodium.to_base64(hashedPassword)
+}
 
 export const showError = (inputEl, message) => {
     inputEl.classList.add('invalid');
@@ -28,10 +38,6 @@ export const displayAuthError = (authErrorEl, message) => {
     authErrorEl.textContent = message
 };
 
-
-export const uint8ArrayToBase64 = (array) => window.sodium.to_base64(array);
-
-
 export const validateUsername = (userNameElement) => {
     const username = userNameElement.value.trim();
     if (username.length < USERNAME_LEN) {
@@ -53,7 +59,6 @@ export const validatePassword = (passwordElement) => {
         return true;
     }
 };
-
 
 export const fetchWithErrorHandling = async (url, options) => {
     const response = await fetch(url, options);

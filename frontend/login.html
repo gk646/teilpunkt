@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/login.css" type="text/css">
     <title>login</title>
     <script type="module" src="js/theme-switcher.js" defer></script>
+    <script type="module" src="js/login.js" defer></script>
+    <script src="js/sodium.js" defer></script>
 </head>
 <body>
 <!-- Logo Section -->
@@ -14,36 +16,39 @@
     <a href="/" class="logo">teilpunkt</a>
 </header>
 
-<div id="auth-error" class="auth-error" style="display: none;">
-    Invalid authentication. Please try again.
-</div>
-
-
 <button id="theme-toggle" title="Toggle Theme">🌞</button>
-<div class="login-container">
-    <form class="login-form" novalidate>
-        <h1>Welcome Back</h1>
 
-        <!-- Username/Password Login -->
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-        </div>
-        <button type="submit" class="auth-btn login-btn">Log In</button>
+<div class="login-wrapper">
+    <div id="auth-error" class="auth-error">
+        An error occurred. Please try again.
+    </div>
+    <div class="login-container">
+        <form class="login-form" novalidate>
+            <h1>Welcome Back</h1>
 
-        <!-- Divider -->
-        <div class="divider">or</div>
+            <!-- Username/Password Login -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                <div class="error-message" id="username-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <div class="error-message" id="password-error"></div>
+            </div>
+            <button type="submit" class="auth-btn login-btn">Log In</button>
 
-        <!-- Passkey (FIDO2/WebAuthn) -->
-        <button type="button" class="auth-btn passkey-btn">Use Passkey</button>
+            <!-- Divider -->
+            <div class="divider">or</div>
 
-        <!-- Signup Link -->
-        <p class="text-links signup-link">Don't have an account? <a href="signup.html">Sign Up</a></p>
-    </form>
+            <!-- Passkey (FIDO2/WebAuthn) -->
+            <button type="button"  id="passkey-btn" class="auth-btn passkey-btn">Use Passkey</button>
+
+            <!-- Signup Link -->
+            <p class="text-links signup-link">Don't have an account? <a href="signup.html">Sign Up</a></p>
+        </form>
+    </div>
 </div>
 </body>
 </html>

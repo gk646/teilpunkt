@@ -1,6 +1,5 @@
 import {
     clearAuthError,
-    clearError,
     displayAuthError,
     fetchWithErrorHandling,
     hashPassword,
@@ -12,28 +11,16 @@ import {
 document.addEventListener('DOMContentLoaded', () => {
     // Cache DOM elements
     const form = document.querySelector('.login-form');
-    const passkeyButton = document.getElementById('passkey-signup-btn');
+    const passkeyButton = document.getElementById('passkey-btn');
     const authError = document.getElementById('auth-error');
     const userNameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirm-password');
 
-    // Initialize sodium once
+
     const sodiumReady = (async () => {
         await window.sodium.ready;
         return window.sodium;
     })();
-
-    const validateConfirmPassword = (confirmElem) => {
-        const passwordStr = passwordInput.value.trim();
-        const confirmStr = confirmElem.value.trim();
-        if (confirmStr !== passwordStr) {
-            showError(confirmElem, 'Passwords do not match.');
-            return false;
-        }
-        clearError(confirmElem);
-        return true;
-    };
 
     // Attach real-time validation
     userNameInput.addEventListener('input', () => {
@@ -42,11 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     passwordInput.addEventListener('input', () => {
         validatePassword(passwordInput);
-        validateConfirmPassword(confirmPasswordInput);
-    });
-
-    confirmPasswordInput.addEventListener('input', () => {
-        validateConfirmPassword(confirmPasswordInput);
     });
 
     // Handle form submission for password signup
@@ -54,29 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         clearAuthError(authError);
 
-        const inputs = [userNameInput, passwordInput, confirmPasswordInput];
+        const inputs = [userNameInput, passwordInput];
         const validators = [
             validateUsername,
             validatePassword,
-            validateConfirmPassword
         ];
 
         let isValid = true;
-        // Validate all fields
         inputs.forEach((elem, idx) => {
             if (!elem.value.trim()) {
                 showError(elem, 'This field is required.');
                 isValid = false;
             } else {
-                // For confirm password, pass the element explicitly.
-                if (validators[idx] === validateConfirmPassword) {
-                    if (!validateConfirmPassword(elem)) isValid = false;
-                } else {
-                    if (!validators[idx](elem)) isValid = false;
+                if (!validators[idx](elem)) {
+                    isValid = false;
                 }
             }
         });
-        if (!isValid) return;
+        if (!isValid) {
+            return;
+        }
 
         await sodiumReady;
 
@@ -84,17 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let passwordValue = passwordInput.value.trim();
         let hashedPassword = hashPassword(passwordValue);
         let requestBody = JSON.stringify({
-            name: usernameValue,
-            credentials: {
-                type: 1,
-                password: hashedPassword,
-                passkey: "asdf"
-            }
+            username: usernameValue,
+            password: hashedPassword
         });
         passwordValue = null;
         usernameValue = null;
         try {
-            let result = fetchWithErrorHandling('/api/signup', {
+            let result = fetchWithErrorHandling('/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,13 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             userNameInput.value = '';
             passwordInput.value = '';
-            confirmPasswordInput.value = '';
             hashedPassword = null;
             requestBody = null;
 
             await result;
-            window.location.href = '/';
 
+            window.location.href = '/';
         } catch (error) {
             displayAuthError(authError, "The login has failed. Please check your login details and try again.");
             console.error('Error during login:', error);
@@ -149,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const credential = await navigator.credentials.create({publicKey});
 
-            await fetchWithErrorHandling('/api/signup/passkey/verify', {
+            await fetchWithErrorHandling('/api/login/passkey/verify', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(credential)

@@ -24,6 +24,8 @@ enum class AuthStatus : uint8_t
     ERR_INVALID_TOKEN,
 };
 
+const char* GetAuthStatusStr(AuthStatus status);
+
 // Every method is atomic
 // Admin can only Add
 struct Authenticator final

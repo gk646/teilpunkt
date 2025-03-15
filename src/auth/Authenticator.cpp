@@ -27,6 +27,20 @@ Authenticator& GetAuthenticator()
     TPUNKT_MACROS_GLOBAL_GET(Authenticator);
 }
 
+const char* GetAuthStatusStr(const AuthStatus status)
+{
+    switch(status)
+    {
+        case AuthStatus::INVALID:
+            return "Invalid";
+        case AuthStatus::OK:
+            return "OK";
+        case AuthStatus::ERR_UNSUCCESSFUL:
+            return "Unsuccessful operation";
+        case AuthStatus::ERR_USER_NAME_EXISTS:
+            return "User name exists";
+    }
+}
 AuthStatus Authenticator::userAdd(const UserName& name, Credentials& consumed)
 {
     SpinlockGuard lock{authLock};

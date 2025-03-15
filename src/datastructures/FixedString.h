@@ -137,7 +137,6 @@ struct FixedString final
         return length;
     }
 
-  private:
     void assign(const char* assignString, const size_t maxLen)
     {
         if(assignString == nullptr)
@@ -155,6 +154,7 @@ struct FixedString final
         strncpy(arr, assignString, assignLen);
     }
 
+  private:
     static size_t strlen_limited(const char* str, const size_t limit)
     {
         size_t len = 0U;

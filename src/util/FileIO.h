@@ -30,7 +30,6 @@ struct File final
 
 struct FileStream final
 {
-
     explicit FileStream(const char* path, const CipherKey& key, size_t chunkSize);
     ~FileStream();
 
