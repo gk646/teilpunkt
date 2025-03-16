@@ -23,15 +23,15 @@ struct ServerEndpoint
     static bool AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user);
 
     // Returns true if the request was already handled - internally calls all listeners and events for requests
-    static bool HandleRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    static bool RegisterRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
-    static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data);
+    static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data = nullptr);
 
     static const char* GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length);
 };
 
 #define TPUNKT_MACROS_CHECK_REQUEST                                                                                    \
-    if(HandleRequest(res, req))                                                                                        \
+    if(RegisterRequest(res, req))                                                                                      \
     {                                                                                                                  \
         return;                                                                                                        \
     }                                                                                                                  \
@@ -40,7 +40,7 @@ struct ServerEndpoint
         return;                                                                                                        \
     }
 
-struct LoginEndpoint final : ServerEndpoint
+struct AuthEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
@@ -55,7 +55,12 @@ struct DownloadEndpoint final : ServerEndpoint
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-struct SignupEndpoint final : ServerEndpoint
+struct RegisterPasswordEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct RegisterPasskeyEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };

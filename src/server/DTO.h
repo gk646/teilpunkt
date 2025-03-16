@@ -10,12 +10,47 @@
 namespace tpunkt
 {
 
-//===== Signup =====//
+//===== Auth =====//
 
-struct DTOUserSignup final
+struct DTOUserSignupPW final
+{
+    UserName name;
+    UserPassword password;
+};
+
+struct DTOUserSignupPK final
+{
+    UserName name;
+    UserPasskey passkey;
+};
+
+struct DTOUserLogin final
 {
     UserName name;
     Credentials credentials;
+};
+
+struct DTOPasskeyStart final
+{
+    FixedString<TPUNKT_CRYPTO_KEY_LEN> challenge;
+    struct
+    {
+        FixedString<TPUNKT_STORAGE_FILE_LEN> id;
+        FixedString<TPUNKT_STORAGE_FILE_LEN> name;
+    } rp; // relaying party
+    struct
+    {
+        UserName displayName;
+        UserName id;
+        UserName name;
+
+    } user;
+    struct PubKeyCredParams final
+    {
+        int alg;
+        FixedString<TPUNKT_STORAGE_FILE_LEN> type{"public-key"};
+    };
+    PubKeyCredParams pubKeyCredParams[ 3 ]{{-8}, {-7}, {-257}};
 };
 
 //===== Files =====//

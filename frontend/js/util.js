@@ -68,3 +68,11 @@ export const fetchWithErrorHandling = async (url, options) => {
     }
     return response;
 };
+
+
+export const isPasskeyAvailable = () => {
+    return window.PublicKeyCredential &&
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
+        PublicKeyCredential.isConditionalMediationAvailable;
+
+}

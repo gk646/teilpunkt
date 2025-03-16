@@ -4,13 +4,24 @@
 > Until version 1.0.0 it is not recommended for production use.
 
 
-`teilpunkt`™ _(ger. sharepoint)_ is a highly secure, self-hosted file server.
+`teilpunkt`™ _(ger. sharepoint)_ is a self-hosted, security first, GDPR-compliant file server. Its built with modern
+technologies
 
-Note: This made to compile with GCC and for a Linux kernel as open source is essential for security.
+Dependencies:
+
+- [uWebSockets](https://github.com/uNetworking/uWebSockets) _(latest)_: HTTPS Server
+- [libsodium](https://github.com/jedisct1/libsodium) _(latest)_: Crypto Primitives
+- [libsodium.js](https://github.com/jedisct1/libsodium.js) _(latest)_: Crypto Primitives in Frontend
+- [glaze](https://github.com/stephenberry/glaze) _(latest)_: JSON library
+- [ankerl](https://github.com/martinus/unordered_dense) _(latest)_: Optimized Hashmap
+
+Note: This project is built with/for GCC and the Linux kernel as open source is essential for security.
 
 **Feature Highlights:**
 
-- Audit Logging with plugin API
+- GDPR compliant data storage
+- Extensive and structured logging of events with Python API
+- Blazingly fast and multithreaded server
 
 ## Authentication
 

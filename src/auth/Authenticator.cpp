@@ -4,6 +4,7 @@
 #include "auth/AuthToken.h"
 #include "datastructures/SecureEraser.h"
 #include "instance/InstanceConfig.h"
+#include "util/Strings.h"
 
 namespace tpunkt
 {
@@ -39,12 +40,22 @@ const char* GetAuthStatusStr(const AuthStatus status)
             return "Unsuccessful operation";
         case AuthStatus::ERR_USER_NAME_EXISTS:
             return "User name exists";
+        case AuthStatus::ERR_INVALID_ARGUMENTS:
+            return "Invalid arguments";
     }
 }
+
 AuthStatus Authenticator::userAdd(const UserName& name, Credentials& consumed)
 {
     SpinlockGuard lock{authLock};
     SecureEraser eraser{consumed};
+
+    if(!IsValidUserName(name) || !IsValidPassword(consumed.password))
+    {
+        LOG_EVENT(UserAction, UserAdd, FAIL_INVALID_ARGUMENTS);
+        return AuthStatus::ERR_INVALID_ARGUMENTS;
+    }
+
     if(GetInstanceConfig().getBool(BoolParamKey::USER_ONLY_ADMIN_CREATE_ACCOUNT))
     {
         LOG_EVENT(UserAction, UserAdd, FAIL_CONFIG_RESTRICTED);

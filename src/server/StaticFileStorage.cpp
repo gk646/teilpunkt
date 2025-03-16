@@ -101,7 +101,7 @@ static void iterateDirectory(const char* dir, int& index, StaticFile* staticFile
                 const size_t nameLength = strlen(path) - basePathLength;
                 char* name = TPUNKT_ALLOC(name, nameLength + 1);
                 strncpy(name, path + basePathLength, nameLength);
-                name[nameLength] = '\0';
+                name[ nameLength ] = '\0';
 
                 // Content
                 char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);
@@ -141,7 +141,7 @@ StaticFileStorage::~StaticFileStorage()
     }
 }
 
-const StaticFile* StaticFileStorage::getFile(const char* filePath) const
+const StaticFile* StaticFileStorage::getFile(const char* filePath, size_t length) const
 {
     for(const auto& file : staticFiles)
     {
@@ -149,7 +149,7 @@ const StaticFile* StaticFileStorage::getFile(const char* filePath) const
         {
             return nullptr;
         }
-        if(strcmp(file.name, filePath) == 0)
+        if(strncmp(file.name, filePath, length) == 0)
         {
             return &file;
         }

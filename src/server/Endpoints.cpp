@@ -6,7 +6,6 @@
 #include "server/DTOMappings.h"
 #include "server/Endpoints.h"
 
-
 namespace tpunkt
 {
 
@@ -148,7 +147,6 @@ static const char* GetStatusString(const int status)
     }
 }
 
-
 bool ServerEndpoint::AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
 {
     for(const auto& [ key, value ] : *req)
@@ -174,18 +172,15 @@ bool ServerEndpoint::AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest*
             return GetAuthenticator().sessionAuth(sessionId, metaData, authToken) != AuthStatus::OK;
         }
     }
-
     res->writeStatus("401");
     res->end("Request has no session id");
     return false;
 }
 
-bool ServerEndpoint::HandleRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+bool ServerEndpoint::RegisterRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-
     return false;
 }
-
 
 void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data)
 {
@@ -198,11 +193,12 @@ void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, co
     res->writeHeader("Content-Security-Policy", "default-src 'none'; "
                                                 "script-src 'self' 'wasm-unsafe-eval';"
                                                 "style-src 'self';"
+                                                "media-src 'self';"
                                                 "connect-src 'self';"
                                                 "img-src 'self'; ");
     res->writeHeader("X-XSS-Protection", "1; mode=block");
-    res->writeHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=(), "
-                                           "fullscreen=(self), autoplay=(self)");
+   // res->writeHeader("Permissions-Policy", "publickey-credentials-get=(self) geolocation=(), microphone=(), camera=(), payment=(), usb=(), "
+   //                                        "fullscreen=(self), autoplay=(self)");
     res->end(data);
 }
 

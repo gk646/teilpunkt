@@ -14,14 +14,12 @@ namespace tpunkt
 
 enum class AuthStatus : uint8_t
 {
-    INVALID, // Prevent default initialized values
+    INVALID,               // Prevent default initialized values
     OK,
-    // Generic error
-    ERR_UNSUCCESSFUL,
-    // userAdd
-    ERR_USER_NAME_EXISTS,
-    // all Methods that accept a token
-    ERR_INVALID_TOKEN,
+    ERR_UNSUCCESSFUL,      // Generic error
+    ERR_USER_NAME_EXISTS,  // userAdd
+    ERR_INVALID_TOKEN,     // all Methods that accept a token
+    ERR_INVALID_ARGUMENTS, // One or more arguments are invalid
 };
 
 const char* GetAuthStatusStr(AuthStatus status);
@@ -39,29 +37,21 @@ struct Authenticator final
     AuthStatus userLogin(const UserName& name, Credentials& consumed, AuthToken& out);
 
     // Deletes all associated sessions
-    AuthStatus userRemove(const AuthToken& token);
+    AuthStatus userRemove(UserID user);
 
-    AuthStatus userChangeCredentials(const AuthToken& token, const UserName& newName, Credentials& consumed);
+    AuthStatus userChangeCredentials(UserID user, const UserName& newName, Credentials& consumed);
 
     //===== Session Management =====//
 
-    // Assigns SessionID on success
-    AuthStatus sessionAdd(const AuthToken& token, const SessionMetaData& data, SecureWrapper<SessionID>& out);
+    AuthStatus sessionAdd(UserID user, const SessionMetaData& data, SecureWrapper<SessionID>& out);
 
-    // TODO needs additional parameter by which to identify session
-    AuthStatus sessionRemove(const AuthToken& token);
+    AuthStatus sessionRemove(UserID user, int idx);
 
-    // Assigns token on success
-    AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out);
+    // Assigns user on success
+    AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, UserID& user);
 
     // TODO make collector class / vector like container with stack memory / wrapper around c pointer with len
     AuthStatus sessionGet(const AuthToken& token);
-
-    //===== Token Management =====//
-
-    [[nodiscard]] bool tokenValid(const AuthToken& token);
-
-    AuthStatus tokenInvalidate(AuthToken& consumed);
 
     //===== User Data =====//
     // Part of the authenticator as data access needs the same atomicity as adding/deleting users

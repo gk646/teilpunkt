@@ -4,7 +4,8 @@
 #define TPUNKT_DTO_MAPPINGS_H
 
 #include <string_view>
-#include <glaze/glaze.hpp>
+#include <glaze/json/read.hpp>
+#include <glaze/json/write.hpp>
 
 namespace glz
 {
@@ -31,6 +32,7 @@ struct to<JSON, tpunkt::FixedString<length>>
         serialize<JSON>::op<Opts>(str, args...);
     }
 };
+
 } // namespace glz
 
 template <>

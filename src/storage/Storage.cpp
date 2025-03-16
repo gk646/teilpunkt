@@ -4,9 +4,31 @@
 #include "auth/AuthToken.h"
 #include "instance/InstanceConfig.h"
 #include "storage/Storage.h"
+#include "util/Wrapper.h"
 
 namespace tpunkt
 {
+
+namespace global
+{
+Storage* Storage;
+}
+
+Storage::Storage()
+{
+    TPUNKT_MACROS_GLOBAL_ASSIGN(Storage);
+    LOG_INFO("Startup Disk Usage: %2d%%", GetDiskUsage());
+}
+
+Storage::~Storage()
+{
+    TPUNKT_MACROS_GLOBAL_RESET(Storage);
+}
+
+Storage& GetStorage()
+{
+    TPUNKT_MACROS_GLOBAL_GET(Storage);
+}
 
 StorageStatus Storage::endpointCreate(const UserID user, const StorageEndpointCreateInfo& info)
 {
@@ -19,7 +41,7 @@ StorageStatus Storage::endpointCreate(const UserID user, const StorageEndpointCr
     }
 
     const auto eid = EndpointID{endpointID++};
-    if(StorageEndpoint::CreateDirs( eid))
+    if(StorageEndpoint::CreateDirs(eid))
     {
         endpoints.emplace_front(info, eid, user);
     }
@@ -92,4 +114,5 @@ StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpoint)
     return StorageStatus::OK;
 }
 
-}
+
+} // namespace tpunkt

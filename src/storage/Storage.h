@@ -14,6 +14,10 @@ namespace tpunkt
 // Implicitly checks permissions using the UAC
 struct Storage final
 {
+
+    Storage();
+    ~Storage();
+
     //===== Global Functions =====//
 
     StorageStatus getRoots(UserID user, std::vector<DTODirectoryInfo>& roots);

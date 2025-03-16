@@ -5,6 +5,7 @@
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
 #include "server/WebServer.h"
+#include "storage/Storage.h"
 #include "uac/UserAccessControl.h"
 #include "util/Logging.h"
 
@@ -20,7 +21,6 @@ void handle_shutdown_signal(const int signal)
 }
 
 } // namespace
-
 
 int32_t main()
 {
@@ -46,6 +46,7 @@ int32_t main()
             tpunkt::Authenticator auth{};
             tpunkt::EventMonitor monitor{};
             tpunkt::UserAccessControl uac{};
+            tpunkt::Storage storage{};
 
             tpunkt::WebServer server{};
             server.run();

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <cctype>
 #include <charconv>
+#include <datastructures/FixedString.h>
 #include "util/Strings.h"
 
 namespace tpunkt
@@ -54,6 +56,50 @@ bool NumberToStringEx(char* buf, const size_t len, const uint32_t num, const cha
 
 bool IsValidFilename(const FileName& name)
 {
+    if(name.size() == 0) [[unlikely]]
+    {
+        return false;
+    }
+    for(const auto chr : name)
+    {
+        if(isprint(chr) == 0) [[unlikely]]
+        {
+            return false; // Not a printable character
+        }
+    }
+    return true;
+}
+
+bool IsValidUserName(const UserName& name)
+{
+    if(name.size() < TPUNKT_AUTH_MIN_USER_LEN)
+    {
+        return false;
+    }
+    for(const auto chr : name)
+    {
+        if(isalpha(chr) == 0 && isdigit(chr) == 0)
+        {
+            return false; // Not a character or digit
+        }
+    }
+    return true;
+}
+
+bool IsValidPassword(const UserPassword& password)
+{
+    if(password.size() != TPUNKT_AUTH_PASSWORD_LEN)
+    {
+        return false;
+    }
+    // Base64
+    for(const auto chr : password)
+    {
+        if(isalpha(chr) == 0 && isdigit(chr) == 0 && chr != '+' && chr != '/' && chr != '=')
+        {
+            return false; // Not a character or digit
+        }
+    }
     return true;
 }
 

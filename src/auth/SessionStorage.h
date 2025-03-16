@@ -4,66 +4,65 @@
 #define TPUNKT_SESSION_STORAGE_H
 
 #include <vector>
-#include "fwd.h"
-#include "datastructures/SecureList.h"
 #include "auth/Session.h"
+#include "datastructures/SecureList.h"
+#include "fwd.h"
 
 namespace tpunkt
 {
-    struct UserSessionData final
+struct UserSessionData final
+{
+    explicit UserSessionData(const UserID user) : userID(user)
     {
-        explicit UserSessionData(const UserID user) : userID(user)
-        {
-        }
+    }
 
-        // Only allow move construction
-        UserSessionData(UserSessionData&& other) noexcept
-            : userID(other.userID), sessions(std::move(other.sessions)), tokens(std::move(other.tokens))
-        {
-        }
-
-        UserSessionData(const UserSessionData&) = delete;
-        UserSessionData& operator=(const UserSessionData&) = delete;
-        UserSessionData& operator=(UserSessionData&& other) = delete;
-
-      private:
-        const UserID userID;          // Which users session data
-        SecureList<Session> sessions; // Session list
-        std::vector<uint32_t> tokens; // Token list
-        friend SessionStorage;
-    };
-
-    struct SessionStorage final
+    // Only allow move construction
+    UserSessionData(UserSessionData&& other) noexcept
+        : userID(other.userID), sessions(std::move(other.sessions)), tokens(std::move(other.tokens))
     {
-        SessionStorage() = default;
+    }
 
-        //===== Session Management =====//
+    UserSessionData(const UserSessionData&) = delete;
+    UserSessionData& operator=(const UserSessionData&) = delete;
+    UserSessionData& operator=(UserSessionData&& other) = delete;
 
-        bool add(UserID userID, const SessionMetaData& data, SessionID& out);
+  private:
+    const UserID userID;          // User it belongs to
+    SecureList<Session> sessions; // Session list
+    friend SessionStorage;
+};
 
-        // If the session is identified but the data does not match its revoked!
-        bool get(const SessionID& sessionId, const SessionMetaData& data, UserID& userID);
+struct SessionStorage final
+{
+    SessionStorage() = default;
 
-        bool removeByRemote(UserID userID, const HashedIP& address);
+    //===== Session Management =====//
 
-        bool removeByID(UserID userID, const SessionID& sessionId);
+    bool add(UserID userID, const SessionMetaData& data, SessionID& out);
 
-        //===== Token Management =====//
+    // If the session is identified but the data does not match its revoked!
+    bool get(const SessionID& sessionId, const SessionMetaData& data, UserID& userID);
 
-        [[nodiscard]] bool tokenValid(const AuthToken& token) const;
+    bool removeByRemote(UserID userID, const HashedIP& address);
 
-        bool addToken(UserID userID, uint32_t& random);
+    bool removeByID(UserID userID, const SessionID& sessionId);
 
-        bool removeToken(const AuthToken& token);
+    //===== Token Management =====//
 
-      private:
-        UserSessionData* getUserData(UserID userID);
+    [[nodiscard]] bool tokenValid(const AuthToken& token) const;
 
-        [[nodiscard]] const UserSessionData* getUserData(UserID userID) const;
+    bool addToken(UserID userID, uint32_t& random);
 
-        std::vector<UserSessionData> sessions;
-        TPUNKT_MACROS_STRUCT(SessionStorage);
-    };
+    bool removeToken(const AuthToken& token);
+
+  private:
+    UserSessionData* getUserData(UserID userID);
+
+    [[nodiscard]] const UserSessionData* getUserData(UserID userID) const;
+
+    std::vector<UserSessionData> sessions;
+    TPUNKT_MACROS_STRUCT(SessionStorage);
+};
 
 } // namespace tpunkt
 

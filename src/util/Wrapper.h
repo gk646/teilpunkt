@@ -11,6 +11,11 @@ bool CreateRelDir(const char* path, bool canExist);
 
 bool RemoveRelDir(const char* path);
 
+size_t GetDiskSizeUsed();
+
+// In percent
+int GetDiskUsage();
+
 } // namespace tpunkt
 
 

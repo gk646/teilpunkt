@@ -6,24 +6,26 @@
 
 namespace tpunkt
 {
+
 void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(HandleRequest(res, req))
+    if(RegisterRequest(res, req))
     {
         return;
     }
     const auto& server = GetWebServer();
-    const auto request = req->getUrl().data();
+    const auto request = req->getUrl();
 
     const StaticFile* file = nullptr;
-    if(strcmp(request, "/") == 0)
+    if(strncmp(request.data(), "/", request.size()) == 0)
     {
-        file = server.staticFiles.getFile("/index.html");
+        file = server.staticFiles.getFile("/index.html",11);
     }
     else
     {
-        file = server.staticFiles.getFile(request);
+        file = server.staticFiles.getFile(request.data(), request.size());
     }
+
     if(file != nullptr)
     {
         res->writeHeader("Content-Type", file->type);

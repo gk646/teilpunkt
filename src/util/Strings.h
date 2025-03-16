@@ -16,6 +16,10 @@ bool NumberToStringEx(char* buf, size_t len, uint32_t num, const char* add);
 
 bool IsValidFilename(const FileName& name);
 
+bool IsValidUserName(const UserName& name);
+
+bool IsValidPassword(const UserPassword& password);
+
 } // namespace tpunkt
 
 #endif // TPUNKT_STRINGS_H

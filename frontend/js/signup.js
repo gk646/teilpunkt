@@ -4,6 +4,7 @@ import {
     displayAuthError,
     fetchWithErrorHandling,
     hashPassword,
+    isPasskeyAvailable,
     showError,
     validatePassword,
     validateUsername
@@ -118,47 +119,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle passkey signup
-    passkeyButton.addEventListener('click', async () => {
-        clearAuthError(authError);
+    if (isPasskeyAvailable()) {
+        passkeyButton.addEventListener('click', async () => {
+            clearAuthError(authError);
 
-        if (!validateUsername(userNameInput)) return;
-        const usernameValue = userNameInput.value.trim();
+            if (!validateUsername(userNameInput)) return;
+            const usernameValue = userNameInput.value.trim();
 
-        try {
-            await sodiumReady;
+            try {
+                await sodiumReady;
 
-            const challengeResponse = await fetchWithErrorHandling('/api/signup', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: usernameValue})
-            });
+                // Generate a secure challenge (e.g. 32 bytes)
+                const challenge = sodium.randombytes_buf(32);
+                // Generate a random 16-byte user ID instead of using the username directly
+                const userId = sodium.randombytes_buf(16);
 
-            const {challenge} = await challengeResponse.json();
 
-            const publicKey = {
-                challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
-                rp: {name: 'teilpunkt'},
-                user: {
-                    id: Uint8Array.from(usernameValue, c => c.charCodeAt(0)),
-                    name: usernameValue,
-                    displayName: usernameValue
-                },
-                pubKeyCredParams: [{type: 'public-key', alg: -7}]
-            };
+                const publicKeyCredentialCreationOptions = {
+                    challenge: Uint8Array.from(
+                        "hello", c => c.charCodeAt(0)),
+                    rp: {
+                        name: "Duo Security",
+                        id: "localhost"
+                    },
+                    user: {
+                        id: Uint8Array.from(
+                            "UZSL85T9AFC", c => c.charCodeAt(0)),
+                        name: "lee@webauthn.guide",
+                        displayName: "Lee",
+                    },
+                    pubKeyCredParams: [{alg: -7, type: "public-key"}],
+                    authenticatorSelection: {
+                        authenticatorAttachment: "cross-platform",
+                        requireResidentKey: true,
+                        residentKey: "preferred",
+                        userVerification: "discouraged"
+                    },
+                    timeout: 60000,
+                    attestation: "indirect"
+                };
 
-            const credential = await navigator.credentials.create({publicKey});
+                const credential = await navigator.credentials.create({
+                    publicKey: publicKeyCredentialCreationOptions
+                });
 
-            await fetchWithErrorHandling('/api/signup/passkey/verify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(credential)
-            });
+                console.log(credential)
+                navigator.credentials.get({
+                    publicKey: {
+                        rpId: "localhost",
+                        challenge: Uint8Array.from(
+                            "hello", c => c.charCodeAt(0)), // The challenge must be produced by the server
+                        allowCredentials: [
+                            {
+                                type: 'public-key',
+                                id: Uint8Array.from(
+                                    "UZSL85T9AFC", c => c.charCodeAt(0)) // The credential_id may be provided by the server
+                            }
+                        ],
+                        timeout: 60000
+                    }
+                }).then(function (assertion) {
+                    console.log(assertion)
+                    // Send new credential info to server for verification and registration.
+                }).catch(function (err) {
+                    console.error(err)
+                    // No acceptable authenticator or user refused consent. Handle appropriately.
+                });
 
-            window.location.href = '/dashboard';
-        } catch (error) {
-            displayAuthError(authError, "Passkey signup failed. Please try again.");
-            console.error('Error during passkey signup:', error);
-        }
-    });
+                // Note: You'll need to convert ArrayBuffers (like credential.response.attestationObject)
+                // into a string (e.g. base64) for sending via JSON.
+
+
+                //window.location.href = '/home';
+            } catch (error) {
+                displayAuthError(authError, "Passkey signup failed. Please try again.");
+                console.error('Error during passkey signup:', error);
+            }
+        });
+    } else {
+
+    }
+
+
 });

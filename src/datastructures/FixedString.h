@@ -5,6 +5,7 @@
 
 #include <cstring>
 #include <sodium/utils.h>
+#include "datastructures/Iterator.h"
 #include "util/Logging.h"
 
 namespace tpunkt
@@ -106,6 +107,16 @@ struct FixedString final
     [[nodiscard]] const unsigned char* u_str() const
     {
         return (const unsigned char*)arr;
+    }
+
+    [[nodiscard]] Iterator<char> begin() const
+    {
+        return Iterator<char>{arr};
+    }
+
+    [[nodiscard]] Iterator<char> end() const
+    {
+        return Iterator<char>{arr + size()};
     }
 
     char* data()

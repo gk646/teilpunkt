@@ -24,7 +24,7 @@ namespace tpunkt
         explicit StaticFileStorage(const char* directory);
         ~StaticFileStorage();
 
-        const StaticFile* getFile(const char* filePath) const;
+        const StaticFile* getFile(const char* filePath, size_t length) const;
 
       private:
         StaticFile staticFiles[ TPUNKT_SERVER_STATIC_FILES_LEN ]{};

@@ -5,21 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/global.css" type="text/css">
     <link rel="stylesheet" href="css/index.css" type="text/css">
-    <script type="module" src="js/theme-switcher.js" integrity="sha384-QU3RZ2hxS6iWvP5hlOHCDETZ5Wm48EjIu1NLJevlBjECPSxdV1z3/bRerA4lU9JV" defer referrerpolicy="no-referrer"></script>
+    <script type="module" src="js/theme-switcher.js" defer></script>
     <title>index</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
 <!-- Logo Section -->
 <header class="header">
     <a href="/" class="logo">teilpunkt</a>
 </header>
-
-<script>
-    const userLoggedIn = localStorage.getItem('loggedIn') === 'true';
-    if (userLoggedIn) {
-        window.location.href = '/dashboard.html';
-    }
-</script>
 
 <!-- Theme Toggle Button -->
 <button id="theme-toggle" title="Toggle Theme">🌞</button>

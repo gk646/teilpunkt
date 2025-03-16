@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <HttpResponse.h>
-#include <glaze/json/read.hpp>
 #include "auth/Authenticator.h"
 #include "server/DTO.h"
+#include "server/DTOMappings.h"
 #include "server/Endpoints.h"
 
 namespace tpunkt
 {
-
-void AuthEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     if(RegisterRequest(res, req))
     {
@@ -25,22 +24,25 @@ void AuthEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
                 return;
             }
 
-            DTOUserLogin authData{};
-            const auto error = glz::read_json(authData, data);
+            DTOUserSignupPW signupData{};
+            const auto error = glz::read_json(signupData, data);
             if(error)
             {
                 EndRequest(res, 400, "Bad JSON");
                 return;
             }
 
-            const auto status = GetAuthenticator().userLogin(authData.name, authData.credentials);
+            Credentials credentials;
+            credentials.type = CredentialsType::PASSWORD;
+            credentials.password = signupData.password;
+            const auto status = GetAuthenticator().userAdd(signupData.name, credentials);
             if(status != AuthStatus::OK)
             {
                 EndRequest(res, 400, GetAuthStatusStr(status));
                 return;
             }
-            res->writeStatus(uWS::HTTP_200_OK);
-            res->end();
+
+            EndRequest(res, 200);
         });
 
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
