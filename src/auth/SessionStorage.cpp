@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <sodium/randombytes.h>
-#include "auth/AuthToken.h"
 #include "auth/SessionStorage.h"
 #include "instance/InstanceConfig.h"
 

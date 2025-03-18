@@ -7,9 +7,12 @@
 
 namespace tpunkt
 {
+
 struct Timestamp
 {
     Timestamp();
+
+    Timestamp operator-(const Timestamp& lhs, const Timestamp& rhs) const;
 
     // Returns true if this timestamp represents a time before the current moment
     [[nodiscard]] bool isInPast() const;
@@ -23,12 +26,16 @@ struct Timestamp
 
     void subtractTime(uint64_t seconds);
 
+    [[nodiscard]] uint64_t getSeconds() const;
+
     // zeros the timestamp - always expires
     void zero();
 
     static Timestamp Now();
 
   private:
+    explicit Timestamp(const uint64_t& timestamp);
+
     uint64_t timestamp;
 };
 

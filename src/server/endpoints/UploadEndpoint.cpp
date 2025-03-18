@@ -64,7 +64,7 @@ void UploadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
                                    {
                                        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                                        printf("Ending now\n");
-                                       res->end("File uploaded successfully!");
+                                       EndRequest(res, 200);
                                    }};
                 thread.detach();
                 file->close();

@@ -26,6 +26,19 @@ Timestamp::Timestamp() : timestamp(getCurrentMonotonicTime())
 {
 }
 
+Timestamp::Timestamp(const uint64_t& timestamp) : timestamp(timestamp)
+{
+}
+
+Timestamp Timestamp::operator-(const Timestamp& lhs, const Timestamp& rhs) const
+{
+    if(lhs.timestamp < rhs.timestamp)
+    {
+        LOG_FATAL("Invalid operation");
+    }
+    return Timestamp{lhs.timestamp - rhs.timestamp};
+}
+
 bool Timestamp::isInPast() const
 {
     return Now().timestamp > timestamp;
@@ -64,6 +77,11 @@ void Timestamp::addDays(const uint64_t days)
 void Timestamp::subtractTime(const uint64_t seconds)
 {
     timestamp -= seconds * 1'000'000'000;
+}
+
+uint64_t Timestamp::getSeconds() const
+{
+    return timestamp / 1'000'000'000U;
 }
 
 void Timestamp::zero()

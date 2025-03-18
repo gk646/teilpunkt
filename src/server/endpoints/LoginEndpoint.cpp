@@ -39,8 +39,7 @@ void AuthEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
                 EndRequest(res, 400, GetAuthStatusStr(status));
                 return;
             }
-            res->writeStatus(uWS::HTTP_200_OK);
-            res->end();
+            EndRequest(res, 200);
         });
 
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });

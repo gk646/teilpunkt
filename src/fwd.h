@@ -22,7 +22,6 @@ namespace tpunkt
 
 struct User;
 struct Credentials;
-struct AuthToken;
 struct Authenticator;
 struct UserStorage;
 struct SessionStorage;
@@ -46,12 +45,6 @@ struct VirtualFilesystem;
 struct VirtualFile;
 struct DTODirectoryInfo;
 struct DTOFileStats;
-
-template <typename T>
-struct BlockStorage;
-
-template <typename T>
-struct BlockNode;
 
 //===== Fixed String =====//
 
@@ -77,7 +70,7 @@ enum TaskID : uint64_t
 
 enum class UserID : uint32_t
 {
-    INVALID = 0
+    INVALID = 0,
 };
 
 enum class EndpointID : uint16_t

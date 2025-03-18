@@ -19,7 +19,6 @@ struct EventMonitor final
     void logData(EventAction action, EventStatus status, EventData data);
 };
 
-
 EventMonitor& GetEventMonitor();
 
 } // namespace tpunkt

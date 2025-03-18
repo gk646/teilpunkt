@@ -3,6 +3,7 @@
 #ifndef TPUNKT_AUTHENTICATOR_H
 #define TPUNKT_AUTHENTICATOR_H
 
+#include <vector>
 #include "auth/SessionStorage.h"
 #include "auth/UserStorage.h"
 #include "datastructures/Spinlock.h"
@@ -25,16 +26,14 @@ enum class AuthStatus : uint8_t
 const char* GetAuthStatusStr(AuthStatus status);
 
 // Every method is atomic
-// Admin can only Add
 struct Authenticator final
 {
     //===== User Management =====//
 
-    // Username must be unique
-    AuthStatus userAdd(const UserName& name, Credentials& consumed);
+    AuthStatus userAdd(UserID user, const UserName& name, Credentials& consumed);
 
     // Assigns token on success
-    AuthStatus userLogin(const UserName& name, Credentials& consumed, AuthToken& out);
+    AuthStatus userLogin(const UserName& name, Credentials& consumed, UserID& out);
 
     // Deletes all associated sessions
     AuthStatus userRemove(UserID user);
@@ -48,19 +47,19 @@ struct Authenticator final
     AuthStatus sessionRemove(UserID user, int idx);
 
     // Assigns user on success
-    AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, UserID& user);
+    AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, UserID& out);
 
     // TODO make collector class / vector like container with stack memory / wrapper around c pointer with len
-    AuthStatus sessionGet(const AuthToken& token);
+    AuthStatus sessionGet(UserID user, std::vector<>);
 
     //===== User Data =====//
     // Part of the authenticator as data access needs the same atomicity as adding/deleting users
 
     // Assigns the username on success
-    AuthStatus getUserName(const AuthToken& token, UserName& out);
+    AuthStatus getUserName(UserID user, UserName& out);
 
     // Assigns the users wrapped key for the given file on success
-    AuthStatus getWrappedKey(const AuthToken& token, FileID file, SecureWrapper<WrappedKey>& out);
+    AuthStatus getWrappedKey(UserID user, FileID file, SecureWrapper<WrappedKey>& out);
 
     // Returns OK if true
     AuthStatus getIsAdmin(UserID user);

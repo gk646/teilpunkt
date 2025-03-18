@@ -15,7 +15,7 @@ Dependencies:
 - [glaze](https://github.com/stephenberry/glaze) _(latest)_: JSON library
 - [ankerl](https://github.com/martinus/unordered_dense) _(latest)_: Optimized Hashmap
 
-Note: This project is built with/for GCC and the Linux kernel as open source is essential for security.
+Note: This project is built with/for GCC and the Linux® kernel as open source is essential for security.
 
 **Feature Highlights:**
 
@@ -126,3 +126,7 @@ Data is generally handled in **32kb** chunks. Specifically chunking is used for:
 - HTTP messages
 - Filesystem I/O
 - Encryption/Decryption
+
+## Notice
+
+Linux® is the registered trademark of Linus Torvalds in the U.S. and other countries.

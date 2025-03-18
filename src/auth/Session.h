@@ -33,7 +33,7 @@ struct Session final
     bool isExpired() const;
 
   private:
-    int num;
+    int num = -1;
     SessionID sessionID;
     SessionMetaData metaData;
     const Timestamp creation;

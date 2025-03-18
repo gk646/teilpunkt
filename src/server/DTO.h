@@ -53,6 +53,16 @@ struct DTOPasskeyStart final
     PubKeyCredParams pubKeyCredParams[ 3 ]{{-8}, {-7}, {-257}};
 };
 
+//===== User =====//
+
+struct DTOSessionInfo final
+{
+    UserAgentString userAgent;
+    uint64_t creationUnix;
+    uint64_t expirationUnix;
+    int num;
+};
+
 //===== Files =====//
 
 struct DTOFileInfo final

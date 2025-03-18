@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <HttpResponse.h>
+#include <sodium/crypto_generichash.h>
 #include "auth/Authenticator.h"
-#include "auth/AuthToken.h"
+#include "monitoring/EventLimiter.h"
 #include "server/DTOMappings.h"
 #include "server/Endpoints.h"
 
@@ -166,23 +167,24 @@ bool ServerEndpoint::AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest*
 
             const auto& ipAddr = res->getRemoteAddress();
             metaData.remoteAddress = HashedIP{ipAddr.data(), ipAddr.size()};
-            // TODO hash ip
+            unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
+            constexpr size_t len = metaData.remoteAddress.capacity();
+            crypto_generichash(content, len, content, len, nullptr, 0);
 
-            AuthToken authToken;
-            return GetAuthenticator().sessionAuth(sessionId, metaData, authToken) != AuthStatus::OK;
+            return GetAuthenticator().sessionAuth(sessionId, metaData, user) != AuthStatus::OK;
         }
     }
-    res->writeStatus("401");
-    res->end("Request has no session id");
+
+    EndRequest(res, 401);
     return false;
 }
 
 bool ServerEndpoint::RegisterRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    return false;
+    return GetEventLimiter().allowRequest(res, req);
 }
 
-void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data)
+void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data, bool close)
 {
     res->writeStatus(GetStatusString(code));
     res->writeHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains;");
@@ -197,9 +199,10 @@ void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, co
                                                 "connect-src 'self';"
                                                 "img-src 'self'; ");
     res->writeHeader("X-XSS-Protection", "1; mode=block");
-   // res->writeHeader("Permissions-Policy", "publickey-credentials-get=(self) geolocation=(), microphone=(), camera=(), payment=(), usb=(), "
-   //                                        "fullscreen=(self), autoplay=(self)");
-    res->end(data);
+    // res->writeHeader("Permissions-Policy", "publickey-credentials-get=(self) geolocation=(), microphone=(),
+    // camera=(), payment=(), usb=(), "
+    //                                        "fullscreen=(self), autoplay=(self)");
+    res->end(data, close);
 }
 
 const char* ServerEndpoint::GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length)

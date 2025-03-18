@@ -5,13 +5,6 @@
 
 #include "fwd.h"
 
-namespace uWS
-{
-struct HttpRequest;
-template <bool T>
-struct HttpResponse;
-} // namespace uWS
-
 namespace tpunkt
 {
 
@@ -25,7 +18,7 @@ struct ServerEndpoint
     // Returns true if the request was already handled - internally calls all listeners and events for requests
     static bool RegisterRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
-    static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data = nullptr);
+    static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data = nullptr, bool close = false);
 
     static const char* GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length);
 };

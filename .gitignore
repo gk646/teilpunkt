@@ -3,3 +3,5 @@ cmake-build*
 external
 key
 ROADMAP.md
+/thesis/
+out
