@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "auth/Authenticator.h"
-#include "auth/AuthToken.h"
 #include "datastructures/SecureEraser.h"
 #include "instance/InstanceConfig.h"
 #include "util/Strings.h"
@@ -142,7 +141,7 @@ AuthStatus Authenticator::userChangeCredentials(const AuthToken& token, const Us
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionMetaData& data, SecureWrapper<SessionID>& out)
+AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionMetaData& data, SecureWrapper<SessionToken>& out)
 {
     SpinlockGuard lock{authLock};
     if(!tokenValid(token))
@@ -151,7 +150,7 @@ AuthStatus Authenticator::sessionAdd(const AuthToken& token, const SessionMetaDa
         return AuthStatus::ERR_INVALID_TOKEN;
     }
 
-    SessionID sessionId;
+    SessionToken sessionId;
     if(!sessionStore.add(token.userID, data, sessionId))
     {
         LOG_EVENT(UserAction, SessionAdd, WARN_OPERATION_FAILED);
@@ -176,7 +175,7 @@ AuthStatus Authenticator::sessionRemove(const AuthToken& token)
     }
 }
 
-AuthStatus Authenticator::sessionAuth(const SessionID& sessionId, const SessionMetaData& data, AuthToken& out)
+AuthStatus Authenticator::sessionAuth(const SessionToken& sessionId, const SessionMetaData& data, AuthToken& out)
 {
     SpinlockGuard lock{authLock};
     auto userID = UserID::INVALID;

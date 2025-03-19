@@ -26,17 +26,17 @@ struct Session final
     Session() = default;
 
     Session(Session&& other) noexcept
-        : sessionID(other.sessionID), metaData(other.metaData), creation(other.creation), expiration(other.expiration)
+        : token(other.token), metaData(other.metaData), creation(other.creation), expiration(other.expiration)
     {
     }
 
-    bool isExpired() const;
+    bool isValid(SessionMetaData);
 
   private:
-    int num = -1;
-    SessionID sessionID;
-    SessionMetaData metaData;
-    const Timestamp creation;
+    int uid = -1;             // uniquely identifies a session internally
+    SessionToken token;       // actual set cookie
+    SessionMetaData metaData; // Metadata that has to match
+    const Timestamp creation; // Tracked for user info
     const Timestamp expiration;
     friend SessionStorage;
 };

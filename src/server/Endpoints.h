@@ -12,14 +12,16 @@ struct ServerEndpoint
 {
     //===== Helper =====//
 
-    // Returns request is authenticated
+    // Returns true and assigns user if request has a valid session cookie
     static bool AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user);
 
-    // Returns true if the request was already handled - internally calls all listeners and events for requests
-    static bool RegisterRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    // Returns true if the request is allowed
+    static bool AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
+    // Ends the request
     static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data = nullptr, bool close = false);
 
+    // Returns nullptr if no header with the given name is found
     static const char* GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length);
 };
 
@@ -30,6 +32,7 @@ struct ServerEndpoint
     }                                                                                                                  \
     if(!AuthRequest(res, req, user))                                                                                   \
     {                                                                                                                  \
+        EndRequest(res, 401);                                                                                          \
         return;                                                                                                        \
     }
 

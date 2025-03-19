@@ -19,7 +19,6 @@ enum class AuthStatus : uint8_t
     OK,
     ERR_UNSUCCESSFUL,      // Generic error
     ERR_USER_NAME_EXISTS,  // userAdd
-    ERR_INVALID_TOKEN,     // all Methods that accept a token
     ERR_INVALID_ARGUMENTS, // One or more arguments are invalid
 };
 
@@ -42,12 +41,12 @@ struct Authenticator final
 
     //===== Session Management =====//
 
-    AuthStatus sessionAdd(UserID user, const SessionMetaData& data, SecureWrapper<SessionID>& out);
+    AuthStatus sessionAdd(UserID user, const SessionMetaData& data, SecureWrapper<SessionToken>& out);
 
     AuthStatus sessionRemove(UserID user, int idx);
 
     // Assigns user on success
-    AuthStatus sessionAuth(const SessionID& sessionId, const SessionMetaData& data, UserID& out);
+    AuthStatus sessionAuth(const SessionToken& token, const SessionMetaData& data, UserID& out);
 
     // TODO make collector class / vector like container with stack memory / wrapper around c pointer with len
     AuthStatus sessionGet(UserID user, std::vector<>);

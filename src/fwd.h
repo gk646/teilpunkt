@@ -50,7 +50,7 @@ struct DTOFileStats;
 
 template <size_t len>
 struct FixedString;
-using SessionID = FixedString<TPUNKT_CRYPTO_SESSION_ID_LEN>;
+using SessionToken = FixedString<TPUNKT_CRYPTO_SESSION_ID_LEN>;
 using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
 using UserPassword = FixedString<TPUNKT_AUTH_PASSWORD_LEN>;
 using UserPasskey = FixedString<TPUNKT_AUTH_PASSKEY_LEN>;

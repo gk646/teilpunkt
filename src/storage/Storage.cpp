@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "auth/Authenticator.h"
-#include "auth/AuthToken.h"
+
 #include "instance/InstanceConfig.h"
 #include "storage/Storage.h"
 #include "util/Wrapper.h"

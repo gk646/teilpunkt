@@ -6,9 +6,10 @@
 
 namespace tpunkt
 {
-bool SessionStorage::add(const UserID userID, const SessionMetaData& data, SessionID& out)
+
+bool SessionStorage::add(const UserID userID, const SessionMetaData& data, SessionToken& token)
 {
-    auto* userData = getUserData(userID);
+    auto* userData = getUserSessionData(userID);
     if(userData == nullptr)
     {
         userData = &sessions.emplace_back(userID);
@@ -26,21 +27,21 @@ bool SessionStorage::add(const UserID userID, const SessionMetaData& data, Sessi
     session.data = data;
     session.expiration.addMins(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_DELAY_SECS));
 
-    randombytes_buf(session.sessionID.data(), session.sessionID.capacity());
-    out = session.sessionID;
+    randombytes_buf(session.token.data(), session.token.capacity());
+    token = session.token;
 
     sessionList.push_back(std::move(session));
     return true;
 }
 
-bool SessionStorage::get(const SessionID& sessionId, const SessionMetaData& data, UserID& userID)
+bool SessionStorage::get(const SessionToken& token, const SessionMetaData& data, UserID& userID)
 {
     return true;
 }
 
-bool SessionStorage::removeByRemote(const UserID userID, const HashedIP& address)
+bool SessionStorage::removeByUID(const UserID userID, const HashedIP& address)
 {
-    auto* userData = getUserData(userID);
+    auto* userData = getUserSessionData(userID);
     if(userData == nullptr)
     {
         return false;
@@ -56,9 +57,9 @@ bool SessionStorage::removeByRemote(const UserID userID, const HashedIP& address
     return false;
 }
 
-bool SessionStorage::removeByID(const UserID userID, const SessionID& sessionId)
+bool SessionStorage::removeByID(const UserID userID, const SessionToken& sessionId)
 {
-    auto* userData = getUserData(userID);
+    auto* userData = getUserSessionData(userID);
     if(userData == nullptr)
     {
         return false;
@@ -66,7 +67,7 @@ bool SessionStorage::removeByID(const UserID userID, const SessionID& sessionId)
     auto sessionList = userData->sessions.get();
     for(size_t i = 0U; i < sessionList.size(); ++i)
     {
-        if(sessionList[ i ].sessionID == sessionId)
+        if(sessionList[ i ].token == sessionId)
         {
             return sessionList.eraseIndex(i);
         }
@@ -81,7 +82,7 @@ bool SessionStorage::tokenValid(const AuthToken& token) const
         return false; // Invalid userID
     }
 
-    const auto* userData = getUserData(token.userID);
+    const auto* userData = getUserSessionData(token.userID);
     if(userData == nullptr)
     {
         return false;
@@ -100,7 +101,7 @@ bool SessionStorage::tokenValid(const AuthToken& token) const
 
 bool SessionStorage::addToken(const UserID userID, uint32_t& random)
 {
-    auto* userData = getUserData(userID);
+    auto* userData = getUserSessionData(userID);
     if(userData == nullptr)
     {
         userData = &sessions.emplace_back(userID);
@@ -113,7 +114,7 @@ bool SessionStorage::addToken(const UserID userID, uint32_t& random)
 
 bool SessionStorage::removeToken(const AuthToken& token)
 {
-    auto* userData = getUserData(token.userID);
+    auto* userData = getUserSessionData(token.userID);
     if(userData == nullptr)
     {
         return true; // Token is invalid as user doesnt exist
@@ -131,11 +132,11 @@ bool SessionStorage::removeToken(const AuthToken& token)
     return true; // Token could not be found - not valid anymore
 }
 
-UserSessionData* SessionStorage::getUserData(const UserID userID)
+UserSessionData* SessionStorage::getUserSessionData(const UserID userID)
 {
     for(auto& session : sessions)
     {
-        if(session.userID == userID)
+        if(session.user == userID)
         {
             return &session;
         }
@@ -143,11 +144,11 @@ UserSessionData* SessionStorage::getUserData(const UserID userID)
     return nullptr;
 }
 
-const UserSessionData* SessionStorage::getUserData(const UserID userID) const
+const UserSessionData* SessionStorage::getUserSessionData(const UserID userID) const
 {
     for(const auto& session : sessions)
     {
-        if(session.userID == userID)
+        if(session.user == userID)
         {
             return &session;
         }

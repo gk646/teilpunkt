@@ -10,15 +10,16 @@
 
 namespace tpunkt
 {
+
+// Groups session data per user
 struct UserSessionData final
 {
-    explicit UserSessionData(const UserID user) : userID(user)
+    explicit UserSessionData(const UserID user) : user(user)
     {
     }
 
     // Only allow move construction
-    UserSessionData(UserSessionData&& other) noexcept
-        : userID(other.userID), sessions(std::move(other.sessions)), tokens(std::move(other.tokens))
+    UserSessionData(UserSessionData&& other) noexcept : user(other.user), sessions(std::move(other.sessions))
     {
     }
 
@@ -27,38 +28,30 @@ struct UserSessionData final
     UserSessionData& operator=(UserSessionData&& other) = delete;
 
   private:
-    const UserID userID;          // User it belongs to
+    const UserID user;            // User it belongs to
     SecureList<Session> sessions; // Session list
     friend SessionStorage;
 };
 
+// Stores and manages all session data
 struct SessionStorage final
 {
     SessionStorage() = default;
 
     //===== Session Management =====//
 
-    bool add(UserID userID, const SessionMetaData& data, SessionID& out);
+    // Returns true if a new session with the give meta-data was added and token is set
+    bool add(UserID userID, const SessionMetaData& data, SessionToken& token);
 
-    // If the session is identified but the data does not match its revoked!
-    bool get(const SessionID& sessionId, const SessionMetaData& data, UserID& userID);
+    // Returns true a valid session was found - automatically revokes if the token matches but not the meta-data
+    bool get(const SessionToken& token, const SessionMetaData& data, UserID& userID);
 
-    bool removeByRemote(UserID userID, const HashedIP& address);
-
-    bool removeByID(UserID userID, const SessionID& sessionId);
-
-    //===== Token Management =====//
-
-    [[nodiscard]] bool tokenValid(const AuthToken& token) const;
-
-    bool addToken(UserID userID, uint32_t& random);
-
-    bool removeToken(const AuthToken& token);
+    // Returns true if the session of the user with the given uid was removed
+    bool removeByUID(UserID userID, int uid);
 
   private:
-    UserSessionData* getUserData(UserID userID);
-
-    [[nodiscard]] const UserSessionData* getUserData(UserID userID) const;
+    UserSessionData* getUserSessionData(UserID userID);
+    [[nodiscard]] const UserSessionData* getUserSessionData(UserID userID) const;
 
     std::vector<UserSessionData> sessions;
     TPUNKT_MACROS_STRUCT(SessionStorage);

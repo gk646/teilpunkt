@@ -150,36 +150,34 @@ static const char* GetStatusString(const int status)
 
 bool ServerEndpoint::AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
 {
-    for(const auto& [ key, value ] : *req)
+    size_t tokenLen = 0;
+    const char* tokenStr = GetHeader(req, TPUNKT_AUTH_SESSION_ID_NAME, tokenLen);
+    if(tokenStr == nullptr)
     {
-        if(key == TPUNKT_AUTH_SESSION_ID_NAME)
-        {
-            const SessionID sessionId{value.data(), value.size()};
-            SessionMetaData metaData;
+        return false;
+    }
+    const SessionToken token{tokenStr, tokenLen};
 
-            size_t userAgentLen = 0;
-            const auto* userAgent = GetHeader(req, "user-agent", userAgentLen);
-            if(userAgent == nullptr)
-            {
-                break;
-            }
-            metaData.userAgent = UserAgentString{userAgent, userAgentLen};
-
-            const auto& ipAddr = res->getRemoteAddress();
-            metaData.remoteAddress = HashedIP{ipAddr.data(), ipAddr.size()};
-            unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
-            constexpr size_t len = metaData.remoteAddress.capacity();
-            crypto_generichash(content, len, content, len, nullptr, 0);
-
-            return GetAuthenticator().sessionAuth(sessionId, metaData, user) != AuthStatus::OK;
-        }
+    size_t agentLen = 0;
+    const auto* agentStr = GetHeader(req, "user-agent", agentLen);
+    if(agentStr == nullptr)
+    {
+        return false;
     }
 
-    EndRequest(res, 401);
-    return false;
+    SessionMetaData metaData;
+    metaData.userAgent = UserAgentString{agentStr, agentLen};
+
+    const auto& ipAddr = res->getRemoteAddress();
+    metaData.remoteAddress = HashedIP{ipAddr.data(), ipAddr.size()};
+    unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
+    constexpr size_t len = metaData.remoteAddress.capacity();
+    crypto_generichash(content, len, content, len, nullptr, 0);
+
+    return GetAuthenticator().sessionAuth(token, metaData, user) != AuthStatus::OK;
 }
 
-bool ServerEndpoint::RegisterRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+bool ServerEndpoint::AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     return GetEventLimiter().allowRequest(res, req);
 }

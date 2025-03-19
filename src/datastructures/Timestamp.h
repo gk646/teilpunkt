@@ -12,7 +12,7 @@ struct Timestamp
 {
     Timestamp();
 
-    Timestamp operator-(const Timestamp& lhs, const Timestamp& rhs) const;
+    Timestamp operator-(const Timestamp& rhs) const;
 
     // Returns true if this timestamp represents a time before the current moment
     [[nodiscard]] bool isInPast() const;

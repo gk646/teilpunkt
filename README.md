@@ -2,37 +2,36 @@
 
 > [!IMPORTANT]
 > Until version 1.0.0 it is not recommended for production use.
+> Work in progress - Features might not be complete yet.
 
 
-`teilpunkt`™ _(ger. sharepoint)_ is a self-hosted, security first, GDPR-compliant file server. Its built with modern
-technologies
+`teilpunkt`™ _(ger. sharepoint)_ is a self-hosted, security first, file server implemented from scratch using modern
+technology in C++ 23.
 
 Dependencies:
 
-- [uWebSockets](https://github.com/uNetworking/uWebSockets) _(latest)_: HTTPS Server
+- [uWebSockets](https://github.com/uNetworking/uWebSockets) _(latest)_: HTTPS server and sockets
 - [libsodium](https://github.com/jedisct1/libsodium) _(latest)_: Crypto Primitives
-- [libsodium.js](https://github.com/jedisct1/libsodium.js) _(latest)_: Crypto Primitives in Frontend
+- [libsodium.js](https://github.com/jedisct1/libsodium.js) _(latest)_: Crypto Primitives for the Frontend
 - [glaze](https://github.com/stephenberry/glaze) _(latest)_: JSON library
 - [ankerl](https://github.com/martinus/unordered_dense) _(latest)_: Optimized Hashmap
 
-Note: This project is built with/for GCC and the Linux® kernel as open source is essential for security.
+Note: This project is built only with/for GCC and the Linux® kernel.
 
 **Feature Highlights:**
 
-- GDPR compliant data storage
-- Extensive and structured logging of events with Python API
-- Blazingly fast and multithreaded server
-
-## Authentication
-
-- Passkeys
-- Password + any 2FA method
-    - Email
-    - Authenticator App
-    - Biometrics
-- Single Sign On (SSOA)
+- **Security first** approach using modern technology
+- [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) enabled file transfers
+- Supports **passkey and MFA** authentication
+- **Fast and compliant multithreaded webserver** with uWebSockets
+- **Linux native** filesystem and webserver
+- Comprehensive **auditing and logging** accessible with various endpoints
+- Modern and lightweight frontend accessible on all devices
+- Many more to come...
 
 ## Deployment
+
+Disclaimer: Currently `teilpunkt` is not ready to be deployed
 
 `teilpunkt` chooses its default settings favoring security over convenience in order to avoid mishaps. Tradeoffs for
 more convenience have to be made explicitly by the admin that deploys the instance.
@@ -62,7 +61,7 @@ These are the active (and passive) security measures used by `teilpunkt`.
 
 ### Deployment
 
-- Runs only on recent GNU/Linux
+- Runs only on Linux kernel
 - All unneeded ports blocked (with setup.sh)
 - Core dumps disabled (with setup.sh)
 - Use of locking and blocking sensitive memory regions
@@ -91,41 +90,35 @@ These are the active (and passive) security measures used by `teilpunkt`.
 
 ### Threading
 
-#### WebServer Threads _(2-4)_:
+#### WebServer Threads _(2-x)_:
 
 - Handle incoming HTTP requests
-- Directly do tasks that return immediately:
+- Directly handle tasks that return immediately:
     - Modify virtual filesystem
     - Create, Login or Remove users
     - Change settings, etc.
 - Also handles chunked file transfer:
     - Use of non-blocking sockets allows to have many connections even per thread
 
-#### Worker Threads _(1-2):_
+#### Worker Threads _(1-x):_
 
 - Priority-based queue worker system
     - Only run tasks that are explicitly given to them
 
 #### Background Thread _(1):_
 
-- Runs an event loop to schedule set tasks
-    - Send audit logs
-    - Invoke plugins
-    -
+- Runs the main event loop
+  - Handles incoming events
+  - Adds tasks to the worker thread
+
 
 This means it runs hardware concurrent on devices with 4+ cores.
 
 ### Instance
 
-The executable
 
 ### Files and Data
 
-Data is generally handled in **32kb** chunks. Specifically chunking is used for:
-
-- HTTP messages
-- Filesystem I/O
-- Encryption/Decryption
 
 ## Notice
 

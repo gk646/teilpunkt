@@ -9,6 +9,7 @@ namespace tpunkt
 
 namespace
 {
+
 uint64_t getCurrentMonotonicTime()
 {
     timespec time{};
@@ -30,13 +31,13 @@ Timestamp::Timestamp(const uint64_t& timestamp) : timestamp(timestamp)
 {
 }
 
-Timestamp Timestamp::operator-(const Timestamp& lhs, const Timestamp& rhs) const
+Timestamp Timestamp::operator-(const Timestamp& rhs) const
 {
-    if(lhs.timestamp < rhs.timestamp)
+    if(timestamp < rhs.timestamp)
     {
         LOG_FATAL("Invalid operation");
     }
-    return Timestamp{lhs.timestamp - rhs.timestamp};
+    return Timestamp{timestamp - rhs.timestamp};
 }
 
 bool Timestamp::isInPast() const
@@ -93,6 +94,5 @@ Timestamp Timestamp::Now()
 {
     return {};
 }
-
 
 } // namespace tpunkt

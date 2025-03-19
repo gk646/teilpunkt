@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "TestCommons.h"
-#include "auth/AuthToken.h"
+
 
 using namespace tpunkt;
 
@@ -138,7 +138,7 @@ TEST_CASE("Return value on invalid token")
     REQUIRE(GetAuthenticator().userChangeCredentials(token, n, c) == AuthStatus::ERR_INVALID_TOKEN);
 
     SessionMetaData data{};
-    SecureWrapper<SessionID> id;
+    SecureWrapper<SessionToken> id;
     REQUIRE(GetAuthenticator().sessionAdd(token, data, id) == AuthStatus::ERR_INVALID_TOKEN);
     REQUIRE(GetAuthenticator().sessionRemove(token) == AuthStatus::ERR_INVALID_TOKEN);
     REQUIRE(GetAuthenticator().sessionGet(token) == AuthStatus::ERR_INVALID_TOKEN);
