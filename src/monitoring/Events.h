@@ -35,6 +35,7 @@ enum class EventAction : uint8_t
     SessionRemove,
     SessionAuthenticate,
     SessionGetSessions,
+    SessionGetInfo,
     // Token
     TokenInvalidate,
     // Endpoint

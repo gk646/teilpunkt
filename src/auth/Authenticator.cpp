@@ -146,93 +146,48 @@ AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& d
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionRemove(const AuthToken& token)
+AuthStatus Authenticator::sessionRemove(const UserID user, const Timestamp& creation)
 {
     SpinlockGuard lock{authLock};
-    if(!tokenValid(token))
+
+    if(!sessionStore.remove(user, creation))
     {
-        LOG_EVENT(UserAction, SessionRemove, FAIL_INVALID_TOKEN);
-        return AuthStatus::ERR_INVALID_TOKEN;
+        LOG_EVENT(UserAction, SessionRemove, FAIL_SERVER_OPERATION);
+        return AuthStatus::ERR_UNSUCCESSFUL;
     }
+
+    LOG_EVENT(UserAction, SessionRemove, SUCCESS);
+    return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionAuth(const SessionToken& sessionId, const SessionMetaData& data, AuthToken& out)
+AuthStatus Authenticator::sessionAuth(const SessionToken& sessionId, const SessionMetaData& data, UserID& user)
 {
     SpinlockGuard lock{authLock};
-    auto userID = UserID::INVALID;
-    if(!sessionStore.get(sessionId, data, userID))
+    if(!sessionStore.get(sessionId, data, user))
     {
-        LOG_EVENT(UserAction, SessionAuthenticate, WARN_OPERATION_FAILED);
+        LOG_EVENT(UserAction, SessionAuthenticate, FAIL_SERVER_OPERATION);
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
-
-    uint32_t random = 0U;
-    if(!sessionStore.addToken(userID, random))
-    {
-        LOG_EVENT(UserAction, SessionAuthenticate, WARN_OPERATION_FAILED);
-        return AuthStatus::ERR_UNSUCCESSFUL;
-    }
-
-    out.random = random;
-    out.userID = userID;
 
     LOG_EVENT(UserAction, SessionAuthenticate, SUCCESS);
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionGet(const AuthToken& token)
+AuthStatus Authenticator::sessionGetInfo(const UserID user, std::vector<DTOSessionInfo>& collector)
 {
     SpinlockGuard lock{authLock};
-    if(!tokenValid(token))
-    {
-        LOG_EVENT(UserAction, SessionGetSessions, FAIL_INVALID_TOKEN);
-        return AuthStatus::ERR_INVALID_TOKEN;
-    }
-}
-
-bool Authenticator::tokenValid(const AuthToken& token)
-{
-    if(!authLock.isLocked()) // Can be called within lock or standalone
-    {
-        SpinlockGuard lock{authLock};
-        return sessionStore.tokenValid(token);
-    }
-    return sessionStore.tokenValid(token);
-}
-
-AuthStatus Authenticator::tokenInvalidate(AuthToken& consumed)
-{
-    SpinlockGuard lock{authLock};
-    SecureEraser eraser{consumed};
-    if(!sessionStore.removeToken(consumed))
-    {
-        LOG_EVENT(ServerAction, TokenInvalidate, FAIL_INVALID_TOKEN);
-        LOG_CRITICAL("Failed to invalidate token");
-        return AuthStatus::ERR_UNSUCCESSFUL;
-    }
-    LOG_EVENT(ServerAction, TokenInvalidate, SUCCESS);
+    sessionStore.getInfo(user, collector);
+    LOG_EVENT(UserAction, SessionGetInfo, SUCCESS);
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::getUserName(const AuthToken& token, UserName& out)
+AuthStatus Authenticator::getUserName(const UserID user, UserName& out)
 {
     SpinlockGuard lock{authLock};
-    if(!tokenValid(token))
-    {
-        LOG_EVENT(UserAction, UserDataGetName, FAIL_INVALID_TOKEN);
-        return AuthStatus::ERR_INVALID_TOKEN;
-    }
+    // TODo
+    return AuthStatus::INVALID;
 }
 
-AuthStatus Authenticator::getWrappedKey(const AuthToken& token, FileID handle, SecureWrapper<WrappedKey>& out)
-{
-    SpinlockGuard lock{authLock};
-    if(!tokenValid(token))
-    {
-        LOG_EVENT(UserAction, UserDataGetWrappedKey, FAIL_INVALID_TOKEN);
-        return AuthStatus::ERR_INVALID_TOKEN;
-    }
-}
 
 AuthStatus Authenticator::getIsAdmin(UserID user)
 {

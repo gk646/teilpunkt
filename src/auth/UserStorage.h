@@ -26,6 +26,8 @@ namespace tpunkt
 
         [[nodiscard]] bool nameExists(const UserName& name) const;
 
+
+
         UserStorage();
         ~UserStorage();
 

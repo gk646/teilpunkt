@@ -66,8 +66,10 @@ struct SessionStorage final
     // Returns true a valid session was found - automatically revokes if the token matches but not the meta-data
     bool get(const SessionToken& token, const SessionMetaData& metaData, UserID& user);
 
-    // Returns true if the session of the user with the given uid was removed
-    bool removeByUID(UserID userID, int uid);
+    // Returns true if the session of the user with the given timestamp was removed
+    bool remove(UserID user, const Timestamp& creation);
+
+    void getInfo(UserID user, std::vector<DTOSessionInfo>& collector);
 
   private:
     UserSessionData* getUserSessionData(UserID userID);

@@ -56,17 +56,13 @@ struct Authenticator final
     // Assigns user on success
     AuthStatus sessionAuth(const SessionToken& token, const SessionMetaData& data, UserID& user);
 
-    // TODO make collector class / vector like container with stack memory / wrapper around c pointer with len
-    AuthStatus sessionGet(UserID user, std::vector<DTOSessionInfo>& collector);
+    AuthStatus sessionGetInfo(UserID user, std::vector<DTOSessionInfo>& collector);
 
     //===== User Data =====//
     // Part of the authenticator as data access needs the same atomicity as adding/deleting users
 
     // Assigns the username on success
     AuthStatus getUserName(UserID user, UserName& out);
-
-    // Assigns the users wrapped key for the given file on success
-    AuthStatus getWrappedKey(UserID user, FileID file, SecureWrapper<WrappedKey>& out);
 
     // Returns OK if true
     AuthStatus getIsAdmin(UserID user);
