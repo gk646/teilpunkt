@@ -40,6 +40,11 @@ Timestamp Timestamp::operator-(const Timestamp& rhs) const
     return Timestamp{timestamp - rhs.timestamp};
 }
 
+bool Timestamp::operator==(const Timestamp& rhs) const
+{
+    return timestamp == rhs.timestamp;
+}
+
 bool Timestamp::isInPast() const
 {
     return Now().timestamp > timestamp;
@@ -90,9 +95,11 @@ void Timestamp::zero()
     timestamp = 0U;
 }
 
-Timestamp Timestamp::Now()
+Timestamp Timestamp::Now(const uint64_t addSeconds)
 {
-    return {};
+    Timestamp result{};
+    result.addSecs(addSeconds);
+    return result;
 }
 
 } // namespace tpunkt

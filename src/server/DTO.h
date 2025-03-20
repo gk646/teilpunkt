@@ -60,7 +60,6 @@ struct DTOSessionInfo final
     UserAgentString userAgent;
     uint64_t creationUnix;
     uint64_t expirationUnix;
-    int num;
 };
 
 //===== Files =====//

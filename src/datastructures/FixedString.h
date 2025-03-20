@@ -109,14 +109,14 @@ struct FixedString final
         return (const unsigned char*)arr;
     }
 
-    [[nodiscard]] Iterator<char> begin() const
+    [[nodiscard]] Iterator<const char> begin() const
     {
-        return Iterator<char>{arr};
+        return Iterator<const char>{arr};
     }
 
-    [[nodiscard]] Iterator<char> end() const
+    [[nodiscard]] Iterator<const char> end() const
     {
-        return Iterator<char>{arr + size()};
+        return Iterator<const char>{arr + size()};
     }
 
     char* data()

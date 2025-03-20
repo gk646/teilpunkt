@@ -13,6 +13,7 @@ struct Timestamp
     Timestamp();
 
     Timestamp operator-(const Timestamp& rhs) const;
+    bool operator==(const Timestamp& rhs) const;
 
     // Returns true if this timestamp represents a time before the current moment
     [[nodiscard]] bool isInPast() const;
@@ -31,7 +32,7 @@ struct Timestamp
     // zeros the timestamp - always expires
     void zero();
 
-    static Timestamp Now();
+    static Timestamp Now(uint64_t addSeconds = 0);
 
   private:
     explicit Timestamp(const uint64_t& timestamp);

@@ -7,12 +7,43 @@
 namespace tpunkt
 {
 
-bool SessionStorage::add(const UserID userID, const SessionMetaData& data, SessionToken& token)
+Session::Session(const SessionMetaData& metaData)
+    : metaData(metaData),
+      expiration(Timestamp::Now(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_DELAY_SECS)))
 {
-    auto* userData = getUserSessionData(userID);
-    if(userData == nullptr)
+    randombytes_buf(token.data(), token.capacity());
+}
+
+Session::Session(Session&& other) noexcept
+    : token(other.token), metaData(other.metaData), creation(other.creation), expiration(other.expiration)
+{
+}
+
+bool Session::isValid(const SessionMetaData& metaData) const
+{
+    if(this->metaData != metaData)
     {
-        userData = &sessions.emplace_back(userID);
+        return false;
+    }
+
+    if(expiration.isInPast())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+UserSessionData::UserSessionData(const UserID user) : user(user)
+{
+}
+
+bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, SessionToken& token)
+{
+    UserSessionData* userData = getUserSessionData(user);
+    if(userData == nullptr)                                                              // User is not present yet
+    {
+        userData = &sessions.emplace_back(user);
     }
 
     auto sessionList = userData->sessions.get();
@@ -23,113 +54,39 @@ bool SessionStorage::add(const UserID userID, const SessionMetaData& data, Sessi
         return false;
     }
 
-    Session session{};
-    session.data = data;
-    session.expiration.addMins(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_DELAY_SECS));
-
-    randombytes_buf(session.token.data(), session.token.capacity());
-    token = session.token;
+    Session session{metaData};
+    token = session.getToken();
 
     sessionList.push_back(std::move(session));
     return true;
 }
 
-bool SessionStorage::get(const SessionToken& token, const SessionMetaData& data, UserID& userID)
+bool SessionStorage::get(const SessionToken& token, const SessionMetaData& metaData, UserID& user)
 {
-    return true;
-}
-
-bool SessionStorage::removeByUID(const UserID userID, const HashedIP& address)
-{
-    auto* userData = getUserSessionData(userID);
-    if(userData == nullptr)
-    {
-        return false;
-    }
-    auto sessionList = userData->sessions.get();
-    for(size_t i = 0U; i < sessionList.size(); ++i)
-    {
-        if(sessionList[ i ].data.remoteAddress == address)
-        {
-            return sessionList.eraseIndex(i);
-        }
-    }
-    return false;
-}
-
-bool SessionStorage::removeByID(const UserID userID, const SessionToken& sessionId)
-{
-    auto* userData = getUserSessionData(userID);
-    if(userData == nullptr)
-    {
-        return false;
-    }
-    auto sessionList = userData->sessions.get();
-    for(size_t i = 0U; i < sessionList.size(); ++i)
-    {
-        if(sessionList[ i ].token == sessionId)
-        {
-            return sessionList.eraseIndex(i);
-        }
-    }
-    return false;
-}
-
-bool SessionStorage::tokenValid(const AuthToken& token) const
-{
-    if(token.userID == UserID::INVALID)
-    {
-        return false; // Invalid userID
-    }
-
-    const auto* userData = getUserSessionData(token.userID);
-    if(userData == nullptr)
+    UserSessionData* sessionData = getUserSessionData(user);
+    if(sessionData == nullptr)
     {
         return false;
     }
 
-    for(const auto random : userData->tokens)
+    auto sessionList = sessionData->sessions.get();
+    for(auto& session : sessionList)
     {
-        if(random == token.random)
+        if(session.getToken() == token) // Found a match
         {
-            return true;
+            if(session.isValid(metaData))
+            {
+                user = sessionData->user;
+                return true;
+            }
+            else                        // Metadata does not match
+            {
+                sessionList.erase(session);
+                return false;
+            }
         }
     }
-
     return false;
-}
-
-bool SessionStorage::addToken(const UserID userID, uint32_t& random)
-{
-    auto* userData = getUserSessionData(userID);
-    if(userData == nullptr)
-    {
-        userData = &sessions.emplace_back(userID);
-    }
-
-    random = randombytes_random();
-    userData->tokens.push_back(random);
-    return true;
-}
-
-bool SessionStorage::removeToken(const AuthToken& token)
-{
-    auto* userData = getUserSessionData(token.userID);
-    if(userData == nullptr)
-    {
-        return true; // Token is invalid as user doesnt exist
-    }
-
-    for(auto& savedRandom : userData->tokens)
-    {
-        if(savedRandom == token.random)
-        {
-            savedRandom = userData->tokens.back();
-            userData->tokens.pop_back();
-            return true;
-        }
-    }
-    return true; // Token could not be found - not valid anymore
 }
 
 UserSessionData* SessionStorage::getUserSessionData(const UserID userID)
@@ -144,16 +101,5 @@ UserSessionData* SessionStorage::getUserSessionData(const UserID userID)
     return nullptr;
 }
 
-const UserSessionData* SessionStorage::getUserSessionData(const UserID userID) const
-{
-    for(const auto& session : sessions)
-    {
-        if(session.user == userID)
-        {
-            return &session;
-        }
-    }
-    return nullptr;
-}
 
 } // namespace tpunkt

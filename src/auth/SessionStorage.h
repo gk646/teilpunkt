@@ -4,28 +4,50 @@
 #define TPUNKT_SESSION_STORAGE_H
 
 #include <vector>
-#include "auth/Session.h"
+#include "datastructures/FixedString.h"
 #include "datastructures/SecureList.h"
+#include "datastructures/Timestamp.h"
 #include "fwd.h"
 
 namespace tpunkt
 {
 
+// Data associated with each session - has to match
+struct SessionMetaData final
+{
+    UserAgentString userAgent;
+    HashedIP remoteAddress;
+
+    bool operator==(const SessionMetaData&) const = default;
+};
+
+// A session saves the authentication so the user does not have to authenticate on each request
+// A session is terminated if ONE of the following is true:
+//      - the current time is greater than the expiration stamp
+//      - the remote address with the cookie differs from the saved one
+//      - the user agent string differs from the saved one
+struct Session final
+{
+    Session() = default;
+    explicit Session(const SessionMetaData& metaData);
+    Session(Session&& other) noexcept;
+
+    [[nodiscard]] bool isValid(const SessionMetaData& metaData) const;
+
+    [[nodiscard]] const SessionToken& getToken() const;
+
+  private:
+    SessionToken token;       // actual set cookie
+    SessionMetaData metaData; // Metadata that has to match
+    const Timestamp creation; // Tracked for user info
+    const Timestamp expiration;
+};
+
 // Groups session data per user
 struct UserSessionData final
 {
-    explicit UserSessionData(const UserID user) : user(user)
-    {
-    }
-
-    // Only allow move construction
-    UserSessionData(UserSessionData&& other) noexcept : user(other.user), sessions(std::move(other.sessions))
-    {
-    }
-
-    UserSessionData(const UserSessionData&) = delete;
-    UserSessionData& operator=(const UserSessionData&) = delete;
-    UserSessionData& operator=(UserSessionData&& other) = delete;
+    explicit UserSessionData(UserID user);
+    TPUNKT_MACROS_MOVE_ONLY(UserSessionData);
 
   private:
     const UserID user;            // User it belongs to
@@ -38,20 +60,17 @@ struct SessionStorage final
 {
     SessionStorage() = default;
 
-    //===== Session Management =====//
-
     // Returns true if a new session with the give meta-data was added and token is set
-    bool add(UserID userID, const SessionMetaData& data, SessionToken& token);
+    bool add(UserID user, const SessionMetaData& metaData, SessionToken& token);
 
     // Returns true a valid session was found - automatically revokes if the token matches but not the meta-data
-    bool get(const SessionToken& token, const SessionMetaData& data, UserID& userID);
+    bool get(const SessionToken& token, const SessionMetaData& metaData, UserID& user);
 
     // Returns true if the session of the user with the given uid was removed
     bool removeByUID(UserID userID, int uid);
 
   private:
     UserSessionData* getUserSessionData(UserID userID);
-    [[nodiscard]] const UserSessionData* getUserSessionData(UserID userID) const;
 
     std::vector<UserSessionData> sessions;
     TPUNKT_MACROS_STRUCT(SessionStorage);

@@ -2,11 +2,10 @@
 
 > [!IMPORTANT]
 > Until version 1.0.0 it is not recommended for production use.
-> Work in progress - Features might not be complete yet.
+> Work in progress - certain features might not be complete.
 
 
-`teilpunkt`™ _(ger. sharepoint)_ is a self-hosted, security first, file server implemented from scratch using modern
-technology in C++ 23.
+`teilpunkt`™ _(ger. sharepoint)_ is a _C++23_ **self-hosted, security first, file server** implemented natively for Linux® using modern technologies.
 
 Dependencies:
 
@@ -16,7 +15,7 @@ Dependencies:
 - [glaze](https://github.com/stephenberry/glaze) _(latest)_: JSON library
 - [ankerl](https://github.com/martinus/unordered_dense) _(latest)_: Optimized Hashmap
 
-Note: This project is built only with/for GCC and the Linux® kernel.
+_Note: This project is built only with/for GCC and the Linux® kernel._
 
 **Feature Highlights:**
 
@@ -108,17 +107,14 @@ These are the active (and passive) security measures used by `teilpunkt`.
 #### Background Thread _(1):_
 
 - Runs the main event loop
-  - Handles incoming events
-  - Adds tasks to the worker thread
-
+    - Handles incoming events
+    - Adds tasks to the worker thread
 
 This means it runs hardware concurrent on devices with 4+ cores.
 
 ### Instance
 
-
 ### Files and Data
-
 
 ## Notice
 

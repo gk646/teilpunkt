@@ -37,7 +37,7 @@ bool NumberToStringEx(char* buf, const size_t len, const uint32_t num, const cha
         return false;
     }
 
-    const size_t numLen = result.ptr - buf;
+    const size_t numLen = static_cast<uint64_t>(result.ptr - buf);
     size_t addLen = 0;
 
     while(add[ addLen ] != '\0')
