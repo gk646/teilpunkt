@@ -34,7 +34,7 @@ struct Authenticator final
     AuthStatus userAdd(UserID actor, const UserName& name, Credentials& consumed);
 
     // New user added via endpoint
-    AuthStatus userAdd(const UserName& name, Credentials& consumed);
+    AuthStatus userAddServer(const UserName& name, Credentials& consumed);
 
     // Assigns token on success
     AuthStatus userLogin(const UserName& name, Credentials& consumed, UserID& user);
@@ -56,6 +56,7 @@ struct Authenticator final
     // Assigns user on success
     AuthStatus sessionAuth(const SessionToken& token, const SessionMetaData& data, UserID& user);
 
+    // Collects info of all session from the given user
     AuthStatus sessionGetInfo(UserID user, std::vector<DTOSessionInfo>& collector);
 
     //===== User Data =====//
@@ -64,7 +65,7 @@ struct Authenticator final
     // Assigns the username on success
     AuthStatus getUserName(UserID user, UserName& out);
 
-    // Returns OK if true
+    // Returns OK if given user is admin
     AuthStatus getIsAdmin(UserID user);
 
     //===== Admin  =====//

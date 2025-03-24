@@ -9,8 +9,7 @@ namespace tpunkt
 
 void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    res->getRemoteAddress()
-    if(RegisterRequest(res, req))
+    if(AllowRequest(res, req))
     {
         return;
     }

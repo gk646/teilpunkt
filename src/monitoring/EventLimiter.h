@@ -26,16 +26,22 @@ enum class EndpointClass : uint8_t
 // Methods return false if denied
 struct EventLimiter final
 {
+
+    EventLimiter();
+    ~EventLimiter();
+
+    // Returns true if the request is allowed
     bool allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
     //===== User =====//
 
-    bool registerUserRequest(UserID user, EndpointClass eclass);
+    // Returns true if the user can
+    bool startUserRequest(UserID user, EndpointClass eclass);
     void endUserRequest(UserID user, EndpointClass eclass);
 
     //===== Non-Users =====//
 
-    bool registerRequest();
+    bool startRequest();
     void endRequest();
 
   private:

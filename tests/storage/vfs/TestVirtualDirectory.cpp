@@ -6,7 +6,6 @@
 
 using namespace tpunkt;
 
-
 // Mocking or creating mock data
 
 UserID getUserID()
@@ -14,26 +13,37 @@ UserID getUserID()
     return UserID{54321};
 }
 
-VirtualFile getFileInfo(const FileName& name)
+FileCreationInfo getFileInfo(const FileName& name)
 {
-    return VirtualFile{{.name = name, .creator = getUserID()}};
+    return {.name = name, .creator = getUserID()};
 }
 
-
-VirtualDirectory getDir(const char* name, uint64_t maxSize, VirtualDirectory* parent)
+DirectoryCreationInfo getDirInfo(const char* name, uint64_t maxSize, VirtualDirectory* parent)
 {
-    return VirtualDirectory{{.name = FileName{name}, .maxSize = maxSize, .parent = parent, .creator=getUserID()}};
+    return {.name = FileName{name}, .maxSize = maxSize, .parent = parent, .creator = getUserID()};
 }
-
 
 TEST_CASE("Virtual Directory")
 {
     TEST_INIT();
 
-    auto baseDir = getDir("Base Dir", 1000, nullptr);
+    constexpr auto sizeLimit = 1000;
+    auto baseDir = VirtualDirectory{getDirInfo("Base Dir", sizeLimit, nullptr)};
+
+    {
+        REQUIRE(baseDir.getStats().accessCount == 0);
+        REQUIRE(baseDir.getStats().changeCount == 0);
+
+        REQUIRE(baseDir.getStats().lastAccess.isInPast());
+        REQUIRE(baseDir.getStats().lastEdit.isInPast());
+        REQUIRE(baseDir.getStats().creation.isInPast());
+
+        REQUIRE(baseDir.getLimits().sizeLimit == sizeLimit);
+    }
 
     SECTION("Add File")
     {
-        //baseDir.fileAdd()
+        baseDir.fileAdd(getFileInfo("File1"));
+        REQUIRE(baseDir.getStats().fileCount == 1);
     }
 }

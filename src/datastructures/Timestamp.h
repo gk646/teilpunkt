@@ -12,12 +12,14 @@ struct Timestamp
 {
     Timestamp();
 
+    bool operator<(const Timestamp& rhs) const;
     Timestamp operator-(const Timestamp& rhs) const;
     bool operator==(const Timestamp& rhs) const;
 
     // Returns true if this timestamp represents a time before the current moment
     [[nodiscard]] bool isInPast() const;
 
+    void addNanos(uint64_t nanos);
     void addMicros(uint64_t micros);
     void addMillis(uint64_t millis);
     void addSecs(uint64_t seconds);
@@ -28,6 +30,7 @@ struct Timestamp
     void subtractTime(uint64_t seconds);
 
     [[nodiscard]] uint64_t getSeconds() const;
+    [[nodiscard]] uint64_t getNanos() const;
 
     // zeros the timestamp - always expires
     void zero();

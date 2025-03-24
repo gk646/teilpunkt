@@ -3,9 +3,31 @@
 #include <HttpResponse.h>
 #include "monitoring/EventLimiter.h"
 #include "server/Endpoints.h"
+#include "util/Macros.h"
+#include "util/Logging.h"
 
 namespace tpunkt
 {
+
+namespace global
+{
+EventLimiter* EventLimiter;
+}
+
+EventLimiter::EventLimiter()
+{
+    TPUNKT_MACROS_GLOBAL_ASSIGN(EventLimiter);
+
+}
+EventLimiter::~EventLimiter()
+{
+    TPUNKT_MACROS_GLOBAL_RESET(EventLimiter);
+}
+
+EventLimiter& GetEventLimiter()
+{
+    TPUNKT_MACROS_GLOBAL_GET(EventLimiter);
+}
 
 bool EventLimiter::allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
@@ -38,7 +60,7 @@ bool EventLimiter::allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
     return true;
 }
 
-bool EventLimiter::registerUserRequest(UserID user, EndpointClass eclass)
+bool EventLimiter::startUserRequest(UserID user, EndpointClass eclass)
 {
 }
 
@@ -46,12 +68,13 @@ void EventLimiter::endUserRequest(UserID user, EndpointClass eclass)
 {
 }
 
-bool EventLimiter::registerRequest()
+bool EventLimiter::startRequest()
 {
 }
 
 void EventLimiter::endRequest()
 {
 }
+
 
 } // namespace tpunkt

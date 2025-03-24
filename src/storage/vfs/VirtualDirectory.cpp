@@ -189,6 +189,16 @@ void VirtualDirectory::rename(const FileName& name)
     info.name = name;
 }
 
+const DirectoryStats& VirtualDirectory::getStats() const
+{
+    return stats;
+}
+
+const DirectoryLimits& VirtualDirectory::getLimits() const
+{
+    return limits;
+}
+
 void VirtualDirectory::onAccess() const
 {
     stats.accessCount++;

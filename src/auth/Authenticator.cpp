@@ -45,7 +45,7 @@ const char* GetAuthStatusStr(const AuthStatus status)
     return nullptr;
 }
 
-AuthStatus Authenticator::userAdd(const UserName& name, Credentials& consumed)
+AuthStatus Authenticator::userAddServer(const UserName& name, Credentials& consumed)
 {
     SpinlockGuard lock{authLock};
     SecureEraser eraser{consumed};
@@ -117,6 +117,12 @@ AuthStatus Authenticator::userChangeCredentials(const UserID user, const UserNam
     SpinlockGuard lock{authLock};
     SecureEraser eraser{consumed};
 
+    if(!IsValidUserName(newName) || !IsValidPassword(consumed.password))
+    {
+        LOG_EVENT(UserAction, UserChangeCredentials, FAIL_INVALID_ARGUMENTS);
+        return AuthStatus::ERR_INVALID_ARGUMENTS;
+    }
+
     if(!userStore.changeCredentials(user, newName, consumed))
     {
         LOG_EVENT(UserAction, UserChangeCredentials, FAIL_SERVER_OPERATION);
@@ -130,6 +136,12 @@ AuthStatus Authenticator::userChangeCredentials(const UserID user, const UserNam
 AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& data, SecureWrapper<SessionToken>& out)
 {
     SpinlockGuard lock{authLock};
+
+    if(user == UserID::INVALID) [[unlikely]]
+    {
+        LOG_EVENT(UserAction, SessionAdd, FAIL_INVALID_ARGUMENTS);
+        return AuthStatus::ERR_INVALID_ARGUMENTS;
+    }
 
     SessionToken sessionId;
     if(!sessionStore.add(user, data, sessionId))
@@ -184,15 +196,16 @@ AuthStatus Authenticator::sessionGetInfo(const UserID user, std::vector<DTOSessi
 AuthStatus Authenticator::getUserName(const UserID user, UserName& out)
 {
     SpinlockGuard lock{authLock};
-    // TODo
+    // TODO
+    LOG_FATAL("Not implemented");
     return AuthStatus::INVALID;
 }
-
 
 AuthStatus Authenticator::getIsAdmin(UserID user)
 {
     SpinlockGuard lock{authLock};
     // TODO
+    LOG_FATAL("Not implemented");
     return AuthStatus::INVALID;
 }
 

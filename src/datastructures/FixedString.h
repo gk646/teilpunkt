@@ -23,7 +23,7 @@ struct FixedString final
         assign(string, N);
     }
 
-    explicit FixedString(const char* string)
+    FixedString(const char* string)
     {
         assign(string, 0);
     }
@@ -122,6 +122,11 @@ struct FixedString final
     char* data()
     {
         return arr;
+    }
+
+    unsigned char* udata()
+    {
+        return (unsigned char*)arr;
     }
 
     void clear()

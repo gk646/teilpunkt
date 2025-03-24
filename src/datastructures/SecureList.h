@@ -68,8 +68,7 @@ struct SecureList final
             {
                 grow(list.capacity > 0U ? list.capacity * 2U : 10U);
             }
-            ::new(&list.arr[ list.elements ]) T();
-            list.arr[ list.elements ] = value;
+            ::new(&list.arr[ list.elements ]) T(value);
             ++list.elements;
         }
 
@@ -80,8 +79,7 @@ struct SecureList final
             {
                 grow(list.capacity > 0U ? list.capacity * 2U : 10U);
             }
-            ::new(&list.arr[ list.elements ]) T();
-            list.arr[ list.elements ] = std::move(value);
+            ::new(&list.arr[ list.elements ]) T(std::move(value));
             ++list.elements;
         }
 
@@ -107,7 +105,7 @@ struct SecureList final
                     // Not at last place - copy last place to the matching one
                     if(i != list.elements - 1U) [[likely]]
                     {
-                        list.arr[ i ] = std::move(list.arr[ list.elements - 1U ]);
+                        ::new(&list.arr[ i ]) T(std::move(list.arr[ list.elements - 1U ]));
                     }
                     --list.elements;
                     return true;
@@ -126,9 +124,10 @@ struct SecureList final
                 return false;
             }
 
+            // Not at last place - copy last place to the matching one
             if(idx != list.elements - 1U) [[likely]]
             {
-                list.arr[ idx ] = std::move(list.arr[ list.elements - 1U ]);
+                ::new(&list.arr[ idx ]) T(std::move(list.arr[ list.elements - 1U ]));
             }
             --list.elements;
             return true;
@@ -179,16 +178,18 @@ struct SecureList final
             }
             T* newVal = TPUNKT_SECUREALLOC(newVal, sizeof(T) * newCapacity);
 
-            for(size_t i = 0U; i < newCapacity; ++i)
+            // Copy from old
+            for(size_t i = 0U; i < list.elements; ++i)
+            {
+                ::new(&newVal[ i ]) T(std::move(list.arr[ i ]));
+            }
+
+            // Initialize new
+            for(size_t i = list.elements; i < newCapacity; ++i)
             {
                 ::new(&newVal[ i ]) T();
             }
 
-            // Copy from old
-            for(size_t i = 0U; i < list.elements; ++i)
-            {
-                newVal[ i ] = std::move(list.arr[ i ]);
-            }
             // Delete old
             TPUNKT_SECUREFREE(list.arr);
             // Assign new to old - will be protected in dtor

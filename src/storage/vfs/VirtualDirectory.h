@@ -71,6 +71,7 @@ struct VirtualDirectory final
     //===== Contents =====//
 
     bool fileAdd(const FileCreationInfo& info);
+    bool fileChange(FileID file, uint64_t newSize);
     bool fileRemove(FileID fileid);
     bool fileRemoveAll();
     [[nodiscard]] bool fileExists(const FileName& name) const;
@@ -89,10 +90,12 @@ struct VirtualDirectory final
 
     void rename(const FileName& name);
 
+    const DirectoryStats& getStats() const;
+
+    const DirectoryLimits& getLimits() const;
+
     //===== DTO =====//
 
-    void dtoInfo(DTOFileInfo& info);
-    void dtoStats(DTOFileStats& stats);
 
     mutable CooperativeSpinlock lock;
 

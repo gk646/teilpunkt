@@ -36,8 +36,14 @@ struct Session final
 
     [[nodiscard]] const SessionToken& getToken() const;
 
+    [[nodiscard]] const Timestamp& getCreation() const;
+
+    [[nodiscard]] const Timestamp& getExpiration() const;
+
+    [[nodiscard]] const UserAgentString& getUserAgent() const;
+
   private:
-    SessionToken token;       // actual set cookie
+    SessionToken token;       // Actual set cookie
     SessionMetaData metaData; // Metadata that has to match
     const Timestamp creation; // Tracked for user info
     const Timestamp expiration;
@@ -49,10 +55,13 @@ struct UserSessionData final
     explicit UserSessionData(UserID user);
     TPUNKT_MACROS_MOVE_ONLY(UserSessionData);
 
+    UserID getUser() const;
+
+    SecureList<Session>& getSessions();
+
   private:
     const UserID user;            // User it belongs to
     SecureList<Session> sessions; // Session list
-    friend SessionStorage;
 };
 
 // Stores and manages all session data

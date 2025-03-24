@@ -5,13 +5,14 @@
 #include "auth/Authenticator.h"
 #include "server/DTO.h"
 #include "server/Endpoints.h"
+#include "server/DTOMappings.h"
 
 namespace tpunkt
 {
 
 void AuthEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(RegisterRequest(res, req))
+    if(AllowRequest(res, req))
     {
         return;
     }
@@ -33,7 +34,8 @@ void AuthEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
                 return;
             }
 
-            const auto status = GetAuthenticator().userLogin(authData.name, authData.credentials);
+            UserID user{};
+            const auto status = GetAuthenticator().userLogin(authData.name, authData.credentials, user);
             if(status != AuthStatus::OK)
             {
                 EndRequest(res, 400, GetAuthStatusStr(status));

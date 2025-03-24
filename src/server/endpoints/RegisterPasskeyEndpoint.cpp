@@ -10,7 +10,7 @@ namespace tpunkt
 
 void RegisterPasskeyEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(RegisterRequest(res, req))
+    if(AllowRequest(res, req))
     {
         return;
     }
@@ -25,7 +25,7 @@ void RegisterPasskeyEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequ
             }
 
             DTOPasskeyStart pubKey;
-            randombytes_buf(pubKey.challenge, TPUNKT_CRYPTO_KEY_LEN);
+            randombytes_buf(pubKey.challenge.data(), pubKey.challenge.capacity());
 
         });
 

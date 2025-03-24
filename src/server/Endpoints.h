@@ -26,7 +26,7 @@ struct ServerEndpoint
 };
 
 #define TPUNKT_MACROS_CHECK_REQUEST                                                                                    \
-    if(RegisterRequest(res, req))                                                                                      \
+    if(AllowRequest(res, req))                                                                                         \
     {                                                                                                                  \
         return;                                                                                                        \
     }                                                                                                                  \

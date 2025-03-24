@@ -103,6 +103,7 @@ struct DTODirectoryInfo final
     FileID dir;
     uint32_t files = 0; // Count of files visible to user
     uint32_t dirs = 0;  // Count of directories visible to user
+
 };
 
 

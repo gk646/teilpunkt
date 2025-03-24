@@ -3,6 +3,7 @@
 #include <sodium/randombytes.h>
 #include "auth/SessionStorage.h"
 #include "instance/InstanceConfig.h"
+#include "server/DTO.h"
 
 namespace tpunkt
 {
@@ -34,8 +35,38 @@ bool Session::isValid(const SessionMetaData& metaData) const
     return true;
 }
 
+const SessionToken& Session::getToken() const
+{
+    return token;
+}
+
+const Timestamp& Session::getCreation() const
+{
+    return creation;
+}
+
+const Timestamp& Session::getExpiration() const
+{
+    return expiration;
+}
+
+const UserAgentString& Session::getUserAgent() const
+{
+    return metaData.userAgent;
+}
+
 UserSessionData::UserSessionData(const UserID user) : user(user)
 {
+}
+
+UserID UserSessionData::getUser() const
+{
+    return user;
+}
+
+SecureList<Session>& UserSessionData::getSessions()
+{
+    return sessions;
 }
 
 bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, SessionToken& token)
@@ -46,7 +77,7 @@ bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, Ses
         userData = &sessions.emplace_back(user);
     }
 
-    auto sessionList = userData->sessions.get();
+    auto sessionList = userData->getSessions().get();
     const auto size = sessionList.size();
 
     if(size >= GetInstanceConfig().getNumber(NumberParamKey::USER_MAX_ALLOWED_SESSIONS)) // Deny if too many
@@ -63,25 +94,21 @@ bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, Ses
 
 bool SessionStorage::get(const SessionToken& token, const SessionMetaData& metaData, UserID& user)
 {
-    UserSessionData* sessionData = getUserSessionData(user);
-    if(sessionData == nullptr)
+    for(auto& userData : sessions)
     {
-        return false;
-    }
-
-    auto sessionList = sessionData->sessions.get();
-    for(auto& session : sessionList)
-    {
-        if(session.getToken() == token) // Found a match
+        auto sessionList = userData.getSessions().get();
+        for(int i = 0; i < sessionList.size(); ++i)
         {
-            if(session.isValid(metaData))
+            auto& session = sessionList[ i ];
+            if(session.getToken() == token) // Found a match
             {
-                user = sessionData->user;
-                return true;
-            }
-            else                        // Metadata does not match
-            {
-                sessionList.erase(session);
+                if(session.isValid(metaData))
+                {
+                    user = userData.getUser();
+                    return true;
+                }
+                // Metadata does not match
+                sessionList.eraseIndex(i);
                 return false;
             }
         }
@@ -89,17 +116,55 @@ bool SessionStorage::get(const SessionToken& token, const SessionMetaData& metaD
     return false;
 }
 
+bool SessionStorage::remove(const UserID user, const Timestamp& creation)
+{
+    UserSessionData* sessionData = getUserSessionData(user);
+    if(sessionData == nullptr) [[unlikely]]
+    {
+        return false;
+    }
+    auto sessionList = sessionData->getSessions().get();
+    for(int i = 0; i < sessionList.size(); ++i)
+    {
+        auto& session = sessionList[ i ];
+        if(session.getCreation() == creation)
+        {
+            sessionList.eraseIndex(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+void SessionStorage::getInfo(const UserID user, std::vector<DTOSessionInfo>& collector)
+{
+    collector.clear();
+    UserSessionData* sessionData = getUserSessionData(user);
+    if(sessionData == nullptr) [[unlikely]]
+    {
+        return;
+    }
+    auto sessionList = sessionData->getSessions().get();
+    for(auto& session : sessionList)
+    {
+        DTOSessionInfo info;
+        info.creationUnix = session.getCreation().getNanos();
+        info.expirationUnix = session.getExpiration().getNanos();
+        info.userAgent = session.getUserAgent();
+        collector.push_back(info);
+    }
+}
+
 UserSessionData* SessionStorage::getUserSessionData(const UserID userID)
 {
     for(auto& session : sessions)
     {
-        if(session.user == userID)
+        if(session.getUser() == userID)
         {
             return &session;
         }
     }
     return nullptr;
 }
-
 
 } // namespace tpunkt

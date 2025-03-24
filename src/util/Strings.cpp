@@ -7,6 +7,7 @@
 
 namespace tpunkt
 {
+
 bool NumberToString(char* buf, const size_t len, const uint32_t num)
 {
     if((buf == nullptr) || len == 0) [[unlikely]]
@@ -72,10 +73,12 @@ bool IsValidFilename(const FileName& name)
 
 bool IsValidUserName(const UserName& name)
 {
-    if(name.size() < TPUNKT_AUTH_MIN_USER_LEN)
+    const size_t size = name.size();
+    if(size < TPUNKT_AUTH_MIN_USER_LEN || size > TPUNKT_STORAGE_USER_LEN)
     {
         return false;
     }
+
     for(const auto chr : name)
     {
         if(isalpha(chr) == 0 && isdigit(chr) == 0)
@@ -88,19 +91,7 @@ bool IsValidUserName(const UserName& name)
 
 bool IsValidPassword(const UserPassword& password)
 {
-    if(password.size() != TPUNKT_AUTH_PASSWORD_LEN)
-    {
-        return false;
-    }
-    // Base64
-    for(const auto chr : password)
-    {
-        if(isalpha(chr) == 0 && isdigit(chr) == 0 && chr != '+' && chr != '/' && chr != '=')
-        {
-            return false; // Not a character or digit
-        }
-    }
-    return true;
+    return password.size() == TPUNKT_AUTH_PASSWORD_LEN;
 }
 
 } // namespace tpunkt

@@ -27,6 +27,11 @@ Timestamp::Timestamp() : timestamp(getCurrentMonotonicTime())
 {
 }
 
+bool Timestamp::operator<(const Timestamp& rhs) const
+{
+    return timestamp < rhs.timestamp;
+}
+
 Timestamp::Timestamp(const uint64_t& timestamp) : timestamp(timestamp)
 {
 }
@@ -48,6 +53,11 @@ bool Timestamp::operator==(const Timestamp& rhs) const
 bool Timestamp::isInPast() const
 {
     return Now().timestamp > timestamp;
+}
+
+void Timestamp::addNanos(uint64_t nanos)
+{
+    timestamp += nanos;
 }
 
 void Timestamp::addMicros(const uint64_t micros)
@@ -88,6 +98,11 @@ void Timestamp::subtractTime(const uint64_t seconds)
 uint64_t Timestamp::getSeconds() const
 {
     return timestamp / 1'000'000'000U;
+}
+
+uint64_t Timestamp::getNanos() const
+{
+    return timestamp;
 }
 
 void Timestamp::zero()
