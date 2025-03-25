@@ -67,8 +67,7 @@ CreateFileTransaction::~CreateFileTransaction()
                 }
             };
 
-
-            datastore->deleteFile(file.getBlock(), cb);
+            datastore->deleteFile(file.getUID(), cb);
         }
         else
         {
@@ -86,17 +85,16 @@ bool CreateFileTransaction::start(ResultCb callback)
 {
     isStarted = true;
 
-    uint32_t idx;
-    if(!parent->fileAdd(info))
+    if(!parent->fileAdd(info,file))
     {
         return false;
     }
-    file = FileID{idx, dir.getEndpoint(), false};
 
-    if(!datastore->createFile(idx, callback))
+    if(!datastore->createFile(file.getUID(), callback))
     {
         return false;
     }
+
     return true;
 }
 

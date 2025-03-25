@@ -82,8 +82,8 @@ enum class EndpointID : uint16_t
 struct FileID final
 {
     FileID() = default;
-    FileID(const uint32_t block, const EndpointID endpointId, const bool isDirectory)
-        : block(block), endpoint(endpointId), directory(isDirectory)
+    FileID(const uint32_t uid, const EndpointID endpointId, const bool isDirectory)
+        : uid(uid), endpoint(endpointId), directory(isDirectory)
     {
     }
 
@@ -97,9 +97,9 @@ struct FileID final
         return !directory;
     }
 
-    [[nodiscard]] uint32_t getBlock() const
+    uint32_t getUID() const
     {
-        return block;
+        return uid;
     }
 
     EndpointID getEndpoint() const
@@ -110,7 +110,7 @@ struct FileID final
     bool operator==(const FileID&) const = default;
 
   private:
-    uint32_t block = UINT32_MAX;
+    uint32_t uid = UINT32_MAX;
     EndpointID endpoint{UINT16_MAX};
     bool directory = false;
     // 1 byte left

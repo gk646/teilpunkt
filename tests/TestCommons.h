@@ -7,6 +7,8 @@
 #include "crypto/CryptoContext.h"
 #include "instance/InstanceConfig.h"
 #include "util/Logging.h"
+#include "storage/Storage.h"
+#include "uac/UserAccessControl.h"
 
 static void handleSignal(int signal){}
 
@@ -17,6 +19,8 @@ static void handleSignal(int signal){}
     tpunkt::InstanceConfig config{};                                                                                   \
     tpunkt::Authenticator auth{};                                                                                      \
     tpunkt::EventMonitor monitor{};                                                                                    \
+    tpunkt::UserAccessControl uac{};                                                                                   \
+    tpunkt::Storage storage{};                                                                                         \
     LOG_INFO("Initialized Testing Environment");                                                                       \
     (void)signal(SIGTRAP, handleSignal)
 

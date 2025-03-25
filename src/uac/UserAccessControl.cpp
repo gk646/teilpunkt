@@ -6,6 +6,7 @@
 
 namespace tpunkt
 {
+
 namespace global
 {
 UserAccessControl* UserAccessControl;
@@ -15,6 +16,7 @@ UserAccessControl::UserAccessControl()
 {
     TPUNKT_MACROS_GLOBAL_ASSIGN(UserAccessControl);
 }
+
 UserAccessControl::~UserAccessControl()
 {
     TPUNKT_MACROS_GLOBAL_RESET(UserAccessControl);

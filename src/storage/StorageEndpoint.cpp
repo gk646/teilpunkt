@@ -17,13 +17,13 @@
 namespace tpunkt
 {
 
-StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator)
-    : virtualFilesystem({})
+StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info,const EndpointID endpoint, const UserID creator)
+    : virtualFilesystem(DirectoryCreationInfo{info.name, info.maxSize, nullptr, creator}, endpoint)
 {
     switch(info.type)
     {
         case StorageEndpointType::LOCAL_FILE_SYSTEM:
-            dataStore = new LocalFileSystemDatastore(eid);
+            dataStore = new LocalFileSystemDatastore(endpoint);
             break;
         case StorageEndpointType::REMOTE_FILE_SYSTEM:
             LOG_CRITICAL("Not supported");
@@ -93,7 +93,7 @@ const StorageEndpointInfo& StorageEndpoint::getInfo() const
     return info;
 }
 
-bool StorageEndpoint::CreateDirs( EndpointID eid)
+bool StorageEndpoint::CreateDirs(EndpointID eid)
 {
     if(!CreateRelDir(TPUNKT_STORAGE_ENDPOINT_DIR, false))
     {

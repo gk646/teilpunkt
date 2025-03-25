@@ -7,10 +7,10 @@
 namespace tpunkt
 {
 
-VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info)
+VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info, const EndpointID endpoint)
 {
     root = SharedBlockAllocator<VirtualDirectory>{}.allocate(1);
-    new(root) VirtualDirectory(info);
+    new(root) VirtualDirectory(info, endpoint);
 }
 
 VirtualFilesystem::~VirtualFilesystem()

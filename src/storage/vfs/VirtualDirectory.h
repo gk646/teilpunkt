@@ -23,7 +23,6 @@ struct DirectoryInfo final
     FileName name;
     VirtualDirectory* parent = nullptr; // Only null if it's the root of an endpoint
     bool isHidden = false;
-    uint32_t idx = UINT32_MAX;
     FileID id;
 };
 
@@ -45,21 +44,21 @@ struct DirectoryStats final
     Timestamp lastAccess;
     Timestamp creation;
 
-    uint64_t sizeCurrent = 0;     // Size of all contained files in bytes
+    uint64_t totalSize = 0; // Size of all contained files in bytes
 
-    uint32_t accessCount = 0;     // How often directory was accessed
-    uint32_t changeCount = 0;     // How often directory was accessed
+    uint32_t accessCount = 0; // How often directory was accessed
+    uint32_t changeCount = 0; // How often directory was accessed
 
     uint32_t fileCount = 0;
     uint32_t dirCount = 0;
-
-    uint32_t subdirFileCount = 0; // Files in all subdirectories only
-    uint32_t subdirDirCount = 0;  // Dirs in all subdirectories only
 };
+
+// TODO every access needs to be fully locked - no coop lock spinlock?
+// Implement file change
 
 struct VirtualDirectory final
 {
-    explicit VirtualDirectory(const DirectoryCreationInfo& info);
+    explicit VirtualDirectory(const DirectoryCreationInfo& info, EndpointID endpoint);
     TPUNKT_MACROS_MOVE_ONLY(VirtualDirectory);
 
     //===== Get =====//
@@ -70,11 +69,14 @@ struct VirtualDirectory final
 
     //===== Contents =====//
 
-    bool fileAdd(const FileCreationInfo& info);
+    // Returns true and assigns the id if a new file with the given info was added
+    bool fileAdd(const FileCreationInfo& info, FileID& file);
+
+    // Returns true if a size change has been made
     bool fileChange(FileID file, uint64_t newSize);
+    bool fileExists(const FileName& name) const;
     bool fileRemove(FileID fileid);
     bool fileRemoveAll();
-    [[nodiscard]] bool fileExists(const FileName& name) const;
 
     bool dirAdd(const DirectoryCreationInfo& info);
     bool dirRemove(FileID dir); // Only works if dir is empty
@@ -82,6 +84,7 @@ struct VirtualDirectory final
     [[nodiscard]] bool dirExists(const FileName& name) const;
 
     std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getDirs();
+    std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>>& getFiles();
 
     // Returns true if a file with the given size fits into this directory - needs to check all parents
     [[nodiscard]] bool canFit(uint64_t fileSize) const;
@@ -96,10 +99,11 @@ struct VirtualDirectory final
 
     //===== DTO =====//
 
-
     mutable CooperativeSpinlock lock;
 
   private:
+    VirtualFile* getFile(FileID file);
+
     void onAccess() const;
     void onChange() const;
 

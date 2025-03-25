@@ -42,17 +42,28 @@ struct FileHistory final
 
 struct VirtualFile final
 {
-    explicit VirtualFile(const FileCreationInfo& info);
-    TPUNKT_MACROS_MOVE_ONLY(VirtualFile);
+    explicit VirtualFile(const FileCreationInfo& info, EndpointID endpoint);
+    VirtualFile(VirtualFile&& other) noexcept;
 
+    VirtualFile(const VirtualFile&) = delete;
+    VirtualFile& operator=(const VirtualFile&) = delete;
 
     void rename();
 
     const FileInfo& getInfo() const;
+    const FileStats& getStats() const;
 
-    mutable CooperativeSpinlock lock;
+    // Changes the files size and returns the diff
+    int64_t changeSize(uint64_t newSize);
+
+    FileID getID() const;
+
+    mutable Spinlock lock;
 
   private:
+    void onAccess() const;
+    void onChange() ;
+
     FileInfo info;
     mutable FileStats stats{};
     FileHistory history{};

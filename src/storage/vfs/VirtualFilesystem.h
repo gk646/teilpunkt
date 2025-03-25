@@ -13,7 +13,7 @@ namespace tpunkt
 // File names must be unique per directory - case-sensitive
 struct VirtualFilesystem
 {
-    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
+    explicit VirtualFilesystem(const DirectoryCreationInfo& info, EndpointID endpoint);
     TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
     ~VirtualFilesystem();
 

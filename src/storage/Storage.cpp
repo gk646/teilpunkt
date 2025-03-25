@@ -114,5 +114,10 @@ StorageStatus Storage::endpointDelete(UserID user, const EndpointID endpoint)
     return StorageStatus::OK;
 }
 
+uint32_t Storage::getNextID()
+{
+    SpinlockGuard lock{fileIDLock};
+    return filesID++;
+}
 
 } // namespace tpunkt

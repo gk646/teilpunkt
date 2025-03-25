@@ -54,7 +54,7 @@ struct StorageEndpointInfo final
 // Datastore stores its files in /endpoints/{id}
 struct StorageEndpoint final
 {
-    explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID eid, UserID creator);
+    explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID endpoint, UserID creator);
     TPUNKT_MACROS_MOVE_ONLY(StorageEndpoint);
     ~StorageEndpoint();
 

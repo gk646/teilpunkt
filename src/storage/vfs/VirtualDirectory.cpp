@@ -6,8 +6,8 @@
 namespace tpunkt
 {
 
-VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
-    : info(info.name, info.parent, false), limits(info.maxSize, false)
+VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info, const EndpointID endpoint)
+    : info(info.name, info.parent, false, FileID{GetStorage().getNextID(), endpoint, true}), limits(info.maxSize, false)
 {
 }
 
@@ -19,11 +19,8 @@ VirtualFile* VirtualDirectory::searchFile(const FileID file)
     {
         return nullptr;
     }
-    for(auto& savedFile : files)
-    {
-        return &savedFile;
-    }
-    return nullptr;
+
+    return getFile(file);
 }
 
 VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
@@ -41,7 +38,7 @@ VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
     return nullptr;
 }
 
-bool VirtualDirectory::fileAdd(const FileCreationInfo& info)
+bool VirtualDirectory::fileAdd(const FileCreationInfo& info, FileID& file)
 {
     {
         CooperativeSpinlockGuard guard{lock, false};
@@ -53,7 +50,25 @@ bool VirtualDirectory::fileAdd(const FileCreationInfo& info)
     }
     CooperativeSpinlockGuard guard{lock, true};
     stats.fileCount++;
-    files.emplace_front(info);
+    const auto& newFile = files.emplace_front(info, this->info.id.getEndpoint());
+    file = newFile.getID();
+    onChange();
+    return true;
+}
+
+bool VirtualDirectory::fileChange(const FileID file, const uint64_t newSize)
+{
+    CooperativeSpinlockGuard guard{lock, true};
+    onAccess();
+
+    VirtualFile* changedFile = getFile(file);
+    if(changedFile == nullptr) [[unlikely]]
+    {
+        return false;
+    }
+
+    const auto diff = changedFile->changeSize(newSize);
+    stats.totalSize = static_cast<uint64_t>(static_cast<int64_t>(stats.totalSize) + diff);
     onChange();
     return true;
 }
@@ -91,7 +106,7 @@ bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
     CooperativeSpinlockGuard guard{lock, true};
     onChange();
     stats.dirCount++;
-    dirs.emplace_front(info);
+    dirs.emplace_front(info, this->info.id.getEndpoint());
     return true;
 }
 
@@ -134,6 +149,11 @@ std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& Vir
     return dirs;
 }
 
+std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>>& VirtualDirectory::getFiles()
+{
+    return files;
+}
+
 bool VirtualDirectory::fileRemoveAll()
 {
     bool changed = false;
@@ -172,7 +192,7 @@ bool VirtualDirectory::canFit(const uint64_t fileSize) const
     const VirtualDirectory* current = this;
     while(current != nullptr)
     {
-        if(current->stats.sizeCurrent + fileSize > current->limits.sizeLimit)
+        if(current->stats.totalSize + fileSize > current->limits.sizeLimit)
         {
             return false;
         }
@@ -197,6 +217,18 @@ const DirectoryStats& VirtualDirectory::getStats() const
 const DirectoryLimits& VirtualDirectory::getLimits() const
 {
     return limits;
+}
+
+VirtualFile* VirtualDirectory::getFile(const FileID file)
+{
+    for(auto& savedFile : files)
+    {
+        if(savedFile.getID() == file)
+        {
+            return &savedFile;
+        }
+    }
+    return nullptr;
 }
 
 void VirtualDirectory::onAccess() const

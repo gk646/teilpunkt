@@ -46,11 +46,15 @@ struct Storage final
     // Deletes the given endpoint
     StorageStatus endpointDelete(UserID user, EndpointID endpoint);
 
+    // Returns the next file number
+    uint32_t getNextID();
+
   private:
     std::forward_list<StorageEndpoint, SharedBlockAllocator<StorageEndpoint>> endpoints;
     Spinlock storageLock;
+    Spinlock fileIDLock;
     uint32_t endpointID = 0;
-    uint32_t filesID = 0;
+    uint32_t filesID = 1;
 };
 
 Storage& GetStorage();
