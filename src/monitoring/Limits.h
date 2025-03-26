@@ -20,11 +20,11 @@ struct UserLimit final
 struct IPRangeLimit final
 {
     constexpr static int32_t TOKENS_PER_SEC = 5;
-    constexpr static int32_t TOKENS_MAX = 5;
+    constexpr static int32_t TOKENS_MAX = 25;
     constexpr static int32_t TOKEN_COST_CONN = 1;
     constexpr static int32_t TOKEN_MAX_MINUS = -TOKENS_PER_SEC * 60; // 1 min timeout
-    constexpr static uint8_t OVER_LIMIT_LIMIT = 5;
-    int32_t tokens = 0;
+    constexpr static uint8_t OVER_LIMIT_LIMIT = 15;
+    int32_t tokens = TOKENS_MAX;
     uint8_t overLimitRequests = 0;
     Timestamp last;
 };

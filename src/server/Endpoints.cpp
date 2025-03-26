@@ -197,9 +197,10 @@ void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, co
                                                 "connect-src 'self';"
                                                 "img-src 'self'; ");
     res->writeHeader("X-XSS-Protection", "1; mode=block");
-    // res->writeHeader("Permissions-Policy", "publickey-credentials-get=(self) geolocation=(), microphone=(),
-    // camera=(), payment=(), usb=(), "
-    //                                        "fullscreen=(self), autoplay=(self)");
+    res->writeHeader("Permissions-Policy", "publickey-credentials-get=(self)"
+                                           "geolocation=(), microphone=(),camera=(),"
+                                           "payment=(), usb=(),"
+                                           "fullscreen=(self), autoplay=(self)");
     res->end(data, close);
 }
 
@@ -215,6 +216,38 @@ const char* ServerEndpoint::GetHeader(uWS::HttpRequest* req, const char* keyName
     }
     length = 0;
     return nullptr;
+}
+
+bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, SessionMetaData& metaData)
+{
+    size_t agentLen = 0;
+    const auto* agentStr = GetHeader(req, "user-agent", agentLen);
+    if(agentStr == nullptr)
+    {
+        return false;
+    }
+
+    metaData.userAgent = UserAgentString{agentStr, agentLen};
+
+    const auto& ipAddr = res->getRemoteAddress();
+    metaData.remoteAddress = HashedIP{ipAddr.data(), ipAddr.size()};
+    unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
+    constexpr size_t len = metaData.remoteAddress.capacity();
+    crypto_generichash(content, len, content, len, nullptr, 0);
+
+    return true;
+}
+
+void ServerEndpoint::SetCookie(uWS::HttpResponse<true>* res, const char* key, const char* value, uint32_t expiration)
+{
+    char buf[ 128 ];
+    const auto result = snprintf(buf, 128, "%s=%s; Path=/; HttpOnly; Max-Age=%d", key, value, expiration);
+    if(result < 0)
+    {
+        LOG_ERROR("Failed to set cookie:%s", key);
+        return;
+    }
+    res->writeHeader("Set-Cookie", buf);
 }
 
 } // namespace tpunkt

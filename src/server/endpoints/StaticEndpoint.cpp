@@ -9,10 +9,11 @@ namespace tpunkt
 
 void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(AllowRequest(res, req))
+    if(!AllowRequest(res, req))
     {
         return;
     }
+
     const auto& server = GetWebServer();
     const auto request = req->getUrl();
 

@@ -25,18 +25,6 @@ const FileStats& VirtualFile::getStats() const
     return stats;
 }
 
-int64_t VirtualFile::changeSize(const uint64_t newSize)
-{
-    SpinlockGuard guard{lock};
-    onAccess();
-    const int64_t currentSize = static_cast<int64_t>(stats.size);
-    const int64_t diff = static_cast<int64_t>(newSize) - currentSize;
-    // Must be >0
-    stats.size = static_cast<uint64_t>(currentSize + diff);
-    onChange();
-    return diff;
-}
-
 FileID VirtualFile::getID() const
 {
     return getInfo().id;
@@ -45,6 +33,7 @@ FileID VirtualFile::getID() const
 void VirtualFile::onAccess() const
 {
 }
+
 void VirtualFile::onChange()
 {
 }

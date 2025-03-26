@@ -13,7 +13,7 @@ VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info, const Endp
 
 VirtualFile* VirtualDirectory::searchFile(const FileID file)
 {
-    CooperativeSpinlockGuard guard{lock, false};
+    SpinlockGuard guard{lock};
     onAccess();
     if(file.isDirectory()) [[unlikely]]
     {
@@ -25,7 +25,7 @@ VirtualFile* VirtualDirectory::searchFile(const FileID file)
 
 VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
 {
-    CooperativeSpinlockGuard guard{lock, false};
+    SpinlockGuard guard{lock};
     onAccess();
     if(dir.isFile()) [[unlikely]]
     {
@@ -40,25 +40,25 @@ VirtualDirectory* VirtualDirectory::searchDir(const FileID dir)
 
 bool VirtualDirectory::fileAdd(const FileCreationInfo& info, FileID& file)
 {
+    SpinlockGuard guard{lock};
+    onAccess();
+    for(const auto& savedFile : files)
     {
-        CooperativeSpinlockGuard guard{lock, false};
-        onAccess();
-        if(fileExists(info.name)) [[unlikely]]
+        if(savedFile.getInfo().name == info.name)
         {
             return false;
         }
     }
-    CooperativeSpinlockGuard guard{lock, true};
-    stats.fileCount++;
     const auto& newFile = files.emplace_front(info, this->info.id.getEndpoint());
+    stats.fileCount++;
     file = newFile.getID();
     onChange();
     return true;
 }
 
-bool VirtualDirectory::fileChange(const FileID file, const uint64_t newSize)
+bool VirtualDirectory::fileChange(const FileID file, const uint64_t newFileSize)
 {
-    CooperativeSpinlockGuard guard{lock, true};
+    SpinlockGuard guard{lock};
     onAccess();
 
     VirtualFile* changedFile = getFile(file);
@@ -67,24 +67,79 @@ bool VirtualDirectory::fileChange(const FileID file, const uint64_t newSize)
         return false;
     }
 
-    const auto diff = changedFile->changeSize(newSize);
-    stats.totalSize = static_cast<uint64_t>(static_cast<int64_t>(stats.totalSize) + diff);
+    const uint64_t currFileSize = changedFile->getStats().size;
+    if(currFileSize == newFileSize) [[unlikely]]
+    {
+        return false;
+    }
+
+    if(!canHoldSizeChange(currFileSize, newFileSize)) [[unlikely]]
+    {
+        return false;
+    }
+
+    bool fitsIntoAll = true;
+    VirtualDirectory* current = info.parent;
+
+    // Iterate up with locking
+    while(current != nullptr)
+    {
+        current->lock.lock();
+        if(!current->canHoldSizeChange(currFileSize, newFileSize)) [[unlikely]]
+        {
+            fitsIntoAll = false;
+        }
+    }
+
+    // Iterate up again to unlock
+    current = info.parent;
+    while(current != nullptr)
+    {
+        if(fitsIntoAll)
+        {
+            current->stats.subDirFileSize = current->stats.subDirFileSize - currFileSize + newFileSize;
+            current->onChange();
+        }
+        current->lock.unlock();
+        current = current->info.parent;
+    }
+
+    // Return early
+    if(!fitsIntoAll)
+    {
+        return false;
+    }
+
+    stats.fileSize = stats.fileSize - currFileSize + newFileSize;
+    changedFile->stats.size = newFileSize;
+    changedFile->onChange();
     onChange();
     return true;
 }
 
-bool VirtualDirectory::fileRemove(const FileID file)
+bool VirtualDirectory::fileExists(const FileName& name) const
 {
+    SpinlockGuard guard{lock};
+    onAccess();
+    for(const auto& file : files)
     {
-        CooperativeSpinlockGuard guard{lock, false};
-        onAccess();
-        if(file.isDirectory()) [[unlikely]]
+        if(file.getInfo().name == name)
         {
-            LOG_ERROR("Wrong call");
-            return false;
+            return true;
         }
     }
-    CooperativeSpinlockGuard guard{lock, true};
+    return false;
+}
+
+bool VirtualDirectory::fileRemove(const FileID file)
+{
+    SpinlockGuard guard{lock};
+    onAccess();
+    if(file.isDirectory()) [[unlikely]]
+    {
+        LOG_ERROR("Wrong call");
+        return false;
+    }
     const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.getInfo().id == file; }) > 0;
     if(result)
     {
@@ -93,17 +148,32 @@ bool VirtualDirectory::fileRemove(const FileID file)
     return result;
 }
 
+bool VirtualDirectory::fileRemoveAll()
+{
+    SpinlockGuard guard{lock};
+    onAccess();
+    if(stats.fileCount > 0)
+    {
+        files.clear();
+        onChange();
+        return true;
+    }
+    return false;
+}
+
+//===== Directories =====//
+
 bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
 {
+    SpinlockGuard guard{lock};
+    onAccess();
+    for(auto& savedDir : dirs)
     {
-        CooperativeSpinlockGuard guard{lock, false};
-        onAccess();
-        if(dirExists(info.name)) [[unlikely]]
+        if(savedDir.info.name == info.name) [[unlikely]]
         {
             return false;
         }
     }
-    CooperativeSpinlockGuard guard{lock, true};
     onChange();
     stats.dirCount++;
     dirs.emplace_front(info, this->info.id.getEndpoint());
@@ -112,17 +182,14 @@ bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
 
 bool VirtualDirectory::dirRemove(const FileID dir)
 {
+    SpinlockGuard guard{lock};
+    onAccess();
+    if(dir.isFile())
     {
-        CooperativeSpinlockGuard guard{lock, false};
-        onAccess();
-        if(dir.isFile())
-        {
-            LOG_ERROR("Wrong call");
-            return false;
-        }
+        LOG_ERROR("Wrong call");
+        return false;
     }
-    CooperativeSpinlockGuard guard{lock, true};
-    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.getInfo().id == dir; }) > 0;
+    const auto result = dirs.remove_if([ & ](const VirtualDirectory& checked) { return checked.info.id == dir; }) > 0;
     if(result)
     {
         onChange();
@@ -132,7 +199,7 @@ bool VirtualDirectory::dirRemove(const FileID dir)
 
 bool VirtualDirectory::dirExists(const FileName& name) const
 {
-    CooperativeSpinlockGuard guard{lock, false};
+    SpinlockGuard guard{lock};
     onAccess();
     for(const auto& dir : dirs)
     {
@@ -154,56 +221,9 @@ std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>>& VirtualDirect
     return files;
 }
 
-bool VirtualDirectory::fileRemoveAll()
-{
-    bool changed = false;
-    {
-        CooperativeSpinlockGuard guard{lock, false};
-        onAccess();
-        changed = stats.fileCount > 0;
-    }
-    if(changed)
-    {
-        CooperativeSpinlockGuard guard{lock, true};
-        files.clear();
-        onChange();
-    }
-    return changed;
-}
-
-bool VirtualDirectory::fileExists(const FileName& name) const
-{
-    CooperativeSpinlockGuard guard{lock, false};
-    onAccess();
-    for(const auto& file : files)
-    {
-        if(file.getInfo().name == name)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool VirtualDirectory::canFit(const uint64_t fileSize) const
-{
-    CooperativeSpinlockGuard guard{lock, false};
-    onAccess();
-    const VirtualDirectory* current = this;
-    while(current != nullptr)
-    {
-        if(current->stats.totalSize + fileSize > current->limits.sizeLimit)
-        {
-            return false;
-        }
-        current = current->info.parent;
-    }
-    return true;
-}
-
 void VirtualDirectory::rename(const FileName& name)
 {
-    CooperativeSpinlockGuard guard{lock, true};
+    SpinlockGuard guard{lock};
     onAccess();
     onChange();
     info.name = name;
@@ -211,13 +231,19 @@ void VirtualDirectory::rename(const FileName& name)
 
 const DirectoryStats& VirtualDirectory::getStats() const
 {
+    onAccess();
     return stats;
 }
 
 const DirectoryLimits& VirtualDirectory::getLimits() const
 {
+    onAccess();
     return limits;
 }
+
+//===== Private =====//
+
+// Locking is assumed for those functions
 
 VirtualFile* VirtualDirectory::getFile(const FileID file)
 {
@@ -229,6 +255,11 @@ VirtualFile* VirtualDirectory::getFile(const FileID file)
         }
     }
     return nullptr;
+}
+
+bool VirtualDirectory::canHoldSizeChange(const uint64_t currSize, const uint64_t newSize) const
+{
+    return (stats.fileSize + stats.subDirFileSize - currSize + newSize) < limits.sizeLimit;
 }
 
 void VirtualDirectory::onAccess() const
@@ -243,12 +274,15 @@ void VirtualDirectory::onChange() const
     stats.lastEdit = Timestamp::Now();
 }
 
-void VirtualDirectory::propagateChange(const DirFunc func) const
+template <typename Func>
+void VirtualDirectory::iterateParents(const Func func) const
 {
     VirtualDirectory* current = info.parent;
+
+    // Iterate up with locking
     while(current != nullptr)
     {
-        CooperativeSpinlockGuard guard{current->lock, true};
+        current->lock.lock();
         const auto changed = func(*current);
         current->onAccess();
         if(changed)
@@ -257,6 +291,15 @@ void VirtualDirectory::propagateChange(const DirFunc func) const
         }
         current = current->info.parent;
     }
+
+    // Iterate up to unlock
+    current = info.parent;
+    while(current != nullptr)
+    {
+        current->lock.unlock();
+        current = current->info.parent;
+    }
 }
+
 
 } // namespace tpunkt

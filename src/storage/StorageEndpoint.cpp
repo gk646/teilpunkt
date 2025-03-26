@@ -52,7 +52,7 @@ StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, c
         return StorageStatus::ERR_NO_SUCH_FILE;
     }
 
-    CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
+    //CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
 
     if(parent->fileExists(info.name) || !IsValidFilename(info.name))
     {

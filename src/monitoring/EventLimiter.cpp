@@ -19,6 +19,7 @@ EventLimiter::EventLimiter()
     TPUNKT_MACROS_GLOBAL_ASSIGN(EventLimiter);
 
 }
+
 EventLimiter::~EventLimiter()
 {
     TPUNKT_MACROS_GLOBAL_RESET(EventLimiter);
@@ -45,6 +46,8 @@ bool EventLimiter::allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
     ipStatus.last = now;
 
     ipStatus.tokens -= IPRangeLimit::TOKEN_COST_CONN;
+    LOG_INFO("Current tokens: %d",ipStatus.tokens);
+
     if(ipStatus.tokens < 0)
     {
         ++ipStatus.overLimitRequests;
@@ -54,7 +57,8 @@ bool EventLimiter::allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
             ipStatus.tokens = IPRangeLimit::TOKEN_MAX_MINUS;
         }
 
-        ServerEndpoint::EndRequest(res, 429, nullptr, true);
+
+        ServerEndpoint::EndRequest(res, 429, "", true);
         return false;
     }
     return true;

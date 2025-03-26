@@ -48,25 +48,26 @@ struct VirtualFile final
     VirtualFile(const VirtualFile&) = delete;
     VirtualFile& operator=(const VirtualFile&) = delete;
 
-    void rename();
+    //===== Change =====//
+
+    void rename(const FileName& newName);
+
+    //===== Info =====//
 
     const FileInfo& getInfo() const;
     const FileStats& getStats() const;
-
-    // Changes the files size and returns the diff
-    int64_t changeSize(uint64_t newSize);
-
     FileID getID() const;
-
-    mutable Spinlock lock;
 
   private:
     void onAccess() const;
-    void onChange() ;
+    void onChange();
 
     FileInfo info;
     mutable FileStats stats{};
+    mutable Spinlock lock;
     FileHistory history{};
+
+    friend VirtualDirectory;
 };
 
 } // namespace tpunkt

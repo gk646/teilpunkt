@@ -10,7 +10,7 @@
 namespace tpunkt
 {
 
-//===== Auth =====//
+//===== Signup =====//
 
 struct DTOUserSignupPW final
 {
@@ -19,18 +19,6 @@ struct DTOUserSignupPW final
 };
 
 struct DTOUserSignupPK final
-{
-    UserName name;
-    UserPasskey passkey;
-};
-
-struct DTOUserLogin final
-{
-    UserName name;
-    Credentials credentials;
-};
-
-struct DTOPasskeyStart final
 {
     FixedString<TPUNKT_CRYPTO_KEY_LEN> challenge;
     struct
@@ -52,6 +40,16 @@ struct DTOPasskeyStart final
     };
     PubKeyCredParams pubKeyCredParams[ 3 ]{{-8}, {-7}, {-257}};
 };
+
+//===== Login =====//
+
+struct DTOUserLoginPW final
+{
+    UserName name;
+    UserPassword password;
+};
+
+
 
 //===== User =====//
 

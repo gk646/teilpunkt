@@ -51,14 +51,14 @@ void CheckChange(const VirtualDirectory& dir, const DirectoryStats& previous, co
     }
 }
 
-TEST_CASE("VirtualDirectory File Operations")
+TEST_CASE("VirtualDirectory Simple File Operations")
 {
     TEST_INIT();
     constexpr auto sizeLimit = 1000;
     auto baseDir = VirtualDirectory{getDirInfo("Base Dir", sizeLimit, nullptr), EndpointID{1}};
 
     {
-        REQUIRE(baseDir.getStats().accessCount == 0);
+        REQUIRE(baseDir.getStats().accessCount == 1); // getStats() is access
         REQUIRE(baseDir.getStats().changeCount == 0);
 
         REQUIRE(baseDir.getStats().lastAccess.isInPast());
@@ -69,62 +69,56 @@ TEST_CASE("VirtualDirectory File Operations")
     }
 
     FileID file1;
-    SECTION("Add File")
     {
-        {
-            const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileAdd(getFileInfo("File1"), file1);
-            REQUIRE(result);
-            REQUIRE(baseDir.getStats().fileCount == 1);
-            CheckAccess(baseDir, stats, true);
-            CheckChange(baseDir, stats, true);
-        }
-
-        // Add existing file
-        {
-            const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileAdd(getFileInfo("File1"), file1);
-            REQUIRE_FALSE(result);
-            CheckAccess(baseDir, stats, true); // Still accessed
-            CheckChange(baseDir, stats, false);
-        }
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.fileAdd(getFileInfo("File1"), file1);
+        REQUIRE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, true);
+        REQUIRE(baseDir.getStats().fileCount == 1);
     }
 
-    SECTION("Change File")
+    // Add existing file
     {
-        // Change within limit bigger
-        {
-            const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileChange(file1, 100);
-            REQUIRE(result);
-
-            REQUIRE(baseDir.getStats().totalSize == 100);
-            CheckAccess(baseDir, stats, true);
-            CheckChange(baseDir, stats, true);
-        }
-
-        // Change outside limit
-        {
-            const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileChange(file1, 1000);
-            REQUIRE_FALSE(result);
-            REQUIRE(baseDir.getStats().totalSize == 100);
-            CheckAccess(baseDir, stats, true);
-            CheckChange(baseDir, stats, false);
-        }
-
-        // Change within limit smaller
-        {
-            const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileChange(file1, 10);
-            REQUIRE_FALSE(result);
-            REQUIRE(baseDir.getStats().totalSize == 10);
-            CheckAccess(baseDir, stats, true);
-            CheckChange(baseDir, stats, true);
-        }
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.fileAdd(getFileInfo("File1"), file1);
+        REQUIRE_FALSE(result);
+        CheckAccess(baseDir, stats, true); // Still accessed
+        CheckChange(baseDir, stats, false);
     }
 
-    SECTION("Exists")
+    // Change within limit bigger
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.fileChange(file1, 100);
+        REQUIRE(result);
+
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, true);
+        REQUIRE(baseDir.getStats().fileSize == 100);
+    }
+
+    // Change outside limit
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.fileChange(file1, 1000);
+        REQUIRE_FALSE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, false);
+        REQUIRE(baseDir.getStats().fileSize == 100);
+    }
+
+    // Change within limit smaller
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.fileChange(file1, 10);
+        REQUIRE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, true);
+        REQUIRE(baseDir.getStats().fileSize == 10);
+    }
+
+    // ("Exists")
     {
         {
             const DirectoryStats stats = baseDir.getStats();
@@ -143,7 +137,7 @@ TEST_CASE("VirtualDirectory File Operations")
         }
     }
 
-    SECTION("Remove")
+    // ("Remove")
     {
         // Remove existing
         {
@@ -151,7 +145,8 @@ TEST_CASE("VirtualDirectory File Operations")
             auto result = baseDir.fileRemove(file1);
             REQUIRE(result);
             CheckAccess(baseDir, stats, true);
-            CheckChange(baseDir, stats, false);
+            CheckChange(baseDir, stats, true);
+            REQUIRE(baseDir.getStats().fileCount == 0);
         }
 
         // Remove missing

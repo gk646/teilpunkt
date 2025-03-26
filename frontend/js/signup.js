@@ -86,11 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let hashedPassword = hashPassword(passwordValue);
         let requestBody = JSON.stringify({
             name: usernameValue,
-            credentials: {
-                type: 1,
-                password: hashedPassword,
-                passkey: "asdf"
-            }
+            password: hashedPassword,
+
         });
         passwordValue = null;
         usernameValue = null;
@@ -111,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             requestBody = null;
 
             await result;
-            window.location.href = '/';
+            window.location.href = '/login';
 
         } catch (error) {
             displayAuthError(authError, "The login has failed. Please check your login details and try again.");
@@ -197,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-
+        console.log("Passkey not available")
     }
 
 

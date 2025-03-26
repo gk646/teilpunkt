@@ -44,7 +44,8 @@ struct DirectoryStats final
     Timestamp lastAccess;
     Timestamp creation;
 
-    uint64_t totalSize = 0; // Size of all contained files in bytes
+    uint64_t fileSize = 0;        // Size of all files in bytes
+    uint64_t subDirFileSize = 0;  // Size of all files in subdirs
 
     uint32_t accessCount = 0; // How often directory was accessed
     uint32_t changeCount = 0; // How often directory was accessed
@@ -52,9 +53,6 @@ struct DirectoryStats final
     uint32_t fileCount = 0;
     uint32_t dirCount = 0;
 };
-
-// TODO every access needs to be fully locked - no coop lock spinlock?
-// Implement file change
 
 struct VirtualDirectory final
 {
@@ -73,7 +71,7 @@ struct VirtualDirectory final
     bool fileAdd(const FileCreationInfo& info, FileID& file);
 
     // Returns true if a size change has been made
-    bool fileChange(FileID file, uint64_t newSize);
+    bool fileChange(FileID file, uint64_t newFileSize);
     bool fileExists(const FileName& name) const;
     bool fileRemove(FileID fileid);
     bool fileRemoveAll();
@@ -81,13 +79,10 @@ struct VirtualDirectory final
     bool dirAdd(const DirectoryCreationInfo& info);
     bool dirRemove(FileID dir); // Only works if dir is empty
     bool dirRemoveAll();
-    [[nodiscard]] bool dirExists(const FileName& name) const;
+    bool dirExists(const FileName& name) const;
 
     std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getDirs();
     std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>>& getFiles();
-
-    // Returns true if a file with the given size fits into this directory - needs to check all parents
-    [[nodiscard]] bool canFit(uint64_t fileSize) const;
 
     //===== Self =====//
 
@@ -99,21 +94,21 @@ struct VirtualDirectory final
 
     //===== DTO =====//
 
-    mutable CooperativeSpinlock lock;
 
   private:
     VirtualFile* getFile(FileID file);
+    bool canHoldSizeChange(uint64_t currSize, uint64_t newSize) const;
 
     void onAccess() const;
     void onChange() const;
 
-    // Returns true on change
-    using DirFunc = bool (*)(VirtualDirectory& file);
     // Called for each parent up to the root
-    void propagateChange(DirFunc func) const;
+    template <typename Func>
+    void iterateParents(Func func) const;
 
     DirectoryInfo info;
     mutable DirectoryStats stats;
+    mutable Spinlock lock;
     DirectoryPerms perms;
     DirectoryLimits limits;
 

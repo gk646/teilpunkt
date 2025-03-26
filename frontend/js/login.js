@@ -3,6 +3,7 @@ import {
     displayAuthError,
     fetchWithErrorHandling,
     hashPassword,
+    isPasskeyAvailable,
     showError,
     validatePassword,
     validateUsername
@@ -92,47 +93,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle passkey signup
-    passkeyButton.addEventListener('click', async () => {
-        clearAuthError(authError);
+    if (isPasskeyAvailable()) {
+        // Handle passkey signup
+        passkeyButton.addEventListener('click', async () => {
+            clearAuthError(authError);
 
-        if (!validateUsername(userNameInput)) return;
-        const usernameValue = userNameInput.value.trim();
+            if (!validateUsername(userNameInput)) return;
+            const usernameValue = userNameInput.value.trim();
 
-        try {
-            await sodiumReady;
+            try {
+                await sodiumReady;
 
-            const challengeResponse = await fetchWithErrorHandling('/api/signup', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: usernameValue})
-            });
+                const challengeResponse = await fetchWithErrorHandling('/api/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: usernameValue})
+                });
 
-            const {challenge} = await challengeResponse.json();
+                const {challenge} = await challengeResponse.json();
 
-            const publicKey = {
-                challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
-                rp: {name: 'teilpunkt'},
-                user: {
-                    id: Uint8Array.from(usernameValue, c => c.charCodeAt(0)),
-                    name: usernameValue,
-                    displayName: usernameValue
-                },
-                pubKeyCredParams: [{type: 'public-key', alg: -7}]
-            };
+                const publicKey = {
+                    challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
+                    rp: {name: 'teilpunkt'},
+                    user: {
+                        id: Uint8Array.from(usernameValue, c => c.charCodeAt(0)),
+                        name: usernameValue,
+                        displayName: usernameValue
+                    },
+                    pubKeyCredParams: [{type: 'public-key', alg: -7}]
+                };
 
-            const credential = await navigator.credentials.create({publicKey});
+                const credential = await navigator.credentials.create({publicKey});
 
-            await fetchWithErrorHandling('/api/login/passkey/verify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(credential)
-            });
+                await fetchWithErrorHandling('/api/login/passkey/verify', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(credential)
+                });
 
-            window.location.href = '/dashboard';
-        } catch (error) {
-            displayAuthError(authError, "Passkey signup failed. Please try again.");
-            console.error('Error during passkey signup:', error);
-        }
-    });
+                window.location.href = '/dashboard';
+            } catch (error) {
+                displayAuthError(authError, "Passkey signup failed. Please try again.");
+                console.error('Error during passkey signup:', error);
+            }
+        });
+    } else {
+        console.log("Passkey not available")
+    }
+
 });

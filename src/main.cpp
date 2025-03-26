@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <csignal>
+#include <monitoring/EventLimiter.h>
 #include <sodium/core.h>
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
+#include "monitoring/EventLimiter.h"
 #include "server/WebServer.h"
 #include "storage/Storage.h"
 #include "uac/UserAccessControl.h"
@@ -45,6 +47,7 @@ int32_t main()
             tpunkt::InstanceConfig config{};
             tpunkt::Authenticator auth{};
             tpunkt::EventMonitor monitor{};
+            tpunkt::EventLimiter limiter{};
             tpunkt::UserAccessControl uac{};
             tpunkt::Storage storage{};
 

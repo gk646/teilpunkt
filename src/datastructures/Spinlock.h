@@ -25,6 +25,7 @@ struct Spinlock
     std::atomic<bool> flag{false};
     friend struct SpinlockGuard;
     friend struct CooperativeSpinlock;
+    friend struct VirtualDirectory;
 };
 
 struct SpinlockGuard final
