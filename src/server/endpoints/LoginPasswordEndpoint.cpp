@@ -3,17 +3,17 @@
 #include <HttpResponse.h>
 #include <glaze/json/read.hpp>
 #include "auth/Authenticator.h"
+#include "instance/InstanceConfig.h"
 #include "server/DTO.h"
 #include "server/DTOMappings.h"
 #include "server/Endpoints.h"
+#include "util/Strings.h"
 
 namespace tpunkt
 {
 
-void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+void LoginPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    thread_local std::vector<DTOSessionInfo> sessionCollector;
-
     if(!AllowRequest(res, req))
     {
         return;
@@ -40,6 +40,7 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
             Credentials credentials{};
             credentials.type = CredentialsType::PASSWORD;
             credentials.password = authData.password;
+
             auto status = GetAuthenticator().userLogin(authData.name, credentials, user);
             if(status != AuthStatus::OK)
             {
@@ -54,17 +55,23 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
                 return;
             }
 
-            status = GetAuthenticator().sessionGetInfo(user, sessionCollector);
+            SecureWrapper<SessionToken> token;
+            status = GetAuthenticator().sessionAdd(user, metaData, token);
             if(status != AuthStatus::OK)
             {
-                EndRequest(res, 500);
+                EndRequest(res, 400, GetAuthStatusStr(status));
                 return;
             }
 
+            const uint32_t expiration = GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_SECS);
+            auto reader = token.get();
+            SetCookie(res, TPUNKT_AUTH_SESSION_ID_NAME, reader.get().c_str(), expiration);
 
+            // Set user id cookie
+            char numBuf[ 12 ];
+            NumberToString(numBuf, 12, static_cast<uint32_t>(user));
+            SetUnsafeCookie(res, TPUNKT_AUTH_SESSION_USER_NAME, numBuf, expiration);
 
-
-            res->writeHeader("Set-Cookie", );
             EndRequest(res, 200);
         });
 

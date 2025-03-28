@@ -41,6 +41,8 @@ const char* GetAuthStatusStr(const AuthStatus status)
             return "User name exists";
         case AuthStatus::ERR_INVALID_ARGUMENTS:
             return "Invalid arguments";
+        case AuthStatus::ERR_NO_ADMIN:
+            return "No admin";
     }
     return nullptr;
 }
@@ -104,7 +106,7 @@ AuthStatus Authenticator::userRemove(const UserID actor, const UserID user)
 
     if(!userStore.remove(user))
     {
-        LOG_EVENT(UserAction, UserRemove, FAIL_SERVER_OPERATION);
+        LOG_EVENT(UserAction, UserRemove, FAIL_SERVER_UNSPECIFIED);
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
@@ -125,7 +127,7 @@ AuthStatus Authenticator::userChangeCredentials(const UserID user, const UserNam
 
     if(!userStore.changeCredentials(user, newName, consumed))
     {
-        LOG_EVENT(UserAction, UserChangeCredentials, FAIL_SERVER_OPERATION);
+        LOG_EVENT(UserAction, UserChangeCredentials, FAIL_SERVER_UNSPECIFIED);
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
@@ -133,7 +135,8 @@ AuthStatus Authenticator::userChangeCredentials(const UserID user, const UserNam
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& data, SecureWrapper<SessionToken>& out)
+AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& metaData,
+                                     SecureWrapper<SessionToken>& out)
 {
     SpinlockGuard lock{authLock};
 
@@ -144,9 +147,9 @@ AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& d
     }
 
     SessionToken sessionId;
-    if(!sessionStore.add(user, data, sessionId))
+    if(!sessionStore.add(user, metaData, sessionId))
     {
-        LOG_EVENT(UserAction, SessionAdd, FAIL_SERVER_OPERATION);
+        LOG_EVENT(UserAction, SessionAdd, FAIL_SERVER_UNSPECIFIED);
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
@@ -164,7 +167,7 @@ AuthStatus Authenticator::sessionRemove(const UserID user, const Timestamp& crea
 
     if(!sessionStore.remove(user, creation))
     {
-        LOG_EVENT(UserAction, SessionRemove, FAIL_SERVER_OPERATION);
+        LOG_EVENT(UserAction, SessionRemove, FAIL_SERVER_UNSPECIFIED);
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
@@ -172,12 +175,13 @@ AuthStatus Authenticator::sessionRemove(const UserID user, const Timestamp& crea
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionAuth(const SessionToken& sessionId, const SessionMetaData& data, UserID& user)
+AuthStatus Authenticator::sessionAuth(const UserID lookup, const SessionToken& sessionId,
+                                      const SessionMetaData& metaData, UserID& user)
 {
     SpinlockGuard lock{authLock};
-    if(!sessionStore.get(sessionId, data, user))
+    if(!sessionStore.get(lookup, sessionId, metaData, user))
     {
-        LOG_EVENT(UserAction, SessionAuthenticate, FAIL_SERVER_OPERATION);
+        LOG_EVENT(UserAction, SessionAuthenticate, FAIL_SERVER_UNSPECIFIED);
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 

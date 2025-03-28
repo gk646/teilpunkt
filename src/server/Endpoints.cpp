@@ -6,6 +6,7 @@
 #include "monitoring/EventLimiter.h"
 #include "server/DTOMappings.h"
 #include "server/Endpoints.h"
+#include "util/Strings.h"
 
 namespace tpunkt
 {
@@ -148,33 +149,44 @@ static const char* GetStatusString(const int status)
     }
 }
 
-bool ServerEndpoint::AuthRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
+bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
 {
     size_t tokenLen = 0;
-    const char* tokenStr = GetHeader(req, TPUNKT_AUTH_SESSION_ID_NAME, tokenLen);
-    if(tokenStr == nullptr)
+    const char* tokenStr = nullptr;
+    size_t userLen = 0;
+    const char* userStr = nullptr;
+    uint32_t lookupUser{};
+
+    // Delete both if either one is missing for consistency
+    if((tokenStr = GetHeader(req, TPUNKT_AUTH_SESSION_ID_NAME, tokenLen)) == nullptr ||
+       (userStr = GetHeader(req, TPUNKT_AUTH_SESSION_USER_NAME, userLen)) == nullptr ||
+       !StringToNumber(userStr, userLen, lookupUser))
     {
+        EndRequest(res, 400, "", false,
+                   [](uWS::HttpResponse<true>* res)
+                   {
+                       ClearCookie(res, TPUNKT_AUTH_SESSION_ID_NAME);
+                       ClearCookie(res, TPUNKT_AUTH_SESSION_USER_NAME);
+                   });
         return false;
     }
+
     const SessionToken token{tokenStr, tokenLen};
 
-    size_t agentLen = 0;
-    const auto* agentStr = GetHeader(req, "user-agent", agentLen);
-    if(agentStr == nullptr)
+    SessionMetaData metaData;
+    if(!GetMetaData(res, req, metaData))
     {
+        EndRequest(res, 400);
         return false;
     }
 
-    SessionMetaData metaData;
-    metaData.userAgent = UserAgentString{agentStr, agentLen};
-
-    const auto& ipAddr = res->getRemoteAddress();
-    metaData.remoteAddress = HashedIP{ipAddr.data(), ipAddr.size()};
-    unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
-    constexpr size_t len = metaData.remoteAddress.capacity();
-    crypto_generichash(content, len, content, len, nullptr, 0);
-
-    return GetAuthenticator().sessionAuth(token, metaData, user) != AuthStatus::OK;
+    const auto status = GetAuthenticator().sessionAuth(UserID{lookupUser}, token, metaData, user);
+    if(status != AuthStatus::OK)
+    {
+        EndRequest(res, 401, GetAuthStatusStr(status));
+        return false;
+    }
+    return true;
 }
 
 bool ServerEndpoint::AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
@@ -182,13 +194,13 @@ bool ServerEndpoint::AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest
     return GetEventLimiter().allowRequest(res, req);
 }
 
-void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data, bool close)
+void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data, const bool close,
+                                const ResponseFunc func)
 {
     res->writeStatus(GetStatusString(code));
     res->writeHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains;");
     res->writeHeader("X-Frame-Options", "DENY");
     res->writeHeader("X-Content-Type-Options", "nosniff");
-    res->writeHeader("Set-Cookie", "HttpOnly; Secure; SameSite=Strict");
     res->writeHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res->writeHeader("Content-Security-Policy", "default-src 'none'; "
                                                 "script-src 'self' 'wasm-unsafe-eval';"
@@ -201,8 +213,13 @@ void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, co
                                            "geolocation=(), microphone=(),camera=(),"
                                            "payment=(), usb=(),"
                                            "fullscreen=(self), autoplay=(self)");
+    if(func != nullptr) [[unlikely]]
+    {
+        func(res);
+    }
     res->end(data, close);
 }
+
 
 const char* ServerEndpoint::GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length)
 {
@@ -234,14 +251,15 @@ bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest*
     unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
     constexpr size_t len = metaData.remoteAddress.capacity();
     crypto_generichash(content, len, content, len, nullptr, 0);
-
     return true;
 }
 
-void ServerEndpoint::SetCookie(uWS::HttpResponse<true>* res, const char* key, const char* value, uint32_t expiration)
+void ServerEndpoint::SetCookie(uWS::HttpResponse<true>* res, const char* key, const char* value,
+                               const uint32_t expiration)
 {
     char buf[ 128 ];
-    const auto result = snprintf(buf, 128, "%s=%s; Path=/; HttpOnly; Max-Age=%d", key, value, expiration);
+    constexpr auto* fmt = "%s=%s; Path=/;HttpOnly;Secure;SameSite=Strict;Max-Age=%d";
+    const auto result = snprintf(buf, 128, fmt, key, value, expiration);
     if(result < 0)
     {
         LOG_ERROR("Failed to set cookie:%s", key);
@@ -249,5 +267,33 @@ void ServerEndpoint::SetCookie(uWS::HttpResponse<true>* res, const char* key, co
     }
     res->writeHeader("Set-Cookie", buf);
 }
+
+void ServerEndpoint::SetUnsafeCookie(uWS::HttpResponse<true>* res, const char* key, const char* value,
+                                     const uint32_t expiration)
+{
+    char buf[ 128 ];
+    constexpr auto* fmt = "%s=%s; Path=/;Secure;SameSite=Strict;Max-Age=%d";
+    const auto result = snprintf(buf, 128, fmt, key, value, expiration);
+    if(result < 0)
+    {
+        LOG_ERROR("Failed to set cookie:%s", key);
+        return;
+    }
+    res->writeHeader("Set-Cookie", buf);
+}
+
+void ServerEndpoint::ClearCookie(uWS::HttpResponse<true>* res, const char* key)
+{
+    char buf[ 128 ];
+    constexpr auto* fmt = "%s=; Path=/;Secure;SameSite=Strict;Max-Age=0";
+    const auto result = snprintf(buf, 128, fmt, key);
+    if(result < 0)
+    {
+        LOG_ERROR("Failed to clear cookie:%s", key);
+        return;
+    }
+    res->writeHeader("Set-Cookie", buf);
+}
+
 
 } // namespace tpunkt

@@ -5,15 +5,18 @@ import {
     fetchWithErrorHandling,
     hashPassword,
     isPasskeyAvailable,
+    redirectDashBoardLoggedIn,
     showError,
     validatePassword,
     validateUsername
 } from './util.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    redirectDashBoardLoggedIn()
+
     // Cache DOM elements
     const form = document.querySelector('.login-form');
-    const passkeyButton = document.getElementById('passkey-signup-btn');
+    const passkeyButton = document.getElementById('passkey-btn');
     const authError = document.getElementById('auth-error');
     const userNameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -92,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordValue = null;
         usernameValue = null;
         try {
-            let result = fetchWithErrorHandling('/api/signup', {
+            let result = fetchWithErrorHandling('/api/signup/password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -111,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/login';
 
         } catch (error) {
-            displayAuthError(authError, "The login has failed. Please check your login details and try again.");
+
+            displayAuthError(authError, "The sign has failed. Please check your login details and try again.");
             console.error('Error during login:', error);
         }
     });
@@ -194,8 +198,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-        console.log("Passkey not available")
+        console.error("Passkey not supported")
+        const passkeyButton = document.getElementById("passkey-btn");
+        passkeyButton.disabled = true;
+        passkeyButton.textContent = "Sign up with Passkey";
+        passkeyButton.style.opacity = "0.5";
+        passkeyButton.style.cursor = "not-allowed";
     }
-
-
 });

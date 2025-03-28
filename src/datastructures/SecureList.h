@@ -114,8 +114,22 @@ struct SecureList final
             return false;
         }
 
+        // Erases all elements for which comp returns true when called
+        template <typename Comparator>
+        void erase_if(Comparator comp)
+        {
+            for(size_t i = 0U; i < list.elements; ++i)
+            {
+                if(comp(list.arr[ i ]))
+                {
+                    eraseIndex(i);
+                    --i;
+                }
+            }
+        }
+
         // Erases the element at the given index
-        // DOES NOT KEEP ORDER
+        // DOES NOT KEEP ORDER - SKIPS ELEMENTS WHEN ITERATING
         bool eraseIndex(const size_t idx)
         {
             if(idx >= list.elements)
@@ -268,7 +282,6 @@ struct SecureList final
     static_assert(std::is_trivially_destructible_v<T>, "Detors are not called");
     static_assert(std::is_default_constructible_v<T>, "No params supported");
 };
-
 
 } // namespace tpunkt
 

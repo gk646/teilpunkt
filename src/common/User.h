@@ -11,6 +11,7 @@
 
 namespace tpunkt
 {
+
 struct User final
 {
     UserName name;               // Unique name of the user

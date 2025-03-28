@@ -54,19 +54,20 @@ enum class EventStatus : uint8_t
 {
     INVALID,
     // Info
-    INFO,                   //----------------
-    SUCCESS,                // Generic success
-    FAIL_SERVER_OPERATION,  // A server operation failed
+    INFO,                    //----------------
+    SUCCESS,                 // Success
+    FAIL_SERVER_UNSPECIFIED, // A server operation failed but It's further not specified
     FAIL_INVALID_CREDENTIALS,
     FAIL_INVALID_TOKEN,
-    FAIL_CONFIG_RESTRICTED, // Prevented due to instance config
-    FAIL_NO_ADMIN,          // Not complete due to missing admin
-    FAIL_NO_UAC,            // Denied cause of UAC
+    FAIL_CONFIG_RESTRICTED,  // Prevented due to instance config
+    FAIL_NO_ADMIN,           // Not complete due to missing admin
+    FAIL_NO_UAC,             // Denied cause of UAC
     FAIL_USERNAME_EXISTS,
     FAIL_NO_SUCH_ENDPOINT,
     FAIL_NO_SUCH_FILE,
-    FAIL_INVALID_ARGUMENTS, // Failed cause arguments had wrong values
-    WARNINGS,               //----------------
+    FAIL_SESSION_EXISTS,
+    FAIL_INVALID_ARGUMENTS,  // Failed cause arguments had wrong values
+    WARNINGS,                //----------------
     // Warnings
     WARN_OPERATION_FAILED, // Internal operation failed
 };

@@ -16,8 +16,8 @@ namespace tpunkt
           staticFiles(TPUNKT_SERVER_STATIC_FILES_DIR)
     {
         server.get("/*", StaticEndpoint::handle);
-        server.post("/api/signup", RegisterPasswordEndpoint::handle);
-        server.post("/api/login", AuthPasswordEndpoint::handle);
+        server.post("/api/signup/password", RegisterPasswordEndpoint::handle);
+        server.post("/api/login/password", LoginPasswordEndpoint::handle);
         server.post("/api/upload", UploadEndpoint::handle);
         server.get("/api/download", DownloadEndpoint::handle);
         TPUNKT_MACROS_GLOBAL_ASSIGN(Server);

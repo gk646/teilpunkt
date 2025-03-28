@@ -47,7 +47,7 @@ StorageStatus Storage::endpointCreate(const UserID user, const StorageEndpointCr
     }
     else
     {
-        LOG_EVENT(UserAction, EndpointCreate, FAIL_SERVER_OPERATION);
+        LOG_EVENT(UserAction, EndpointCreate, FAIL_SERVER_UNSPECIFIED);
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
 

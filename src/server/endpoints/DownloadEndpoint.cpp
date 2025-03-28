@@ -20,7 +20,6 @@ bool sendData(uWS::HttpResponse<true>* res)
 void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     UserID user;
-    TPUNKT_MACROS_CHECK_REQUEST;
 
     res->getRemoteAddress();
     size_t begin{};

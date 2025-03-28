@@ -42,6 +42,8 @@ struct Session final
 
     [[nodiscard]] const UserAgentString& getUserAgent() const;
 
+    bool isExpired() const;
+
   private:
     SessionToken token;       // Actual set cookie
     SessionMetaData metaData; // Metadata that has to match
@@ -69,11 +71,11 @@ struct SessionStorage final
 {
     SessionStorage() = default;
 
-    // Returns true if a new session with the give meta-data was added and token is set
+    // Returns true if either a new session was created or an existing reused and token is set to the session token
     bool add(UserID user, const SessionMetaData& metaData, SessionToken& token);
 
     // Returns true a valid session was found - automatically revokes if the token matches but not the meta-data
-    bool get(const SessionToken& token, const SessionMetaData& metaData, UserID& user);
+    bool get(UserID lookup, const SessionToken& token, const SessionMetaData& metaData, UserID& user);
 
     // Returns true if the session of the user with the given timestamp was removed
     bool remove(UserID user, const Timestamp& creation);

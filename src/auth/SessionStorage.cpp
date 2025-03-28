@@ -10,9 +10,11 @@ namespace tpunkt
 
 Session::Session(const SessionMetaData& metaData)
     : metaData(metaData),
-      expiration(Timestamp::Now(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_DELAY_SECS)))
+      expiration(Timestamp::Now(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_SECS)))
 {
     randombytes_buf(token.data(), token.capacity());
+    sodium_base64_ENCODED_LEN(24, sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
+    sodium_bin2base64(token.data(), token.capacity(), token.udata(), 23, sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
 }
 
 Session::Session(Session&& other) noexcept
@@ -55,6 +57,11 @@ const UserAgentString& Session::getUserAgent() const
     return metaData.userAgent;
 }
 
+bool Session::isExpired() const
+{
+    return expiration.isInPast();
+}
+
 UserSessionData::UserSessionData(const UserID user) : user(user)
 {
 }
@@ -72,31 +79,50 @@ SecureList<Session>& UserSessionData::getSessions()
 bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, SessionToken& token)
 {
     UserSessionData* userData = getUserSessionData(user);
-    if(userData == nullptr)                                                              // User is not present yet
+    if(userData == nullptr) // User is not present yet
     {
         userData = &sessions.emplace_back(user);
     }
 
     auto sessionList = userData->getSessions().get();
-    const auto size = sessionList.size();
 
-    if(size >= GetInstanceConfig().getNumber(NumberParamKey::USER_MAX_ALLOWED_SESSIONS)) // Deny if too many
+    // Evict expired session on each adds
+    sessionList.erase_if([](const Session& session) { return session.isExpired(); });
+
+    // Check if session exists for current metadata
+    for(auto& session : sessionList)
+    {
+        if(session.isValid(metaData))
+        {
+            token = session.getToken();
+            return true;
+        }
+    }
+
+    // Deny if too many
+    if(sessionList.size() >= GetInstanceConfig().getNumber(NumberParamKey::USER_MAX_ALLOWED_SESSIONS))
     {
         return false;
     }
 
     Session session{metaData};
     token = session.getToken();
-
     sessionList.push_back(std::move(session));
+
     return true;
 }
 
-bool SessionStorage::get(const SessionToken& token, const SessionMetaData& metaData, UserID& user)
+bool SessionStorage::get(const UserID lookup, const SessionToken& token, const SessionMetaData& metaData, UserID& user)
 {
-    for(auto& userData : sessions)
+    UserSessionData* userData = getUserSessionData(user);
+    if(userData == nullptr)                 // User is not present yet
     {
-        auto sessionList = userData.getSessions().get();
+        return false;
+    }
+
+    if(userData->getUser() == lookup)
+    {
+        auto sessionList = userData->getSessions().get();
         for(int i = 0; i < sessionList.size(); ++i)
         {
             auto& session = sessionList[ i ];
@@ -104,7 +130,7 @@ bool SessionStorage::get(const SessionToken& token, const SessionMetaData& metaD
             {
                 if(session.isValid(metaData))
                 {
-                    user = userData.getUser();
+                    user = userData->getUser();
                     return true;
                 }
                 // Metadata does not match

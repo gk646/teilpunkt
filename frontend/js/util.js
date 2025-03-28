@@ -1,6 +1,7 @@
 const USERNAME_LEN = 3
 const PASSWORD_LEN = 7
 const HASH_LENGTH = 24 // Produces 32 length base 64
+const USER_ID_COOKIE = "tp-session-user"
 
 // Hash the password
 export const hashPassword = (plainPassword) => {
@@ -69,10 +70,15 @@ export const fetchWithErrorHandling = async (url, options) => {
     return response;
 };
 
-
 export const isPasskeyAvailable = () => {
     return window.PublicKeyCredential &&
         PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
         PublicKeyCredential.isConditionalMediationAvailable;
 
+}
+
+export const redirectDashBoardLoggedIn = () => {
+    if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(USER_ID_COOKIE + '='))) {
+        window.location.replace('/dashboard.html');
+    }
 }

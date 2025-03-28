@@ -108,10 +108,10 @@ uint32_t InstanceConfig::getDefault(const NumberParamKey key)
         case NumberParamKey::USER_IP_ACCOUNT_CREATION_TIMEOUT_MIN:
             return 30;
         case NumberParamKey::USER_MAX_ALLOWED_TASKS:
-            return 3;
+            return 2;
         case NumberParamKey::USER_MAX_ALLOWED_SESSIONS:
-            return 1;
-        case NumberParamKey::USER_SESSION_EXPIRATION_DELAY_SECS:
+            return 3;
+        case NumberParamKey::USER_SESSION_EXPIRATION_SECS:
             return 24 * 60 * 60; // 1 day in seconds
         case NumberParamKey::API_REQUESTS_PER_USER_PER_MIN:
             return 40;

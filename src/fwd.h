@@ -46,6 +46,7 @@ struct VirtualFile;
 struct DTODirectoryInfo;
 struct DTOFileStats;
 struct DTOSessionInfo;
+struct SessionMetaData;
 
 //===== Fixed String =====//
 

@@ -33,11 +33,11 @@ enum class NumberParamKey : uint8_t
     // 3
     USER_MAX_ALLOWED_SESSIONS,
     // Max amount of tasks (e.g. uploads, downloads etc.) a user can have at the same time
-    // 1
+    // 2
     USER_MAX_ALLOWED_TASKS,
     // Time until a new session expires in seconds
     // 1 day = 24 * 60 * 60
-    USER_SESSION_EXPIRATION_DELAY_SECS,
+    USER_SESSION_EXPIRATION_SECS,
     // Max allowed number of requests to the server per user per minute
     // 40
     API_REQUESTS_PER_USER_PER_MIN,

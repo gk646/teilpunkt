@@ -47,14 +47,14 @@ struct Authenticator final
 
     //===== Session Management =====//
 
-    // Adds a new session with the given data to the user
-    AuthStatus sessionAdd(UserID user, const SessionMetaData& data, SecureWrapper<SessionToken>& out);
+    // Adds a new session with the given data to the user or reuses an existing one that matches
+    AuthStatus sessionAdd(UserID user, const SessionMetaData& metaData, SecureWrapper<SessionToken>& out);
 
     // Removes the session with the given creation timestamp
     AuthStatus sessionRemove(UserID user, const Timestamp& creation);
 
-    // Assigns user on success
-    AuthStatus sessionAuth(const SessionToken& token, const SessionMetaData& data, UserID& user);
+    // Assigns user on success - only searches the given lookup user
+    AuthStatus sessionAuth(UserID lookup, const SessionToken& token, const SessionMetaData& metaData, UserID& user);
 
     // Collects info of all session from the given user
     AuthStatus sessionGetInfo(UserID user, std::vector<DTOSessionInfo>& collector);

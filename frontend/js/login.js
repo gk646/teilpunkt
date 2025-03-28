@@ -3,13 +3,15 @@ import {
     displayAuthError,
     fetchWithErrorHandling,
     hashPassword,
-    isPasskeyAvailable,
+    isPasskeyAvailable, redirectDashBoardLoggedIn,
     showError,
     validatePassword,
     validateUsername
 } from './util.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    redirectDashBoardLoggedIn()
+
     // Cache DOM elements
     const form = document.querySelector('.login-form');
     const passkeyButton = document.getElementById('passkey-btn');
@@ -64,13 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let passwordValue = passwordInput.value.trim();
         let hashedPassword = hashPassword(passwordValue);
         let requestBody = JSON.stringify({
-            username: usernameValue,
+            name: usernameValue,
             password: hashedPassword
         });
         passwordValue = null;
         usernameValue = null;
         try {
-            let result = fetchWithErrorHandling('/api/login', {
+            let result = fetchWithErrorHandling('/api/login/password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await result;
 
-            window.location.href = '/';
+            window.location.href = '/dashboard';
         } catch (error) {
             displayAuthError(authError, "The login has failed. Please check your login details and try again.");
             console.error('Error during login:', error);
@@ -138,7 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-        console.log("Passkey not available")
+        console.error("Passkey not supported")
+        const passkeyButton = document.getElementById("passkey-btn");
+        passkeyButton.disabled = true;
+        passkeyButton.textContent = "Use Passkey";
+        passkeyButton.style.opacity = "0.5";
+        passkeyButton.style.cursor = "not-allowed";
     }
 
 });

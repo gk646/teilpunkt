@@ -15,6 +15,8 @@ constexpr size_t TPUNKT_INSTANCE_SECRET_MAX_LEN = 32;
 
 constexpr auto* TPUNKT_AUTH_SESSION_ID_NAME = "tp-session-id";
 
+constexpr auto* TPUNKT_AUTH_SESSION_USER_NAME = "tp-session-user";
+
 constexpr size_t TPUNKT_AUTH_PASSWORD_LEN = 32;
 
 constexpr size_t TPUNKT_AUTH_PASSKEY_LEN = 128;

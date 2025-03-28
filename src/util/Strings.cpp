@@ -55,6 +55,12 @@ bool NumberToStringEx(char* buf, const size_t len, const uint32_t num, const cha
     return true;
 }
 
+bool StringToNumber(const char* buf, const size_t len, uint32_t& num)
+{
+    auto result = std::from_chars(buf, buf + len, num);
+    return result.ec != std::errc();
+}
+
 bool IsValidFilename(const FileName& name)
 {
     if(name.size() == 0) [[unlikely]]

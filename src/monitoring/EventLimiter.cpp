@@ -44,9 +44,7 @@ bool EventLimiter::allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
     ipStatus.tokens = std::min(IPRangeLimit::TOKENS_MAX, ipStatus.tokens + addTokens);
 
     ipStatus.last = now;
-
     ipStatus.tokens -= IPRangeLimit::TOKEN_COST_CONN;
-    LOG_INFO("Current tokens: %d",ipStatus.tokens);
 
     if(ipStatus.tokens < 0)
     {
@@ -56,8 +54,6 @@ bool EventLimiter::allowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
             ipStatus.overLimitRequests = 0;
             ipStatus.tokens = IPRangeLimit::TOKEN_MAX_MINUS;
         }
-
-
         ServerEndpoint::EndRequest(res, 429, "", true);
         return false;
     }
