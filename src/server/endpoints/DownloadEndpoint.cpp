@@ -19,98 +19,55 @@ bool sendData(uWS::HttpResponse<true>* res)
 
 void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    UserID user;
+    const size_t fileSize = 1 * 1024 * 1024; // 10 MB
 
-    res->getRemoteAddress();
-    size_t begin{};
-    size_t end{};
-    FileID file{}; // From request
-    StorageEndpoint* endpoint = nullptr;
-    /*
+    res->writeHeader("Content-Disposition", "attachment; filename=\"dummy.bin\"");
+    res->writeHeader("Content-Type", "application/octet-stream");
+    res->writeHeader("Content-Length", std::to_string(fileSize));
+
+    std::string dummyChunk(TPUNKT_SERVER_CHUNK_SIZE, 'x');
+
+    auto offset = 0;
+
+    // Initial direct writes until backpressure occurs
+    while(offset < fileSize)
+    {
+        size_t remaining = fileSize - offset;
+        size_t toSend = std::min(TPUNKT_SERVER_CHUNK_SIZE, remaining);
+        bool canWrite = res->write(std::string_view(dummyChunk.data(), toSend));
+        offset += toSend;
+        if(!canWrite)
         {
-            const auto ret = GetStorage().endpointGet(user, file.endpoint, endpoint);
-            if(ret != StorageStatus::OK)
-            {
-                RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
-                return;
-            }
+            break;
         }
+    }
 
-        // TODO use slot allocator
-        auto state = std::make_shared<ReadTransaction>(ReadTransaction{});
+    if(offset >= fileSize)
+    {
+        res->end();
+    }
+
+    res->onWritable(
+        [ res, fileSize, dummyChunk, offset ](size_t) mutable -> bool
         {
-            const auto ret = endpoint->fileGet(user, file, begin, end, *state);
-            if(endpoint == nullptr || ret != StorageStatus::OK)
+            while(offset < fileSize)
             {
-                RejectRequest(res, StorageHTTPErrCode(ret), StorageErrString(ret));
-                return;
-            }
-        }
-
-        state->response = res;
-        state->loop = uWS::Loop::get();
-
-
-        auto dataCallback = [ state ](const unsigned char* data, size_t length, bool success, bool isLast)
-        {
-            if(!success || state->isFinished()) // If finished we shouldn't be here
-            {
-                state->abort();
-                // Schedule termination on the event loop thread.
-                state->loop->defer([ state ]() { state->response->end("Error reading file"); });
-            }
-
-            if(isLast)
-            {
-                state->setFinished();
-            }
-
-            auto sendData = [ data, length, state ]()
-            {
-                // Attempt to send chunk
-                const auto dataChunk = std::string_view(reinterpret_cast<const char*>(data));
-                const auto [ ok, done ] = state->response->tryEnd(dataChunk, length);
-                if(done)
+                size_t remaining = fileSize - offset;
+                size_t toSend = std::min(TPUNKT_SERVER_CHUNK_SIZE, remaining);
+                bool canWrite = res->write(std::string_view(dummyChunk.data(), toSend));
+                offset += toSend;
+                if(!canWrite)
                 {
-                    state->setFinished();
+                    // Backpressure: wait for next onWritable event
+                    return false;
                 }
-                else if(!ok)
-                {
-                    // Backpressure detected
-                    state->setPaused(true);
-                }
-            };
-            state->loop->defer(sendData);
-        };
-
-        auto sendChunk = [ state, dataCallback ]()
-        {
-            if(state->isFinished() || state->isPaused())
-            {
-                return;
             }
+            res->end();
+            return true;
+        });
 
-            if(!state->readFile(TPUNKT_SERVER_CHUNK_SIZE, dataCallback))
-            {
-                state->abort();
-                state->response->end("Error reading file");
-            }
-        };
 
-        // Register writable callback
-        res->onWritable(
-            [ state, sendChunk ](size_t offset)
-            {
-                state->setPaused(false);
-                sendChunk();
-                return !state->isPaused();
-            });
-
-        res->onAborted([ state ] { state->abort(); });
-
-        // Start streaming
-        sendChunk();
-        */
+    res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
 }
 
 } // namespace tpunkt

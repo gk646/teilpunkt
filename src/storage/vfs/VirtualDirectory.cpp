@@ -79,7 +79,7 @@ bool VirtualDirectory::fileChange(const FileID file, const uint64_t newFileSize)
     }
 
     bool fitsIntoAll = true;
-    VirtualDirectory* current = info.parent;
+    const VirtualDirectory* current = info.parent;
 
     // Iterate up with locking
     while(current != nullptr)
@@ -89,6 +89,7 @@ bool VirtualDirectory::fileChange(const FileID file, const uint64_t newFileSize)
         {
             fitsIntoAll = false;
         }
+        current = current->info.parent;
     }
 
     // Iterate up again to unlock
@@ -131,7 +132,7 @@ bool VirtualDirectory::fileExists(const FileName& name) const
     return false;
 }
 
-bool VirtualDirectory::fileRemove(const FileID file)
+bool VirtualDirectory::fileDelete(const FileID file)
 {
     SpinlockGuard guard{lock};
     onAccess();
@@ -140,19 +141,21 @@ bool VirtualDirectory::fileRemove(const FileID file)
         LOG_ERROR("Wrong call");
         return false;
     }
-    const auto result = files.remove_if([ & ](const VirtualFile& checked) { return checked.getInfo().id == file; }) > 0;
-    if(result)
+    const auto removed = files.remove_if([ & ](const VirtualFile& checked) { return checked.getInfo().id == file; });
+    if(removed > 0) [[likely]]
     {
+        stats.fileCount -= removed;
         onChange();
+        return true;
     }
-    return result;
+    return false;
 }
 
-bool VirtualDirectory::fileRemoveAll()
+bool VirtualDirectory::fileDeleteAll()
 {
     SpinlockGuard guard{lock};
     onAccess();
-    if(stats.fileCount > 0)
+    if(stats.fileCount > 0) [[likely]]
     {
         files.clear();
         onChange();
@@ -163,10 +166,15 @@ bool VirtualDirectory::fileRemoveAll()
 
 //===== Directories =====//
 
-bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
+bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info, FileID& dir)
 {
     SpinlockGuard guard{lock};
     onAccess();
+    if(info.maxSize > limits.sizeLimit) [[unlikely]]
+    {
+        return false;
+    }
+
     for(auto& savedDir : dirs)
     {
         if(savedDir.info.name == info.name) [[unlikely]]
@@ -176,11 +184,12 @@ bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& info)
     }
     onChange();
     stats.dirCount++;
-    dirs.emplace_front(info, this->info.id.getEndpoint());
+    const auto& newDir = dirs.emplace_front(info, this->info.id.getEndpoint());
+    dir = newDir.getID();
     return true;
 }
 
-bool VirtualDirectory::dirRemove(const FileID dir)
+bool VirtualDirectory::dirDelete(const FileID dir)
 {
     SpinlockGuard guard{lock};
     onAccess();
@@ -239,6 +248,11 @@ const DirectoryLimits& VirtualDirectory::getLimits() const
 {
     onAccess();
     return limits;
+}
+
+FileID VirtualDirectory::getID() const
+{
+    return info.id;
 }
 
 //===== Private =====//

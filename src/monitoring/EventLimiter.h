@@ -21,8 +21,6 @@ enum class EndpointClass : uint8_t
 
 };
 
-// TODO implement rate limiting
-
 // Methods return false if denied
 struct EventLimiter final
 {

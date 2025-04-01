@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "auth/Authenticator.h"
-
 #include "instance/InstanceConfig.h"
 #include "storage/Storage.h"
 #include "util/Wrapper.h"
@@ -72,6 +71,7 @@ StorageStatus Storage::endpointCreateFrom(const UserID user, CreateInfo info, co
     }
 
     SpinlockGuard lock{storageLock};
+    LOG_FATAL("Not implemented");
 
     // TODO
     LOG_EVENT(UserAction, EndpointCreateFrom, SUCCESS);

@@ -59,13 +59,13 @@ bool UserStorage::add(const UserName& name, const Credentials& credentials)
     return true;
 }
 
-bool UserStorage::login(const UserName& name, const Credentials& credentials, UserID& userID) const
+bool UserStorage::login(const UserName& name, const Credentials& credentials, UserID& user) const
 {
     for(const auto& box : users)
     {
         const auto boxReader = box.get();
-        const auto& user = boxReader.get();
-        if(user.name == name)
+        const auto& userData = boxReader.get();
+        if(userData.name == name)
         {
             switch(credentials.type)
             {
@@ -73,13 +73,13 @@ bool UserStorage::login(const UserName& name, const Credentials& credentials, Us
                     return false;
                 case CredentialsType::PASSWORD:
                     {
-                        const auto& storedPw = user.credentials.password;
+                        const auto& storedPw = userData.credentials.password;
                         const auto& inputPw = credentials.password;
                         if(crypto_pwhash_str_verify(storedPw.c_str(), inputPw.c_str(), inputPw.size()) != 0)
                         {
-                            return false;     // Failed comparison
+                            return false;       // Failed comparison
                         }
-                        userID = user.userID; // Save the userID
+                        user = userData.userID; // Save the userID
                         return true;
                     }
                 case CredentialsType::PASSKEY:
@@ -92,18 +92,17 @@ bool UserStorage::login(const UserName& name, const Credentials& credentials, Us
     return false;
 }
 
-bool UserStorage::changeCredentials(const UserID userID, const UserName& newName, const Credentials& newCredentials)
+bool UserStorage::changeCredentials(const UserID user, const UserName& newName, const Credentials& newCredentials)
 {
     for(auto& box : users)
     {
         auto boxReader = box.get();
-        auto& user = boxReader.get();
-
-        if(user.userID == userID)
+        auto& userData = boxReader.get();
+        if(userData.userID == user)
         {
-            user.name = newName;                                      // Always assign new name
-            if(user.credentials == newCredentials)                    // No need to assign new credentials
+            if(userData.credentials == newCredentials)                // No need to assign new credentials
             {
+                userData.name = newName;                              // Always assign new name
                 return true;
             }
 
@@ -121,7 +120,9 @@ bool UserStorage::changeCredentials(const UserID userID, const UserName& newName
                         {
                             return false;                             // Out of memory - user password didn't change
                         }
-                        user.credentials = tempCredentials;           // Successful - assign new credentials
+                        // Successful operation - assigns both
+                        userData.credentials = tempCredentials;
+                        userData.name = newName;
                         return true;
                     }
                 case CredentialsType::PASSKEY:
@@ -134,14 +135,14 @@ bool UserStorage::changeCredentials(const UserID userID, const UserName& newName
     return false;
 }
 
-bool UserStorage::remove(const UserID userID)
+bool UserStorage::remove(const UserID user)
 {
     for(auto& userBox : users)
     {
         bool found = false;
         {
             auto boxReader = userBox.get();
-            found = boxReader.get().userID == userID;
+            found = boxReader.get().userID == user;
         }
         if(found)
         {

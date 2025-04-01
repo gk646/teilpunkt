@@ -44,11 +44,11 @@ struct DirectoryStats final
     Timestamp lastAccess;
     Timestamp creation;
 
-    uint64_t fileSize = 0;        // Size of all files in bytes
-    uint64_t subDirFileSize = 0;  // Size of all files in subdirs
+    uint64_t fileSize = 0;       // Size of all files in bytes
+    uint64_t subDirFileSize = 0; // Size of all files in subdirs
 
-    uint32_t accessCount = 0; // How often directory was accessed
-    uint32_t changeCount = 0; // How often directory was accessed
+    uint32_t accessCount = 0;    // How often directory was accessed
+    uint32_t changeCount = 0;    // How often directory was accessed
 
     uint32_t fileCount = 0;
     uint32_t dirCount = 0;
@@ -61,7 +61,7 @@ struct VirtualDirectory final
 
     //===== Get =====//
 
-    // Only local search - non-recursive
+    // Returns nullptr of the element identified by the given id - Only local non-recursive search
     VirtualFile* searchFile(FileID file);
     VirtualDirectory* searchDir(FileID dir);
 
@@ -70,16 +70,25 @@ struct VirtualDirectory final
     // Returns true and assigns the id if a new file with the given info was added
     bool fileAdd(const FileCreationInfo& info, FileID& file);
 
-    // Returns true if a size change has been made
+    // Returns true if the size of the given file has changed
     bool fileChange(FileID file, uint64_t newFileSize);
-    bool fileExists(const FileName& name) const;
-    bool fileRemove(FileID fileid);
-    bool fileRemoveAll();
 
-    bool dirAdd(const DirectoryCreationInfo& info);
-    bool dirRemove(FileID dir); // Only works if dir is empty
-    bool dirRemoveAll();
+    // Returns true if a file with the given name exists
+    bool fileExists(const FileName& name) const;
+
+    // Returns true if the given file is deleted - deletes all its subdirs and subfiles
+    bool fileDelete(FileID fileid);
+    bool fileDeleteAll();
+
+    // Returns true and assigns dir if a new directory was added
+    bool dirAdd(const DirectoryCreationInfo& info, FileID& dir);
+
+    // Returns true if a directory with the given name exists
     bool dirExists(const FileName& name) const;
+
+    // Returns true if a directory was removed
+    bool dirDelete(FileID dir);
+    bool dirDeleteAll();
 
     std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getDirs();
     std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>>& getFiles();
@@ -88,12 +97,15 @@ struct VirtualDirectory final
 
     void rename(const FileName& name);
 
+    //===== Info =====//
+
     const DirectoryStats& getStats() const;
 
     const DirectoryLimits& getLimits() const;
 
-    //===== DTO =====//
+    FileID getID() const;
 
+    //===== DTO =====//
 
   private:
     VirtualFile* getFile(FileID file);

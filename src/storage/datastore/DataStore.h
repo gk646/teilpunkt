@@ -88,7 +88,7 @@ struct DataStore
   protected:
     explicit DataStore(EndpointID endpoint, bool& success);
     SyncedBuffer buffers[ TPUNKT_STORAGE_DATASTORE_MAX_READERS ]; // Cant use vector as expanding needs sync
-    FixedString<64> dir;                                            // Directory of the datastore
+    FixedString<64> dir;                                          // Directory of the datastore
 };
 
 } // namespace tpunkt

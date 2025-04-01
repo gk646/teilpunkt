@@ -21,8 +21,6 @@ CryptoContext::CryptoContext()
     TPUNKT_MACROS_GLOBAL_ASSIGN(CryptoContext);
 
     // TODO init tpm or ephemeral key
-
-
 }
 
 CryptoContext::~CryptoContext()

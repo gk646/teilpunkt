@@ -47,7 +47,7 @@ CreateFileTransaction::~CreateFileTransaction()
     {
         if(shouldAbort())
         {
-            (void)parent->fileRemove(file);
+            (void)parent->fileDelete(file);
 
             auto cb = [ & ](const bool success)
             {

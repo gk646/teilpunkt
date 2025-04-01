@@ -196,7 +196,7 @@ TEST_CASE("Sessions Add, Remove and Auth")
     // Correct auth
     {
         UserID newUser{};
-        auto status = GetAuthenticator().sessionAuth(token, original, newUser);
+        auto status = GetAuthenticator().sessionAuth(user, token, original, newUser);
         REQUIRE(status == AuthStatus::OK);
         REQUIRE(newUser == user);
     }
@@ -205,7 +205,7 @@ TEST_CASE("Sessions Add, Remove and Auth")
     {
         UserID newUser{};
         SessionMetaData newMeta{"NotFireFox", "FakeAddress"};
-        auto status = GetAuthenticator().sessionAuth(token, newMeta, newUser);
+        auto status = GetAuthenticator().sessionAuth(user, token, newMeta, newUser);
         REQUIRE(status == AuthStatus::ERR_UNSUCCESSFUL);
 
         // Automatically deletes session

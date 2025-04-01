@@ -76,6 +76,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
         CheckAccess(baseDir, stats, true);
         CheckChange(baseDir, stats, true);
         REQUIRE(baseDir.getStats().fileCount == 1);
+        REQUIRE(baseDir.searchFile(file1) != nullptr);
     }
 
     // Add existing file
@@ -142,7 +143,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
         // Remove existing
         {
             const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileRemove(file1);
+            auto result = baseDir.fileDelete(file1);
             REQUIRE(result);
             CheckAccess(baseDir, stats, true);
             CheckChange(baseDir, stats, true);
@@ -152,10 +153,75 @@ TEST_CASE("VirtualDirectory Simple File Operations")
         // Remove missing
         {
             const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileRemove(file1);
+            auto result = baseDir.fileDelete(file1);
             REQUIRE_FALSE(result);
             CheckAccess(baseDir, stats, true);
             CheckChange(baseDir, stats, false);
         }
+    }
+}
+
+TEST_CASE("Virtual Directory Nested Dir File Operations")
+{
+    TEST_INIT();
+    // TODO
+}
+
+TEST_CASE("Virtual Directory Simple Dir Operations")
+{
+    TEST_INIT();
+
+    constexpr auto sizeLimit = 1000;
+    auto baseDir = VirtualDirectory{getDirInfo("Base Dir", sizeLimit, nullptr), EndpointID{1}};
+
+    FileID sub1;
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.dirAdd(getDirInfo("Sub1", 500, &baseDir), sub1);
+        REQUIRE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, true);
+        REQUIRE(baseDir.getStats().dirCount == 1);
+        REQUIRE(baseDir.searchDir(sub1) != nullptr);
+    }
+
+    // Create subdir with limit bigger than parent
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto dir = baseDir.searchDir(sub1);
+        FileID subDir2;
+        auto result = dir->dirAdd(getDirInfo("SubDir2", 1000, &baseDir), subDir2);
+        REQUIRE_FALSE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, false);
+    }
+
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.dirExists("Sub1");
+        REQUIRE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, false);
+
+        result = baseDir.dirExists("Sub11");
+        REQUIRE_FALSE(result);
+    }
+
+
+    // Delete non existent
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.dirDelete(FileID{});
+        REQUIRE_FALSE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, true);
+    }
+
+    {
+        const DirectoryStats stats = baseDir.getStats();
+        auto result = baseDir.dirDelete(sub1);
+        REQUIRE(result);
+        CheckAccess(baseDir, stats, true);
+        CheckChange(baseDir, stats, true);
     }
 }

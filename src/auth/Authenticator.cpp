@@ -200,6 +200,7 @@ AuthStatus Authenticator::sessionGetInfo(const UserID user, std::vector<DTOSessi
 AuthStatus Authenticator::getUserName(const UserID user, UserName& out)
 {
     SpinlockGuard lock{authLock};
+
     // TODO
     LOG_FATAL("Not implemented");
     return AuthStatus::INVALID;

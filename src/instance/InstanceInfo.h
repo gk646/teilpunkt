@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-
 #ifndef TPUNKT_INSTANCE_INFO_H
 #define TPUNKT_INSTANCE_INFO_H
-
 
 // Global Instance Info data
 

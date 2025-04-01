@@ -114,7 +114,7 @@ bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, Ses
 
 bool SessionStorage::get(const UserID lookup, const SessionToken& token, const SessionMetaData& metaData, UserID& user)
 {
-    UserSessionData* userData = getUserSessionData(user);
+    UserSessionData* userData = getUserSessionData(lookup);
     if(userData == nullptr)                 // User is not present yet
     {
         return false;

@@ -43,7 +43,7 @@ constexpr size_t TPUNKT_STORAGE_MAX_DEFAULT_FILE_DIR_LIMIT = 50'000;
 
 //===== Server =====//
 
-constexpr size_t TPUNKT_SERVER_CHUNK_SIZE = 32000;
+constexpr size_t TPUNKT_SERVER_CHUNK_SIZE = 85'000;
 
 // Size of static file buffer
 constexpr size_t TPUNKT_SERVER_STATIC_FILES_LEN = 25;

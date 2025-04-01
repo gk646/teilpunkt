@@ -7,19 +7,19 @@ const fileSystem = [
                 type: 'folder',
                 name: 'Documents',
                 children: [
-                    { type: 'file', name: 'Resume.docx' },
-                    { type: 'file', name: 'Budget.xlsx' },
+                    {type: 'file', name: 'Resume.docx'},
+                    {type: 'file', name: 'Budget.xlsx'},
                 ]
             },
             {
                 type: 'folder',
                 name: 'Pictures',
                 children: [
-                    { type: 'file', name: 'Vacation.jpg' },
-                    { type: 'file', name: 'Family.png' },
+                    {type: 'file', name: 'Vacation.jpg'},
+                    {type: 'file', name: 'Family.png'},
                 ]
             },
-            { type: 'file', name: 'todo.txt' }
+            {type: 'file', name: 'todo.txt'}
         ]
     },
     {
@@ -29,14 +29,28 @@ const fileSystem = [
                 type: 'folder',
                 name: 'Projects',
                 children: [
-                    { type: 'file', name: 'Project1.zip' },
-                    { type: 'file', name: 'Project2.zip' },
+                    {type: 'file', name: 'Project1.zip'},
+                    {type: 'file', name: 'Project2.zip'},
                 ]
             },
-            { type: 'file', name: 'readme.md' }
+            {type: 'file', name: 'readme.md'}
         ]
     }
 ];
+
+// Helper functions
+
+async function downloadFile() {
+    const link = document.createElement('a');
+    link.href = '/api/download';
+    link.download = 'dummy.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+document.getElementById('download-btn').addEventListener('click', downloadFile);
+
 
 // Navigation state (stack of folders)
 let navigationStack = [];
@@ -85,7 +99,7 @@ function loadFiles(files, path) {
         fileItem.className = 'file-item';
         fileItem.addEventListener('click', (e) => {
             // Prevent row click if an action button is clicked
-            if(e.target.closest('.file-action')) return;
+            if (e.target.closest('.file-action')) return;
             handleItemClick(item, path);
         });
 
