@@ -80,7 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        if (!isValid) return;
+
+        if (!isValid) {
+            return;
+        }
 
         await sodiumReady;
 
@@ -95,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordValue = null;
         usernameValue = null;
         try {
-            let result = fetchWithErrorHandling('/api/signup/password', {
+            let result = fetchWithErrorHandling('/api/register/password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,17 +127,19 @@ document.addEventListener('DOMContentLoaded', () => {
         passkeyButton.addEventListener('click', async () => {
             clearAuthError(authError);
 
-            if (!validateUsername(userNameInput)) return;
+            if (!validateUsername(userNameInput)) {
+                return;
+            }
+
             const usernameValue = userNameInput.value.trim();
+            await sodiumReady;
 
             try {
-                await sodiumReady;
 
                 // Generate a secure challenge (e.g. 32 bytes)
                 const challenge = sodium.randombytes_buf(32);
                 // Generate a random 16-byte user ID instead of using the username directly
                 const userId = sodium.randombytes_buf(16);
-
 
                 const publicKeyCredentialCreationOptions = {
                     challenge: Uint8Array.from(
@@ -149,14 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         name: "lee@webauthn.guide",
                         displayName: "Lee",
                     },
-                    pubKeyCredParams: [{alg: -7, type: "public-key"}],
+                    pubKeyCredParams: [{alg: -8, type: "public-key"}],
                     authenticatorSelection: {
                         authenticatorAttachment: "cross-platform",
                         requireResidentKey: true,
                         residentKey: "preferred",
                         userVerification: "discouraged"
                     },
-                    timeout: 60000,
+                    timeout: 15,
                     attestation: "indirect"
                 };
 
@@ -189,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Note: You'll need to convert ArrayBuffers (like credential.response.attestationObject)
                 // into a string (e.g. base64) for sending via JSON.
-
 
                 //window.location.href = '/home';
             } catch (error) {

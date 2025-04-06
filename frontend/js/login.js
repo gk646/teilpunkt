@@ -3,7 +3,8 @@ import {
     displayAuthError,
     fetchWithErrorHandling,
     hashPassword,
-    isPasskeyAvailable, redirectDashBoardLoggedIn,
+    isPasskeyAvailable,
+    redirectDashBoardLoggedIn,
     showError,
     validatePassword,
     validateUsername
@@ -18,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const authError = document.getElementById('auth-error');
     const userNameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
-
 
     const sodiumReady = (async () => {
         await window.sodium.ready;
@@ -72,12 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
         passwordValue = null;
         usernameValue = null;
         try {
-            let result = fetchWithErrorHandling('/api/login/password', {
+            let result = fetchWithErrorHandling('/api/auth/password', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Auth-Method': 'password'
-                },
+                headers: {'Content-Type': 'application/json'},
                 body: requestBody
             });
 
@@ -106,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await sodiumReady;
 
-                const challengeResponse = await fetchWithErrorHandling('/api/signup', {
+                const challengeResponse = await fetchWithErrorHandling('/api/auth/passkey-get', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username: usernameValue})
@@ -127,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const credential = await navigator.credentials.create({publicKey});
 
-                await fetchWithErrorHandling('/api/login/passkey/verify', {
+                await fetchWithErrorHandling('/api/auth/passkey', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(credential)

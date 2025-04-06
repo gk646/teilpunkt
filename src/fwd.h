@@ -83,6 +83,7 @@ enum class EndpointID : uint16_t
 struct FileID final
 {
     FileID() = default;
+
     FileID(const uint32_t uid, const EndpointID endpointId, const bool isDirectory)
         : uid(uid), endpoint(endpointId), directory(isDirectory)
     {
@@ -98,12 +99,12 @@ struct FileID final
         return !directory;
     }
 
-    uint32_t getUID() const
+    [[nodiscard]] uint32_t getUID() const
     {
         return uid;
     }
 
-    EndpointID getEndpoint() const
+    [[nodiscard]] EndpointID getEndpoint() const
     {
         return endpoint;
     }

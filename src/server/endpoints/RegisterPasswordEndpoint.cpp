@@ -8,6 +8,7 @@
 
 namespace tpunkt
 {
+
 void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     if(!AllowRequest(res, req))

@@ -3,7 +3,10 @@
 #ifndef TPUNKT_ENDPOINTS_H
 #define TPUNKT_ENDPOINTS_H
 
+#include <string_view>
 #include "fwd.h"
+
+// TODO refactor to use string_view
 
 namespace tpunkt
 {
@@ -28,41 +31,47 @@ struct ServerEndpoint
     // Returns nullptr if no header with the given name is found
     static const char* GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length);
 
+    // Returns a view of the cookie if exists, else empty
+    static std::string_view GetCookie(const std::string_view& cookieHeader, const char* name);
+
     // Returns true if the connection metadata is successfully set
     static bool GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, SessionMetaData& metaData);
 
     // Sets the cookie with the given value
     static void SetCookie(uWS::HttpResponse<true>* res, const char* key, const char* value, uint32_t expiration);
 
-    // Sets the cookie such that it's accessible via clientside java script
+    // Sets the cookie such that it's accessible via clientside JavaScript
     static void SetUnsafeCookie(uWS::HttpResponse<true>* res, const char* key, const char* value, uint32_t expiration);
 
     // Clears the given cookie
     static void ClearCookie(uWS::HttpResponse<true>* res, const char* key);
 };
 
+//===== Auth =====//
 
-struct LoginPasswordEndpoint final : ServerEndpoint
+struct AuthPasswordEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-struct AuthPasskeyEndpoint final : ServerEndpoint
+struct AuthPasskeyGetEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-struct UploadEndpoint final : ServerEndpoint
+struct AuthPasskeyValidateEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-struct DownloadEndpoint final : ServerEndpoint
-{
-    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
-};
+//===== Register =====//
 
 struct RegisterPasswordEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct RegisterPasskeyOptionsEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
@@ -72,10 +81,36 @@ struct RegisterPasskeyEndpoint final : ServerEndpoint
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
+//===== Filesystem =====//
+
+struct FileUploadEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct FileDownloadEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct FileDirectoryEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct FileRootsEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+//===== Misc =====//
+
+
 struct StaticEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
+
 
 } // namespace tpunkt
 

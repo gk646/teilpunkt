@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include "datastructures/FixedString.h"
+#include "server/DTO.h"
 #include "storage/datastore/DataStore.h"
 #include "storage/StorageTransaction.h"
 #include "storage/vfs/VirtualFilesystem.h"
@@ -26,8 +27,7 @@ enum class StorageStatus : uint8_t
     ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };
 
-const char* StorageErrString(StorageStatus status);
-int StorageHTTPErrCode(StorageStatus status);
+const char* GetStorageStatusStr(StorageStatus status);
 
 enum class StorageEndpointType : uint8_t
 {
@@ -78,6 +78,9 @@ struct StorageEndpoint final
 
     StorageStatus dirChange();
     StorageStatus dirRename();
+
+    // Collects all files in the given dir the user has access to
+    StorageStatus dirGetInfo(UserID user, FileID dir, std::vector<DTODirectoryEntry>& entries);
 
     StorageStatus clear();
 

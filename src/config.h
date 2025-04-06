@@ -39,7 +39,7 @@ constexpr size_t TPUNKT_STORAGE_USER_LEN = 16;
 constexpr size_t TPUNKT_STORAGE_DATASTORE_MAX_READERS = 25;
 
 // Default limit for the count of files and directories EACH across all endpoints
-constexpr size_t TPUNKT_STORAGE_MAX_DEFAULT_FILE_DIR_LIMIT = 50'000;
+constexpr size_t TPUNKT_STORAGE_MAX_DEFAULT_FILE_DIR_LIMIT = 50'000U;
 
 //===== Server =====//
 
@@ -53,6 +53,9 @@ constexpr auto* TPUNKT_SERVER_STATIC_FILES_DIR = "../frontend";
 
 // Server Port - HTTPS port
 constexpr size_t TPUNKT_SERVER_PORT = 8080;
+
+// Start size of the character buffer for returned json in bytes
+constexpr size_t TPUNKT_SERVER_JSON_THREAD_BUFFER_START = 256U;
 
 //===== Monitoring =====//
 

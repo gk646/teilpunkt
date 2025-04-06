@@ -24,6 +24,14 @@ Storage::~Storage()
     TPUNKT_MACROS_GLOBAL_RESET(Storage);
 }
 
+StorageStatus Storage::getRoots(UserID user, std::vector<DTODirectoryInfo>& roots)
+{
+    for(uint32_t i = 0; i < 10; ++i)
+    {
+        roots.push_back({"TestFile", {i, EndpointID{i}, true}});
+    }
+}
+
 Storage& GetStorage()
 {
     TPUNKT_MACROS_GLOBAL_GET(Storage);

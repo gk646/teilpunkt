@@ -8,16 +8,7 @@
 namespace tpunkt
 {
 
-namespace
-{
-
-bool sendData(uWS::HttpResponse<true>* res)
-{
-}
-
-} // namespace
-
-void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+void FileDownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     const size_t fileSize = 1 * 1024 * 1024; // 10 MB
 
@@ -65,7 +56,6 @@ void DownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* re
             res->end();
             return true;
         });
-
 
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
 }

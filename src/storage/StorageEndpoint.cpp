@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <cerrno>
 #include <cstdio>
 #include <sys/stat.h>
 #include "crypto/WrappedKey.h"
@@ -17,7 +16,31 @@
 namespace tpunkt
 {
 
-StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info,const EndpointID endpoint, const UserID creator)
+const char* GetStorageStatusStr(const StorageStatus status)
+{
+    switch(status)
+    {
+        case StorageStatus::INVALID:
+            return "INVALID";
+        case StorageStatus::ERR_UNSUCCESSFUL:
+            return "Generic Error";
+        case StorageStatus::ERR_NO_UAC_PERM:
+            return "No access or file";
+        case StorageStatus::ERR_NO_ADMIN:
+            return "No admin";
+        case StorageStatus::ERR_NO_SUCH_FILE:
+            return "No access or file";
+        case StorageStatus::ERR_INVALID_FILE_NAME:
+            return "Invalid file name";
+        case StorageStatus::ERR_NO_SUCH_ENDPOINT:
+            return "No such endpoint";
+        case StorageStatus::OK:
+            return "OK";
+    }
+    return nullptr;
+}
+
+StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const EndpointID endpoint, const UserID creator)
     : virtualFilesystem(DirectoryCreationInfo{info.name, info.maxSize, nullptr, creator}, endpoint)
 {
     switch(info.type)
@@ -52,7 +75,7 @@ StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, c
         return StorageStatus::ERR_NO_SUCH_FILE;
     }
 
-    //CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
+    // CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
 
     if(parent->fileExists(info.name) || !IsValidFilename(info.name))
     {
@@ -84,6 +107,16 @@ StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, 
     {
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
+
+    return StorageStatus::OK;
+}
+
+StorageStatus StorageEndpoint::dirGetInfo(UserID user, FileID dir, std::vector<DTODirectoryEntry>& entries)
+{
+    entries.clear();
+
+    entries.push_back({});
+    entries.push_back({});
 
     return StorageStatus::OK;
 }

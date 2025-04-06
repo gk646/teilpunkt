@@ -12,7 +12,7 @@
 namespace tpunkt
 {
 
-void LoginPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     if(!AllowRequest(res, req))
     {

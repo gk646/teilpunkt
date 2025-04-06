@@ -4,7 +4,7 @@ const HASH_LENGTH = 24 // Produces 32 length base 64
 const USER_ID_COOKIE = "tp-session-user"
 
 // Hash the password
-export const hashPassword = (plainPassword) => {
+export function hashPassword(plainPassword) {
     let hashedPassword = window.sodium.crypto_generichash(
         HASH_LENGTH,
         window.sodium.from_string(plainPassword)
@@ -12,23 +12,23 @@ export const hashPassword = (plainPassword) => {
     return window.sodium.to_base64(hashedPassword)
 }
 
-export const showError = (inputEl, message) => {
+export function showError(inputEl, message) {
     inputEl.classList.add('invalid');
     const errorEl = document.getElementById(`${inputEl.id}-error`);
     if (errorEl) {
         errorEl.textContent = message;
         errorEl.style.visibility = 'visible';
     }
-};
+}
 
-export const clearError = (inputEl) => {
+export function clearError(inputEl) {
     inputEl.classList.remove('invalid');
     const errorEl = document.getElementById(`${inputEl.id}-error`);
     if (errorEl) {
         errorEl.textContent = '';
         errorEl.style.visibility = 'hidden';
     }
-};
+}
 
 export const clearAuthError = (authErrorEl) => {
     authErrorEl.style.opacity = '0';

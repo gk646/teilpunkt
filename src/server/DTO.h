@@ -49,59 +49,45 @@ struct DTOUserLoginPW final
     UserPassword password;
 };
 
-
-
 //===== User =====//
 
 struct DTOSessionInfo final
 {
     UserAgentString userAgent;
-    uint64_t creationUnix;
-    uint64_t expirationUnix;
-};
-
-//===== Files =====//
-
-struct DTOFileInfo final
-{
-    FileName name;
-    uint64_t unixLastEdit = 0;
-};
-
-struct DTOFileDownload final
-{
-    FileID fileID;
-    size_t begin;
-    size_t end;
-};
-
-struct DTOFileStats final
-{
-    uint64_t unixLastEdit;
-    uint64_t unixLastAccess;
-    uint64_t unixCreation;
-
-    uint64_t sizeBytes;
+    uint64_t creationUnix = 0;
+    uint64_t expirationUnix = 0;
 };
 
 //===== Directories =====//
 
-struct DTODirectoryEntry
+struct DTODirectoryInfo
 {
     FileName name;
-    FileID file;
-    uint64_t lastEdit{};
-    UserName creator;
-    UserName owner;
+    FileID fid;
 };
 
-struct DTODirectoryInfo final
+struct DTODirectoryEntry final
 {
     FileName name;
-    FileID dir;
-    uint32_t files = 0; // Count of files visible to user
-    uint32_t dirs = 0;  // Count of directories visible to user
+    FileID fid;
 
+    UserName creator;
+    UserName owner;
+
+    uint64_t unixLastEdit = 0;
+    uint64_t unixLastAccess = 0;
+    uint64_t unixCreation = 0;
+
+    uint64_t sizeBytes = 0;
+};
+
+
+//===== Requests =====//
+
+struct DTODirectoryRequest final
+{
+    // The user is already gained through auth with the cookie
+    FileID directory;
 };
 
 
