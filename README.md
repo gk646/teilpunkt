@@ -20,7 +20,6 @@ _Note: This project is built only with/for GCC and the Linux® kernel._
 **Feature Highlights:**
 
 - **Security first** approach using modern technology
-- [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) enabled file transfers
 - Supports **passkey and MFA** authentication
 - **Fast and compliant multithreaded webserver** with uWebSockets
 - **Linux native** filesystem and webserver

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <csignal>
-#include <monitoring/EventLimiter.h>
 #include <sodium/core.h>
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
@@ -39,6 +38,7 @@ int32_t main()
         (void)fputs("Failed to initialize libsodium", stderr);
         return 1;
     }
+
     // All variables are declared on the stack and cleaned up in a fixed scope
     {
         tpunkt::Logger logger{};

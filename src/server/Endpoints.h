@@ -6,8 +6,6 @@
 #include <string_view>
 #include "fwd.h"
 
-// TODO refactor to use string_view
-
 namespace tpunkt
 {
 
