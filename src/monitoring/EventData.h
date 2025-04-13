@@ -8,11 +8,32 @@
 namespace tpunkt
 {
 
-struct FileSystemEventData final
+struct APIRequestEventData final
+{
+};
+
+struct AuthenticationEventData final
+{
+};
+
+struct FilesystemEventData final
 {
     FileID file;
     // FileName name;
 };
+
+struct SessionsEventData final
+{
+};
+
+struct InstanceEventData final
+{
+};
+
+struct ServerEventData final
+{
+};
+
 
 } // namespace tpunkt
 

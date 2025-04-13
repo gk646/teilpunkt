@@ -35,16 +35,16 @@ struct Storage final
     using CreateInfo = const StorageEndpointCreateInfo&;
 
     // Creates a new empty endpoint
-    StorageStatus endpointCreate(UserID user, CreateInfo info);
+    StorageStatus endpointCreate(UserID actor, CreateInfo info);
 
     // Creates a new endpoint by copying from the given local file source - requires admin && process needs access
-    StorageStatus endpointCreateFrom(UserID user, CreateInfo info, const char* file, bool recurse);
+    StorageStatus endpointCreateFrom(UserID actor, CreateInfo info, const char* file, bool recurse);
 
     // Only valid if returns StorageStatus::OK
-    StorageStatus endpointGet(UserID user, EndpointID endpointId, StorageEndpoint*& ept);
+    StorageStatus endpointGet(UserID actor, EndpointID endpointId, StorageEndpoint*& ept);
 
     // Deletes the given endpoint
-    StorageStatus endpointDelete(UserID user, EndpointID endpoint);
+    StorageStatus endpointDelete(UserID actor, EndpointID endpoint);
 
     // Returns the next file number
     uint32_t getNextID();

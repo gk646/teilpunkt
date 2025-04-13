@@ -117,6 +117,8 @@ uint32_t InstanceConfig::getDefault(const NumberParamKey key)
             return 40;
         case NumberParamKey::STORAGE_MAX_TOTAL_FILES_OR_DIRS:
             return 50'000;
+        case NumberParamKey::INSTANCE_WORKER_THREADS:
+            return 2;
         case NumberParamKey::INVALID:
         case NumberParamKey::ENUM_SIZE:
             break;

@@ -74,8 +74,8 @@ CryptoContext::CryptoContext()
         sprintf(buff, "%0*" PRIu64, 6, code);
         puts(buff);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        break;
     }
-
 
     // TODO init tpm or ephemeral key
 }

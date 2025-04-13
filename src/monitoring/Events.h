@@ -11,12 +11,13 @@ namespace tpunkt
 enum class EventType : uint8_t
 {
     INVALID,
-    API_Request,       // User-initiated API requests
-    UserAction,        // Actions performed by a user
-    FileSystem,        // File-related operations
-    SessionManagement, // Authentication & session handling
-    Security,          // Security-related events
-    ServerAction,      // Server events (non-user initiated)
+    APIRequest, // API requests
+    Users,      // Register, Login and user information retrieval
+    Filesystem, // File-related operations
+    Sessions,   // Authentication & session handling
+    Instance,   // Instance events like settings, config
+    Server,     // Server process events like work tasks
+    Host        // Host machine events like resource usage
 };
 
 enum class EventAction : uint8_t
@@ -39,47 +40,59 @@ enum class EventAction : uint8_t
     // Token
     TokenInvalidate,
     // Endpoint
-    EndpointCreate,
-    EndpointCreateFrom,
-    EndpointGet,
-    EndpointDelete,
+    StorageEndpointCreate,
+    StorageEndpointCreateFrom,
+    StorageEndpointGet,
+    StorageEndpointDelete,
     // Virtual File System
-    FilesystemCreateFile,
+    FileSystemCreateFile,
     FilesystemWriteFile,
     FilesystemRemoveFile,
     FilesystemAddDirectory,
+    // TaskManager
+    ThreadAdd,
+    ThreadRemove,
 };
 
 enum class EventStatus : uint8_t
 {
     INVALID,
     // Info
-    INFO,                    //----------------
-    SUCCESS,                 // Success
-    FAIL_SERVER_UNSPECIFIED, // A server operation failed but It's further not specified
+    INFO,                   //----------------
+    INFO_SUCCESS,           // Success
+    INFO_FAIL_UNSPECIFIED,  // Something failed but It's further not specified
     FAIL_INVALID_CREDENTIALS,
     FAIL_INVALID_TOKEN,
-    FAIL_CONFIG_RESTRICTED,  // Prevented due to instance config
-    FAIL_NO_ADMIN,           // Not complete due to missing admin
-    FAIL_NO_UAC,             // Denied cause of UAC
+    FAIL_CONFIG_RESTRICTED, // Prevented due to instance config
+    FAIL_NO_ADMIN,          // Not complete due to missing admin
+    FAIL_NO_UAC,            // Denied cause of UAC
     FAIL_USERNAME_EXISTS,
     FAIL_NO_SUCH_ENDPOINT,
     FAIL_NO_SUCH_FILE,
     FAIL_SESSION_EXISTS,
-    FAIL_INVALID_ARGUMENTS,  // Failed cause arguments had wrong values
-    WARNINGS,                //----------------
+    FAIL_INVALID_ARGUMENTS, // Failed cause arguments had wrong values
+    FAIL_INVALID_OPERATION, // Illogic operation or impossible
+    FAIL_TOO_MANY,
+    WARNING,                //----------------
     // Warnings
-    WARN_OPERATION_FAILED, // Internal operation failed
+    WARN_FAILED_UNSPECIFIED, // Internal operation failed
+    ERROR,
+    ERROR_OPERATION_FAILED,  // Internal operation failed
 };
 
 constexpr bool IsWarnEvent(const EventStatus status)
 {
-    return status >= EventStatus::WARNINGS;
+    return status >= EventStatus::WARNING;
 }
 
 constexpr bool IsInfoEvent(const EventStatus status)
 {
-    return status >= EventStatus::INFO && status < EventStatus::WARNINGS;
+    return status >= EventStatus::INFO && status < EventStatus::WARNING;
+}
+
+constexpr bool IsErrorEvent(const EventStatus status)
+{
+    return status >= EventStatus ::ERROR;
 }
 
 } // namespace tpunkt

@@ -27,23 +27,37 @@ EventMonitor& GetEventMonitor()
     TPUNKT_MACROS_GLOBAL_GET(EventMonitor);
 }
 
-void EventMonitor::log(const EventType type, const EventAction action, const EventStatus status)
-{
-    (void)type;
-    (void)action;
-    (void)status;
-}
-
-template <EventType type, typename EventData>
-void EventMonitor::logData(EventAction action, EventStatus status, EventData data)
-{
-}
 
 template <>
-void EventMonitor::logData<EventType::FileSystem, FileSystemEventData>(EventAction action, EventStatus status,
-                                                                       FileSystemEventData data)
+void EventMonitor::logAuditTrace<EventType::Filesystem, FilesystemEventData>(UserID actor, EventAction action,
+                                                                             EventStatus status,
+                                                                             FilesystemEventData data)
 {
+
 }
+template <>
+void EventMonitor::logAuditTrace<EventType::APIRequest, APIRequestEventData>(UserID actor, EventAction action,
+                                                                             EventStatus status,
+                                                                             APIRequestEventData data)
+{
+
+}
+template <>
+void EventMonitor::logAuditTrace<EventType::Users, AuthenticationEventData>(UserID actor, EventAction action,
+                                                                                     EventStatus status,
+                                                                                     AuthenticationEventData data)
+{
+
+}
+template <>
+void EventMonitor::logAuditTrace<EventType::Server, ServerEventData>(UserID actor, EventAction action,
+                                                                             EventStatus status,
+                                                                             ServerEventData data)
+{
+
+}
+
+
 
 
 } // namespace tpunkt

@@ -47,38 +47,39 @@ const char* GetAuthStatusStr(const AuthStatus status)
     return nullptr;
 }
 
-AuthStatus Authenticator::userAddServer(const UserName& name, Credentials& consumed)
+AuthStatus Authenticator::userAdd(const UserID actor, const UserName& name, Credentials& consumed)
 {
     SpinlockGuard lock{authLock};
     SecureEraser eraser{consumed};
 
     if(!IsValidUserName(name) || !IsValidPassword(consumed.password))
     {
-        LOG_EVENT(UserAction, UserAdd, FAIL_INVALID_ARGUMENTS);
+        LOG_EVENT(actor, Users, UserAdd, FAIL_INVALID_ARGUMENTS, AuthenticationEventData{});
         return AuthStatus::ERR_INVALID_ARGUMENTS;
     }
 
     if(GetInstanceConfig().getBool(BoolParamKey::USER_ONLY_ADMIN_CREATE_ACCOUNT))
     {
-        LOG_EVENT(UserAction, UserAdd, FAIL_CONFIG_RESTRICTED);
+        LOG_EVENT(actor, Users, UserAdd, FAIL_CONFIG_RESTRICTED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
     if(userStore.nameExists(name))
     {
-        LOG_EVENT(UserAction, UserAdd, FAIL_USERNAME_EXISTS); // We report this
+        LOG_EVENT(actor, Users, UserAdd, FAIL_USERNAME_EXISTS, AuthenticationEventData{}); // We report this
         return AuthStatus::ERR_USER_NAME_EXISTS;
     }
 
     if(!userStore.add(name, consumed))
     {
-        LOG_EVENT(UserAction, UserAdd, WARN_OPERATION_FAILED);
+        LOG_EVENT(actor, Users, UserAdd, WARN_FAILED_UNSPECIFIED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(UserAction, UserAdd, SUCCESS);
+    LOG_EVENT(actor, Users, UserAdd, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
+
 
 AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed, UserID& user)
 {
@@ -87,11 +88,11 @@ AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed,
 
     if(!userStore.login(name, consumed, user))
     {
-        LOG_EVENT(UserAction, UserLogin, FAIL_INVALID_CREDENTIALS);
+        LOG_EVENT(UserID::SERVER, Users, UserLogin, FAIL_INVALID_CREDENTIALS, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(UserAction, UserLogin, SUCCESS);
+    LOG_EVENT(user, Users, UserLogin, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 
@@ -100,56 +101,56 @@ AuthStatus Authenticator::userRemove(const UserID actor, const UserID user)
     SpinlockGuard lock{authLock};
     if(actor != user && GetAuthenticator().getIsAdmin(actor) != AuthStatus::OK)
     {
-        LOG_EVENT(UserAction, UserRemove, FAIL_NO_ADMIN);
+        LOG_EVENT(actor, Users, UserRemove, FAIL_NO_ADMIN, AuthenticationEventData{});
         return AuthStatus::ERR_NO_ADMIN;
     }
 
     if(!userStore.remove(user))
     {
-        LOG_EVENT(UserAction, UserRemove, FAIL_SERVER_UNSPECIFIED);
+        LOG_EVENT(actor, Users, UserRemove, INFO_FAIL_UNSPECIFIED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(UserAction, UserRemove, SUCCESS);
+    LOG_EVENT(actor, Users, UserRemove, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::userChangeCredentials(const UserID user, const UserName& newName, Credentials& consumed)
+AuthStatus Authenticator::userChangeCredentials(const UserID actor, const UserName& newName, Credentials& consumed)
 {
     SpinlockGuard lock{authLock};
     SecureEraser eraser{consumed};
 
     if(!IsValidUserName(newName) || !IsValidPassword(consumed.password))
     {
-        LOG_EVENT(UserAction, UserChangeCredentials, FAIL_INVALID_ARGUMENTS);
+        LOG_EVENT(actor, Users, UserChangeCredentials, FAIL_INVALID_ARGUMENTS, AuthenticationEventData{});
         return AuthStatus::ERR_INVALID_ARGUMENTS;
     }
 
-    if(!userStore.changeCredentials(user, newName, consumed))
+    if(!userStore.changeCredentials(actor, newName, consumed))
     {
-        LOG_EVENT(UserAction, UserChangeCredentials, FAIL_SERVER_UNSPECIFIED);
+        LOG_EVENT(actor, Users, UserChangeCredentials, INFO_FAIL_UNSPECIFIED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(UserAction, UserChangeCredentials, SUCCESS);
+    LOG_EVENT(actor, Users, UserChangeCredentials, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& metaData,
+AuthStatus Authenticator::sessionAdd(const UserID actor, const SessionMetaData& metaData,
                                      SecureWrapper<SessionToken>& out)
 {
     SpinlockGuard lock{authLock};
 
-    if(user == UserID::INVALID) [[unlikely]]
+    if(actor == UserID::INVALID) [[unlikely]]
     {
-        LOG_EVENT(UserAction, SessionAdd, FAIL_INVALID_ARGUMENTS);
+        LOG_EVENT(actor, Users, SessionAdd, FAIL_INVALID_ARGUMENTS, AuthenticationEventData{});
         return AuthStatus::ERR_INVALID_ARGUMENTS;
     }
 
     SessionToken sessionId;
-    if(!sessionStore.add(user, metaData, sessionId))
+    if(!sessionStore.add(actor, metaData, sessionId))
     {
-        LOG_EVENT(UserAction, SessionAdd, FAIL_SERVER_UNSPECIFIED);
+        LOG_EVENT(actor, Users, SessionAdd, INFO_FAIL_UNSPECIFIED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
@@ -157,21 +158,21 @@ AuthStatus Authenticator::sessionAdd(const UserID user, const SessionMetaData& m
     auto reader = out.get();
     reader.get() = sessionId;
 
-    LOG_EVENT(UserAction, SessionAdd, SUCCESS);
+    LOG_EVENT(actor, Users, SessionAdd, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionRemove(const UserID user, const Timestamp& creation)
+AuthStatus Authenticator::sessionRemove(const UserID actor, const Timestamp& creation)
 {
     SpinlockGuard lock{authLock};
 
-    if(!sessionStore.remove(user, creation))
+    if(!sessionStore.remove(actor, creation))
     {
-        LOG_EVENT(UserAction, SessionRemove, FAIL_SERVER_UNSPECIFIED);
+        LOG_EVENT(actor, Users, SessionRemove, INFO_FAIL_UNSPECIFIED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(UserAction, SessionRemove, SUCCESS);
+    LOG_EVENT(actor, Users, SessionRemove, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 
@@ -181,19 +182,19 @@ AuthStatus Authenticator::sessionAuth(const UserID lookup, const SessionToken& s
     SpinlockGuard lock{authLock};
     if(!sessionStore.get(lookup, sessionId, metaData, user))
     {
-        LOG_EVENT(UserAction, SessionAuthenticate, FAIL_SERVER_UNSPECIFIED);
+        LOG_EVENT(UserID::SERVER, Users, SessionAuthenticate, INFO_FAIL_UNSPECIFIED, AuthenticationEventData{});
         return AuthStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(UserAction, SessionAuthenticate, SUCCESS);
+    LOG_EVENT(user, Users, SessionAuthenticate, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionGetInfo(const UserID user, std::vector<DTOSessionInfo>& collector)
+AuthStatus Authenticator::sessionGetInfo(const UserID actor, std::vector<DTOSessionInfo>& collector)
 {
     SpinlockGuard lock{authLock};
-    sessionStore.getInfo(user, collector);
-    LOG_EVENT(UserAction, SessionGetInfo, SUCCESS);
+    sessionStore.getInfo(actor, collector);
+    LOG_EVENT(actor, Users, SessionGetInfo, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
 

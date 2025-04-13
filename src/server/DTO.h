@@ -33,12 +33,11 @@ struct DTOUserSignupPK final
         UserName name;
 
     } user;
-    struct PubKeyCredParams final
+    struct
     {
-        int alg;
+        int alg = 0;
         FixedString<TPUNKT_STORAGE_FILE_LEN> type{"public-key"};
-    };
-    PubKeyCredParams pubKeyCredParams[ 3 ]{{-8}, {-7}, {-257}};
+    } pubKeyCredParams[ 1 ]{{.alg = -8}};
 };
 
 //===== Login =====//
@@ -81,13 +80,39 @@ struct DTODirectoryEntry final
     uint64_t sizeBytes = 0;
 };
 
-
 //===== Requests =====//
 
 struct DTODirectoryRequest final
 {
     // The user is already gained through auth with the cookie
     FileID directory;
+};
+
+//===== Task Management =====//
+
+struct DTOTaskInfo final
+{
+    TaskName name;                 // Name of the task
+    uint64_t addedUnixNanos = 0;
+    uint64_t startUnixNanos = 0;
+    uint64_t doneUnixNanos = 0;
+    uint32_t threadID = 0;         // 0 means task is only scheduled not taken
+    uint32_t taskID = 0;
+};
+
+struct DTOThreadInfo final
+{
+    uint64_t startUnixNanos = 0;   // Thread start
+    uint32_t threadID = 0;
+    uint32_t currentTaskID = 0;    // 0 means no task
+    bool isWorking = false;
+};
+
+struct DTOTaskManagerInfo final
+{
+    uint32_t threadsCurrent = 0;   // Current threads in use
+    uint32_t threadsMax = 0;       // Global maximum of used threads
+    uint32_t threadsAvailable = 0; // Max available
 };
 
 

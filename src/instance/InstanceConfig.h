@@ -44,6 +44,9 @@ enum class NumberParamKey : uint8_t
     // Max amount of files and directories (each) the storage can hold across all endpoints
     // 50'000
     STORAGE_MAX_TOTAL_FILES_OR_DIRS,
+    // Worker threads
+    // 2
+    INSTANCE_WORKER_THREADS,
     ENUM_SIZE
 };
 
@@ -76,7 +79,6 @@ struct InstanceConfig final
     void setString(StringParamKey key, const ConfigString& string);
     void setNumber(NumberParamKey key, uint32_t number);
     void setBool(BoolParamKey key, bool boolean);
-
 
   private:
     [[nodiscard]] const char* getDefault(StringParamKey key);

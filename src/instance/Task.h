@@ -8,32 +8,39 @@
 namespace tpunkt
 {
 
-using TaskName = FixedString<25>;
+enum class TaskType : uint8_t
+{
+    ONE_TIME_TASK,
+    PERIODIC_TASK,
+};
 
 struct Task
 {
-    Task() = default;
+    explicit Task(const TaskType type) : type(type)
+    {
+    }
+
     virtual ~Task() = default;
 
     // Task has no return value we care about - handles errors in its own context
-    virtual void invoke();
+    virtual void invoke() = 0;
 
     // Returns true if the task should be removed
     virtual bool shouldBeRemoved() = 0;
 
-    // Checked after task was invoked
+    // Checked before task is invoked
     virtual bool shouldBeInvoked() = 0;
 
-  private:
-    TPUNKT_MACROS_STRUCT(Task);
+  protected:
+    TaskType type;
 };
 
 template <typename Callable>
 struct PeriodicTask final : Task
 {
     explicit PeriodicTask(Callable&& func, const uint32_t intervalMicros, const uint32_t limit)
-        : Task(), func(std::move(func)), nextExecution(Timestamp::Now()), intervalMicros(intervalMicros),
-          countLimit(limit)
+        : Task(TaskType::PERIODIC_TASK), func(std::move(func)), nextExecution(Timestamp::Now()),
+          intervalMicros(intervalMicros), countLimit(limit)
     {
     }
 
@@ -64,9 +71,9 @@ struct PeriodicTask final : Task
 };
 
 template <typename Callable>
-struct SimpleTask final : Task
+struct OneTimeTask final : Task
 {
-    explicit SimpleTask(Callable&& func) : func(std::move(func))
+    explicit OneTimeTask(Callable&& func) : Task(TaskType::ONE_TIME_TASK), func(std::move(func))
     {
     }
 
@@ -89,7 +96,7 @@ struct SimpleTask final : Task
   private:
     Callable func;
     bool executed = false;
-    TPUNKT_MACROS_STRUCT(SimpleTask);
+    TPUNKT_MACROS_STRUCT(OneTimeTask);
 };
 
 } // namespace tpunkt

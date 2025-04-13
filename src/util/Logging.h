@@ -50,7 +50,7 @@ Logger& GetLogger();
     tpunkt::GetLogger().logEx(tpunkt::LogLevel::CRITICAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 #define LOG_FATAL(msg, ...) tpunkt::GetLogger().logFatal(__PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 
-#define LOG_EVENT(type, action, status, ...)                                                                           \
+#define LOG_EVENT(actor, type, action, status, data)                                                                   \
     do                                                                                                                 \
     {                                                                                                                  \
         if constexpr(IsWarnEvent(EventStatus::status))                                                                 \
@@ -61,7 +61,8 @@ Logger& GetLogger();
         {                                                                                                              \
             LOG_INFO(#type " : " #action " : " #status);                                                               \
         }                                                                                                              \
-        GetEventMonitor().log(EventType::type, EventAction::action, EventStatus::status);                              \
+        GetEventMonitor().logAuditTrace<EventType::type>(actor, EventAction::action, EventStatus::status, data);       \
     } while(false)
+
 
 #endif // TPUNKT_LOGGER_H

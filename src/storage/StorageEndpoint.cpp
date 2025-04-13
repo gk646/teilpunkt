@@ -58,12 +58,12 @@ StorageEndpoint::~StorageEndpoint()
 {
 }
 
-StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, const FileCreationInfo& info,
+StorageStatus StorageEndpoint::fileCreate(const UserID actor, const FileID dir, const FileCreationInfo& info,
                                           CreateFileTransaction& action)
 {
-    if(GetUAC().userCanAction(user, dir, PermissionFlag::CREATE) != UACStatus::OK)
+    if(GetUAC().userCanAction(actor, dir, PermissionFlag::CREATE) != UACStatus::OK)
     {
-        LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_NO_UAC);
+        LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
@@ -71,7 +71,7 @@ StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, c
 
     if(parent == nullptr)
     {
-        LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_NO_SUCH_FILE);
+        LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_FILE;
     }
 
@@ -79,13 +79,13 @@ StorageStatus StorageEndpoint::fileCreate(const UserID user, const FileID dir, c
 
     if(parent->fileExists(info.name) || !IsValidFilename(info.name))
     {
-        LOG_EVENT(UserAction, FilesystemCreateFile, FAIL_INVALID_ARGUMENTS);
+        LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_INVALID_FILE_NAME;
     }
 
     new(&action) CreateFileTransaction{*dataStore, *parent, virtualFilesystem, info, dir};
 
-    LOG_EVENT(UserAction, FilesystemCreateFile, SUCCESS);
+    LOG_EVENT(actor, Filesystem, FileSystemCreateFile, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 

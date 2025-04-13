@@ -4,6 +4,7 @@
 #include <sodium/core.h>
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
+#include "instance/TaskManager.h"
 #include "monitoring/EventLimiter.h"
 #include "server/WebServer.h"
 #include "storage/Storage.h"
@@ -43,10 +44,12 @@ int32_t main()
     {
         tpunkt::Logger logger{};
         {
-            tpunkt::CryptoContext crypto{};
-            tpunkt::InstanceConfig config{};
-            tpunkt::Authenticator auth{};
             tpunkt::EventMonitor monitor{};
+            tpunkt::InstanceConfig config{};
+
+            tpunkt::TaskManager tasks{};
+            tpunkt::CryptoContext crypto{};
+            tpunkt::Authenticator auth{};
             tpunkt::EventLimiter limiter{};
             tpunkt::UserAccessControl uac{};
             tpunkt::Storage storage{};

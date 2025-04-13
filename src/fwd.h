@@ -62,10 +62,11 @@ using ConfigString = FixedString<TPUNKT_STORAGE_FILE_LEN>;
 using FileName = FixedString<TPUNKT_STORAGE_FILE_LEN>; // Max length for any single file name
 using CipherKey = FixedString<TPUNKT_CRYPTO_KEY_LEN>;
 using InstanceSecret = FixedString<TPUNKT_INSTANCE_SECRET_MAX_LEN>;
+using TaskName = FixedString<25>;
 
 //===== Identifiers =====//
 
-enum TaskID : uint64_t
+enum TaskID : uint32_t
 {
     INVALID = 0
 };
@@ -73,6 +74,7 @@ enum TaskID : uint64_t
 enum class UserID : uint32_t
 {
     INVALID = 0,
+    SERVER = 1,
 };
 
 enum class EndpointID : uint16_t
@@ -87,6 +89,7 @@ struct FileID final
     FileID(const uint32_t uid, const EndpointID endpointId, const bool isDirectory)
         : uid(uid), endpoint(endpointId), directory(isDirectory)
     {
+
     }
 
     [[nodiscard]] bool isDirectory() const

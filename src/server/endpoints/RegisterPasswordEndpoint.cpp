@@ -36,7 +36,7 @@ void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpReq
             Credentials credentials;
             credentials.type = CredentialsType::PASSWORD;
             credentials.password = signupData.password;
-            const auto status = GetAuthenticator().userAddServer(signupData.name, credentials);
+            const auto status = GetAuthenticator().userAdd(UserID::SERVER,signupData.name, credentials);
             if(status != AuthStatus::OK)
             {
                 EndRequest(res, 400, GetAuthStatusStr(status));

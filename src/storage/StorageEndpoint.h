@@ -60,7 +60,7 @@ struct StorageEndpoint final
 
     //===== File Manipulation =====//
 
-    StorageStatus fileCreate(UserID user, FileID dir, const FileCreationInfo& info, CreateFileTransaction& action);
+    StorageStatus fileCreate(UserID actor, FileID dir, const FileCreationInfo& info, CreateFileTransaction& action);
     StorageStatus fileWrite(UserID user, FileID file, WriteFileTransaction& action);
     StorageStatus fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
     StorageStatus fileRemove(UserID user, FileID file);

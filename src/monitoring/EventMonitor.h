@@ -8,16 +8,33 @@
 
 namespace tpunkt
 {
+
 struct EventMonitor final
 {
     EventMonitor();
     ~EventMonitor();
 
-    void log(EventType type, EventAction action, EventStatus status);
-
     template <EventType type, typename EventData>
-    void logData(EventAction action, EventStatus status, EventData data);
+    void logAuditTrace(UserID actor, EventAction action, EventStatus status, EventData data);
 };
+
+template <>
+void EventMonitor::logAuditTrace<EventType::Filesystem, FilesystemEventData>(UserID actor, EventAction action,
+                                                                             EventStatus status,
+                                                                             FilesystemEventData data);
+template <>
+void EventMonitor::logAuditTrace<EventType::APIRequest, APIRequestEventData>(UserID actor, EventAction action,
+                                                                             EventStatus status,
+                                                                             APIRequestEventData data);
+template <>
+void EventMonitor::logAuditTrace<EventType::Users, AuthenticationEventData>(UserID actor, EventAction action,
+                                                                                     EventStatus status,
+                                                                                     AuthenticationEventData data);
+template <>
+void EventMonitor::logAuditTrace<EventType::Server, ServerEventData>(UserID actor, EventAction action,
+                                                                             EventStatus status,
+                                                                             ServerEventData data);
+
 
 EventMonitor& GetEventMonitor();
 
