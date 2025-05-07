@@ -103,7 +103,7 @@ These are the active (and passive) security measures used by `teilpunkt`.
 - Priority-based queue worker system
     - Only run tasks that are explicitly given to them
 
-#### Background Thread _(1):_
+#### Main Thread _(1):_
 
 - Runs the main event loop
     - Handles incoming events

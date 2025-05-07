@@ -12,6 +12,13 @@
 namespace tpunkt
 {
 
+struct InstanceState final
+{
+    int cpuLoad;   // %
+    int ramUsage;  // %
+    int diskUsage; // %
+};
+
 struct InstanceInfo
 {
     InstanceInfo();
@@ -19,6 +26,8 @@ struct InstanceInfo
 
     // Returns the file descriptor of the root start dir
     int getRoot() const;
+
+    void GetInstanceState(InstanceState& instanceState) const;
 
     const SecureBox<InstanceSecret>& getInstanceSecret() const;
 

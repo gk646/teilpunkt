@@ -4,6 +4,7 @@
 #include <sodium/core.h>
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
+#include "instance/MainThread.h"
 #include "instance/TaskManager.h"
 #include "monitoring/EventLimiter.h"
 #include "server/WebServer.h"
@@ -18,7 +19,7 @@ void handle_shutdown_signal(const int signal)
 {
     if(signal != SIGTRAP)
     {
-        tpunkt::GetWebServer().stop();
+        tpunkt::GetMainThread().stop();
     }
 }
 
@@ -41,22 +42,25 @@ int32_t main()
     }
 
     // All variables are declared on the stack and cleaned up in a fixed scope
+    int status{};
     {
         tpunkt::Logger logger{};
         {
             tpunkt::EventMonitor monitor{};
             tpunkt::InstanceConfig config{};
-
-            tpunkt::TaskManager tasks{};
             tpunkt::CryptoContext crypto{};
+            return 0;
+            tpunkt::TaskManager tasks{};
+
             tpunkt::Authenticator auth{};
             tpunkt::EventLimiter limiter{};
             tpunkt::UserAccessControl uac{};
             tpunkt::Storage storage{};
+            tpunkt::WebServer webServer{2};
 
-            tpunkt::WebServer server{};
-            server.run();
+            tpunkt::MainThread main{};
+            status = main.run();
         }
     }
-    return 0;
+    return status;
 }

@@ -8,22 +8,37 @@
 
 namespace tpunkt
 {
-    struct WebServer final
-    {
-        uWS::SSLApp server;
-        StaticFileStorage staticFiles;
 
-        WebServer();
-        ~WebServer();
+struct WebThread final
+{
+    std::thread thread;
+    uWS::SSLApp* app;
+    int threadNum = 0;
+};
 
-        void run();
-        void stop();
+// TODO add stats
+struct WebServer final
+{
+    explicit WebServer(int threads);
+    TPUNKT_MACROS_MOVE_ONLY(WebServer);
+    ~WebServer();
 
-    private:
-    };
+    [[nodiscard]] const StaticFileStorage& getStaticFileStorage();
 
-    WebServer& GetWebServer();
+  private:
+    uWS::SSLApp& getNextHandler();
+
+    StaticFileStorage staticFiles;
+    std::vector<WebThread> webThreads;
+    int roundRobinNum = 0;
+    int threadCount = 0;
+
+    friend uWS::SSLApp& GetNextHandler();
+    friend void WebThreadFunc(int, uWS::SocketContextOptions*, volatile bool*);
+};
+
+WebServer& GetWebServer();
 
 } // namespace tpunkt
 
-#endif //TPUNKT_WEBSERVER_H
+#endif // TPUNKT_WEBSERVER_H

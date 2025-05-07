@@ -48,9 +48,6 @@ constexpr size_t TPUNKT_SERVER_CHUNK_SIZE = 85'000;
 // Size of static file buffer
 constexpr size_t TPUNKT_SERVER_STATIC_FILES_LEN = 25;
 
-// Directory that contains all static files to preload
-constexpr auto* TPUNKT_SERVER_STATIC_FILES_DIR = "../frontend";
-
 // Server Port - HTTPS port
 constexpr size_t TPUNKT_SERVER_PORT = 8080;
 
@@ -62,6 +59,15 @@ constexpr size_t TPUNKT_SERVER_JSON_THREAD_BUFFER_START = 256U;
 constexpr size_t TPUNKT_MONITOR_REQ_PER_MIN = 50;
 
 //===== Instance =====//
+
+// Directory that contains all static files to preload
+constexpr auto* TPUNKT_INSTANCE_STATIC_FILES_DIR = "../frontend";
+
+// Path where the key SSL key is stored
+constexpr auto* TPUNKT_INSTANCE_KEY_DIR = "../key/key.pem";
+
+// Path where teh SSL certificate is stored
+constexpr auto* TPUNKT_INSTANCE_CERT_DIR = "../key/cert.pem";
 
 // Max length of any string config parameter
 constexpr size_t TPUNKT_INSTANCE_CONFIG_STRING_LEN = 24;

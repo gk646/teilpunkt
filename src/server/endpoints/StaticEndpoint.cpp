@@ -14,17 +14,16 @@ void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
         return;
     }
 
-    const auto& server = GetWebServer();
     const auto request = req->getUrl();
 
     const StaticFile* file = nullptr;
     if(strncmp(request.data(), "/", request.size()) == 0)
     {
-        file = server.staticFiles.getFile("/index.html",11);
+        file = GetWebServer().getStaticFileStorage().getFile("/index.html", 11);
     }
     else
     {
-        file = server.staticFiles.getFile(request.data(), request.size());
+        file = GetWebServer().getStaticFileStorage().getFile(request.data(), request.size());
     }
 
     if(file != nullptr)

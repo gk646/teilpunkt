@@ -3,7 +3,7 @@
 #ifndef TPUNKT_CRYPTO_CONTEXT_H
 #define TPUNKT_CRYPTO_CONTEXT_H
 
-#include <cstddef>
+#include "datastructures/FixedString.h"
 #include "util/Macros.h"
 
 namespace tpunkt
@@ -17,6 +17,10 @@ struct CryptoContext
 
     void encrypt(void* data, size_t len);
     void decrypt(void* data, size_t len);
+
+    [[nodiscard]] TimedOneTimeCode getTOTP(const TimedOneTimeKey& key) const;
+
+    [[nodiscard]] FixedString<256> getTOTPCreationString(const UserName& name, TimedOneTimeKey& out) const;
 
   private:
     TPUNKT_MACROS_STRUCT(CryptoContext);

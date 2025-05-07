@@ -49,7 +49,7 @@ static const char* getMimeType(const char* path)
 
 static void iterateDirectory(const char* dir, int& index, StaticFile* staticFiles)
 {
-    const auto basePathLength = strlen(TPUNKT_SERVER_STATIC_FILES_DIR);
+    const auto basePathLength = strlen(TPUNKT_INSTANCE_STATIC_FILES_DIR);
     if(index == TPUNKT_SERVER_STATIC_FILES_LEN)
     {
         LOG_CRITICAL("Too many static files");
@@ -74,7 +74,7 @@ static void iterateDirectory(const char* dir, int& index, StaticFile* staticFile
         }
 
         char path[ bufferSize ]{};
-        snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
+        (void)snprintf(path, sizeof(path), "%s/%s", dir, entry->d_name);
 
         if(strlen(path) > bufferSize)
         {
@@ -125,7 +125,7 @@ StaticFileStorage::StaticFileStorage(const char* directory)
 {
     int index = 0;
     iterateDirectory(directory, index, staticFiles);
-    LOG_INFO("Loaded %d static files", index);
+    LOG_INFO("Cached %d frontend static files", index);
 }
 
 StaticFileStorage::~StaticFileStorage()
@@ -141,7 +141,7 @@ StaticFileStorage::~StaticFileStorage()
     }
 }
 
-const StaticFile* StaticFileStorage::getFile(const char* filePath, size_t length) const
+const StaticFile* StaticFileStorage::getFile(const char* filePath, const size_t length) const
 {
     for(const auto& file : staticFiles)
     {

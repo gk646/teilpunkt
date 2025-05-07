@@ -206,6 +206,8 @@ bool TaskManager::taskRemove(const TaskID task)
     {
         if(val.taskId == task)
         {
+            delete val.task;
+            val.task = nullptr;
             val = tasks.back();
             tasks.pop_back();
             return true;

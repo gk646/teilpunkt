@@ -63,6 +63,8 @@ using FileName = FixedString<TPUNKT_STORAGE_FILE_LEN>; // Max length for any sin
 using CipherKey = FixedString<TPUNKT_CRYPTO_KEY_LEN>;
 using InstanceSecret = FixedString<TPUNKT_INSTANCE_SECRET_MAX_LEN>;
 using TaskName = FixedString<25>;
+using TimedOneTimeKey = FixedString<32>;
+using TimedOneTimeCode = FixedString<32>;
 
 //===== Identifiers =====//
 
@@ -89,7 +91,6 @@ struct FileID final
     FileID(const uint32_t uid, const EndpointID endpointId, const bool isDirectory)
         : uid(uid), endpoint(endpointId), directory(isDirectory)
     {
-
     }
 
     [[nodiscard]] bool isDirectory() const

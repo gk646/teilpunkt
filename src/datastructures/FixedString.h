@@ -167,7 +167,8 @@ struct FixedString final
             assignLen = length;
         }
 
-        strncpy(arr, assignString, assignLen);
+        memcpy(arr,assignString, assignLen);
+        arr[ assignLen ] = '\0';
     }
 
   private:
