@@ -3,7 +3,6 @@
 #ifndef TPUNKT_CREDENTIALS_H
 #define TPUNKT_CREDENTIALS_H
 
-#include <cstdint>
 #include <sodium/crypto_pwhash.h>
 #include "datastructures/FixedString.h"
 
@@ -18,8 +17,7 @@ enum class CredentialsType : uint8_t
 
 struct Credentials final
 {
-    Credentials() = default;
-    CredentialsType type{};
+    CredentialsType type = CredentialsType::INVALID;
     UserPassword password;
     UserPasskey passkey;
 
@@ -29,7 +27,6 @@ struct Credentials final
         {
             return false;
         }
-
         if(type == CredentialsType::PASSWORD)
         {
             return password == other.password;

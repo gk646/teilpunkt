@@ -28,12 +28,11 @@ void EventMonitor::logAuditTrace<EventType::APIRequest, APIRequestEventData>(Use
                                                                              APIRequestEventData data);
 template <>
 void EventMonitor::logAuditTrace<EventType::Users, AuthenticationEventData>(UserID actor, EventAction action,
-                                                                                     EventStatus status,
-                                                                                     AuthenticationEventData data);
+                                                                            EventStatus status,
+                                                                            AuthenticationEventData data);
 template <>
 void EventMonitor::logAuditTrace<EventType::Server, ServerEventData>(UserID actor, EventAction action,
-                                                                             EventStatus status,
-                                                                             ServerEventData data);
+                                                                     EventStatus status, ServerEventData data);
 
 
 EventMonitor& GetEventMonitor();

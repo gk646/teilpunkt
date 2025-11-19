@@ -51,11 +51,6 @@ InstanceInfo::~InstanceInfo()
     close(rootfd);
 }
 
-InstanceInfo& GetInstanceInfo()
-{
-    TPUNKT_MACROS_GLOBAL_GET(InstanceInfo);
-}
-
 int InstanceInfo::getRoot() const
 {
     return rootfd;
@@ -64,6 +59,11 @@ int InstanceInfo::getRoot() const
 const SecureBox<InstanceSecret>& InstanceInfo::getInstanceSecret() const
 {
     return instanceSecret;
+}
+
+InstanceInfo& InstanceInfo::Get()
+{
+    TPUNKT_MACROS_GLOBAL_GET(InstanceInfo);
 }
 
 

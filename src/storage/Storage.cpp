@@ -30,6 +30,7 @@ StorageStatus Storage::getRoots(UserID user, std::vector<DTODirectoryInfo>& root
     {
         roots.push_back({"TestFile", {i, EndpointID{i}, true}});
     }
+    return StorageStatus::OK;
 }
 
 Storage& GetStorage()

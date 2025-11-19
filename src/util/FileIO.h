@@ -3,7 +3,6 @@
 #ifndef TPUNKT_FILEIO_H
 #define TPUNKT_FILEIO_H
 
-#include <cstdint>
 #include "util/Macros.h"
 
 namespace tpunkt

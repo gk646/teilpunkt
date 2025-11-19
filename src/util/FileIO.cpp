@@ -15,7 +15,7 @@ namespace tpunkt
 
 File::File(const char* path)
 {
-    fd = openat(GetInstanceInfo().getRoot(), path, O_CREAT | O_RDWR, TPUNKT_INSTANCE_FILE_MODE);
+    fd = openat(InstanceInfo::Get().getRoot(), path, O_CREAT | O_RDWR, TPUNKT_INSTANCE_FILE_MODE);
     if(fd == -1) [[unlikely]]
     {
         LOG_ERROR("Creating file failed: %s", strerror(errno));

@@ -23,11 +23,12 @@ enum class AuthStatus : uint8_t
     ERR_NO_ADMIN,          // Action requires admin but actor is not
 };
 
-const char* GetAuthStatusStr(AuthStatus status);
 
 // Every method is atomic
 struct Authenticator final
 {
+    static const char* GetStatusStr(AuthStatus status);
+
     //===== User Management =====//
 
     // Existing user adds a new user

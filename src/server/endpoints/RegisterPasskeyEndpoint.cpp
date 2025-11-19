@@ -26,7 +26,6 @@ void RegisterPasskeyEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequ
 
             DTOUserSignupPK pubKey;
             randombytes_buf(pubKey.challenge.data(), pubKey.challenge.capacity());
-
         });
 
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });

@@ -15,17 +15,17 @@ InstanceConfig::InstanceConfig()
     for(uint8_t i = 1; i < (uint8_t)StringParamKey::ENUM_SIZE; ++i)
     {
         const auto key = StringParamKey{i};
-        setString(key, ConfigString(getDefault(key)));
+        setString(key, ConfigString(GetDefault(key)));
     }
     for(uint8_t i = 1; i < (uint8_t)NumberParamKey::ENUM_SIZE; ++i)
     {
         const auto key = NumberParamKey{i};
-        setNumber(key, getDefault(key));
+        setNumber(key, GetDefault(key));
     }
     for(uint8_t i = 1; i < (uint8_t)BoolParamKey::ENUM_SIZE; ++i)
     {
         const auto key = BoolParamKey{i};
-        setBool(key, getDefault(key));
+        setBool(key, GetDefault(key));
     }
 }
 
@@ -88,7 +88,7 @@ void InstanceConfig::setBool(BoolParamKey key, const bool boolean)
     boolParams[ static_cast<int>(key) ].boolean = boolean;
 }
 
-const char* InstanceConfig::getDefault(const StringParamKey key)
+const char* InstanceConfig::GetDefault(const StringParamKey key)
 {
     switch(key)
     {
@@ -101,7 +101,7 @@ const char* InstanceConfig::getDefault(const StringParamKey key)
     LOG_FATAL("Wrong key");
 }
 
-uint32_t InstanceConfig::getDefault(const NumberParamKey key)
+uint32_t InstanceConfig::GetDefault(const NumberParamKey key)
 {
     switch(key)
     {
@@ -126,7 +126,7 @@ uint32_t InstanceConfig::getDefault(const NumberParamKey key)
     LOG_FATAL("Wrong key");
 }
 
-bool InstanceConfig::getDefault(const BoolParamKey key)
+bool InstanceConfig::GetDefault(const BoolParamKey key)
 {
     switch(key)
     {

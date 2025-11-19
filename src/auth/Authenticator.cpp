@@ -7,27 +7,13 @@
 
 namespace tpunkt
 {
+
 namespace global
 {
 static Authenticator* Authenticator;
 }
 
-Authenticator::Authenticator()
-{
-    TPUNKT_MACROS_GLOBAL_ASSIGN(Authenticator);
-}
-
-Authenticator::~Authenticator()
-{
-    TPUNKT_MACROS_GLOBAL_RESET(Authenticator);
-}
-
-Authenticator& GetAuthenticator()
-{
-    TPUNKT_MACROS_GLOBAL_GET(Authenticator);
-}
-
-const char* GetAuthStatusStr(const AuthStatus status)
+const char* Authenticator::GetStatusStr(const AuthStatus status)
 {
     switch(status)
     {
@@ -79,7 +65,6 @@ AuthStatus Authenticator::userAdd(const UserID actor, const UserName& name, Cred
     LOG_EVENT(actor, Users, UserAdd, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
-
 
 AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed, UserID& user)
 {
@@ -135,6 +120,7 @@ AuthStatus Authenticator::userChangeCredentials(const UserID actor, const UserNa
     LOG_EVENT(actor, Users, UserChangeCredentials, INFO_SUCCESS, AuthenticationEventData{});
     return AuthStatus::OK;
 }
+
 
 AuthStatus Authenticator::sessionAdd(const UserID actor, const SessionMetaData& metaData,
                                      SecureWrapper<SessionToken>& out)
@@ -213,6 +199,21 @@ AuthStatus Authenticator::getIsAdmin(UserID user)
     // TODO
     LOG_FATAL("Not implemented");
     return AuthStatus::INVALID;
+}
+
+Authenticator::Authenticator()
+{
+    TPUNKT_MACROS_GLOBAL_ASSIGN(Authenticator);
+}
+
+Authenticator::~Authenticator()
+{
+    TPUNKT_MACROS_GLOBAL_RESET(Authenticator);
+}
+
+Authenticator& GetAuthenticator()
+{
+    TPUNKT_MACROS_GLOBAL_GET(Authenticator);
 }
 
 } // namespace tpunkt

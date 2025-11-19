@@ -6,6 +6,7 @@
 #include <string_view>
 #include <glaze/json/read.hpp>
 #include <glaze/json/write.hpp>
+#include "auth/Credentials.h"
 
 namespace glz
 {
@@ -35,37 +36,30 @@ struct to<JSON, tpunkt::FixedString<length>>
 
 static_assert(sizeof(tpunkt::FileID) <= sizeof(uint64_t), "FileID too big!");
 
-template<>
+template <>
 struct from<JSON, tpunkt::FileID>
 {
     template <auto Opts>
     static void op(tpunkt::FileID value, auto&&... args)
     {
-        uint64_t num;
+        uint64_t num{};
         parse<JSON>::op<Opts>(num, args...);
         memcpy(&value, &num, sizeof(uint64_t));
     }
 };
 
-template<>
+template <>
 struct to<JSON, tpunkt::FileID>
 {
     template <auto Opts>
     static void op(tpunkt::FileID& value, auto&&... args) noexcept
     {
-        uint64_t num;
+        uint64_t num{};
         memcpy(&value, &num, sizeof(uint64_t));
         serialize<JSON>::op<Opts>(num, args...);
     }
 };
 
 } // namespace glz
-
-template <>
-struct glz::meta<tpunkt::Credentials>
-{
-    using T = tpunkt::Credentials;
-    static constexpr auto value = object("password", &T::password, "type", &T::type, "passkey", &T::passkey);
-};
 
 #endif // TPUNKT_DTO_MAPPINGS_H

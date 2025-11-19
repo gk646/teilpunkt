@@ -3,7 +3,6 @@
 #ifndef TPUNKT_FWD_H
 #define TPUNKT_FWD_H
 
-#include <cstddef>
 #include <cstdint>
 #include "config.h"
 
@@ -126,7 +125,6 @@ enum class GroupID : uint16_t
 {
     INVALID = 0
 };
-
 
 } // namespace tpunkt
 

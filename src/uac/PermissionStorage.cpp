@@ -4,24 +4,24 @@
 
 namespace tpunkt
 {
-    bool PermissionStorage::userHasPermission(const UserID user, PermissionFlag perm, const FileID file)
+bool PermissionStorage::userHasPermission(const UserID user, PermissionFlag perm, const FileID file)
+{
+    /*
+    for(const auto& entry : userFiles)
     {
-        /*
-        for(const auto& entry : userFiles)
+        if(entry.user == user && entry.file == file)
         {
-            if(entry.user == user && entry.file == file)
+            if((static_cast<std::underlying_type_t<UserID>>(entry.perms) &
+                static_cast<std::underlying_type_t<UserID>>(perm)) != 0U)
             {
-                if((static_cast<std::underlying_type_t<UserID>>(entry.perms) &
-                    static_cast<std::underlying_type_t<UserID>>(perm)) != 0U)
-                {
-                    return true;
-                }
+                return true;
             }
         }
-        */
     }
+    */
+}
 
-    bool PermissionStorage::groupHasPermission(GroupID group, PermissionFlag perm, FileID file)
-    {
-    }
+bool PermissionStorage::groupHasPermission(GroupID group, PermissionFlag perm, FileID file)
+{
+}
 } // namespace tpunkt

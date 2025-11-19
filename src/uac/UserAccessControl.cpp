@@ -22,11 +22,6 @@ UserAccessControl::~UserAccessControl()
     TPUNKT_MACROS_GLOBAL_RESET(UserAccessControl);
 }
 
-UserAccessControl& GetUAC()
-{
-    TPUNKT_MACROS_GLOBAL_GET(UserAccessControl);
-}
-
 UACStatus UserAccessControl::userCanWrite(UserID user, FileID file, uint64_t newSize)
 {
     SpinlockGuard guard{uacLock};
@@ -43,6 +38,11 @@ UACStatus UserAccessControl::userCanAction(UserID user, FileID file, PermissionF
     // otherwise its an expensive lookup
 
     return UACStatus::OK;
+}
+
+UserAccessControl& GetUAC()
+{
+    TPUNKT_MACROS_GLOBAL_GET(UserAccessControl);
 }
 
 

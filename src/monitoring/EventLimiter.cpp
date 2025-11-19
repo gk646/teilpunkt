@@ -3,8 +3,8 @@
 #include <HttpResponse.h>
 #include "monitoring/EventLimiter.h"
 #include "server/Endpoints.h"
-#include "util/Macros.h"
 #include "util/Logging.h"
+#include "util/Macros.h"
 
 namespace tpunkt
 {
@@ -17,7 +17,6 @@ EventLimiter* EventLimiter;
 EventLimiter::EventLimiter()
 {
     TPUNKT_MACROS_GLOBAL_ASSIGN(EventLimiter);
-
 }
 
 EventLimiter::~EventLimiter()

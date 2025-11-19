@@ -69,7 +69,8 @@ void CooperativeSpinlock::exclusiveAdd()
         exclusiveCount.fetch_add(1, std::memory_order_release);
     }
 
-    while (coopCount.load(std::memory_order_acquire) > 0) {
+    while(coopCount.load(std::memory_order_acquire) > 0)
+    {
         sched_yield();
     }
     exclusive.lock();

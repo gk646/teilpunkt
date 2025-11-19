@@ -1,9 +1,9 @@
-[submodule "static/external/uWebSocket"]
-	path = external/uWebSocket
-	url = https://github.com/uNetworking/uWebSockets
-[submodule "external/ankerl"]
-	path = external/ankerl
+[submodule "external/unordered_dense"]
+	path = external/unordered_dense
 	url = https://github.com/martinus/unordered_dense.git
 [submodule "external/glaze"]
 	path = external/glaze
 	url = https://github.com/stephenberry/glaze.git
+[submodule "external/uWebSocket"]
+	path = external/uWebSocket
+	url = https://github.com/uNetworking/uWebSockets

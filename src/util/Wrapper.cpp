@@ -33,7 +33,7 @@ bool RemoveRelDir(const char* path)
 
 size_t GetDiskSizeUsed()
 {
-    struct statvfs stat;
+    struct statvfs stat{};
     if(statvfs("/", &stat) != 0)
     {
         LOG_ERROR("Failed to get disk size of /:%s", strerror(errno));
@@ -45,7 +45,7 @@ size_t GetDiskSizeUsed()
 
 int GetDiskUsage()
 {
-    struct statvfs stat;
+    struct statvfs stat{};
     if(statvfs("/", &stat) != 0)
     {
         LOG_ERROR("Failed to get disk size of /:%s", strerror(errno));

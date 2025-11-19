@@ -55,10 +55,9 @@ bool NumberToStringEx(char* buf, const size_t len, const uint32_t num, const cha
     return true;
 }
 
-bool StringToNumber(const char* buf, const size_t len, uint32_t& num)
+bool StringToNumber(const std::string_view& view, uint32_t& num)
 {
-    auto result = std::from_chars(buf, buf + len, num);
-    return result.ec != std::errc();
+    return std::from_chars(view.data(), view.data() + view.size(), num).ec == std::errc{};
 }
 
 bool IsValidFilename(const FileName& name)
@@ -170,7 +169,7 @@ void Base32Decode(const char* pin, const size_t ilen, char* pout, const size_t o
         uint8_t bits[ INPUT_BYTES ]{};
         memcpy(bits, pin + (i * INPUT_BYTES), INPUT_BYTES);
 
-        for(unsigned char & bit : bits)
+        for(unsigned char& bit : bits)
         {
             bit = base32ToChar(bit);
         }

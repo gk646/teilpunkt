@@ -85,7 +85,7 @@ bool CreateFileTransaction::start(ResultCb callback)
 {
     isStarted = true;
 
-    if(!parent->fileAdd(info,file))
+    if(!parent->fileAdd(info, file))
     {
         return false;
     }

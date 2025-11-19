@@ -10,7 +10,6 @@ namespace tpunkt
 // Tracks current actions, users and misc stats (access count, ...)
 struct EndpointStats final
 {
-
 };
 
 } // namespace tpunkt

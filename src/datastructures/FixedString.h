@@ -4,23 +4,23 @@
 #define TPUNKT_FIXED_STRING_H
 
 #include <cstring>
+#include <string_view>
 #include <sodium/utils.h>
 #include "datastructures/Iterator.h"
 #include "util/Logging.h"
 
 namespace tpunkt
 {
+
 // Fixed string for names/keys that handles overflow and truncation
 template <size_t length>
 struct FixedString final
 {
     FixedString() = default;
 
-    template <size_t N>
-    explicit FixedString(const char (&string)[ N ])
+    explicit FixedString(const std::string_view& string)
     {
-        static_assert(N <= length, "FixedString cannot hold the provided string literal.");
-        assign(string, N);
+        assign(string.data(), string.size());
     }
 
     FixedString(const char* string)
@@ -77,6 +77,12 @@ struct FixedString final
     FixedString& operator=(const char* assignString)
     {
         assign(assignString, 0);
+        return *this;
+    }
+
+    FixedString& operator=(const std::string_view& view)
+    {
+        assign(view.data(), view.size());
         return *this;
     }
 
@@ -167,8 +173,13 @@ struct FixedString final
             assignLen = length;
         }
 
-        memcpy(arr,assignString, assignLen);
+        memcpy(arr, assignString, assignLen);
         arr[ assignLen ] = '\0';
+    }
+
+    [[nodiscard]] bool isEmpty() const
+    {
+        return size() == 0;
     }
 
   private:

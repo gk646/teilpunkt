@@ -10,4 +10,4 @@ UserLimit::UserLimit() : connectionLimit()
 {
 }
 
-} // namespace tpuntk
+} // namespace tpunkt

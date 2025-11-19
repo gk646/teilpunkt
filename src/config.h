@@ -3,6 +3,8 @@
 #ifndef TPUNKT_CONFIG_H
 #define TPUNKT_CONFIG_H
 
+#include <cstddef>
+
 //===== Crypto =====//
 
 constexpr size_t TPUNKT_CRYPTO_SESSION_ID_LEN = 32;
@@ -13,7 +15,7 @@ constexpr size_t TPUNKT_INSTANCE_SECRET_MAX_LEN = 32;
 
 //===== Authentication =====//
 
-constexpr auto* TPUNKT_AUTH_SESSION_ID_NAME = "tp-session-id";
+constexpr auto* TPUNKT_AUTH_SESSION_TOKEN_NAME = "tp-session-token";
 
 constexpr auto* TPUNKT_AUTH_SESSION_USER_NAME = "tp-session-user";
 
@@ -30,7 +32,7 @@ constexpr auto* TPUNKT_STORAGE_ENDPOINT_DIR = "./endpoints";
 constexpr auto* TPUNKT_STORAGE_DATASTORE_DIR = "datastore";
 
 // Maximum name length for any file or storage endpoint
-constexpr size_t TPUNKT_STORAGE_FILE_LEN = 32;
+constexpr size_t TPUNKT_STORAGE_FILE_LEN = 64;
 
 // Maximum length for usernames
 constexpr size_t TPUNKT_STORAGE_USER_LEN = 16;
@@ -46,13 +48,13 @@ constexpr size_t TPUNKT_STORAGE_MAX_DEFAULT_FILE_DIR_LIMIT = 50'000U;
 constexpr size_t TPUNKT_SERVER_CHUNK_SIZE = 85'000;
 
 // Size of static file buffer
-constexpr size_t TPUNKT_SERVER_STATIC_FILES_LEN = 25;
+constexpr size_t TPUNKT_SERVER_STATIC_FILES_LEN = 32;
 
 // Server Port - HTTPS port
 constexpr size_t TPUNKT_SERVER_PORT = 8080;
 
 // Start size of the character buffer for returned json in bytes
-constexpr size_t TPUNKT_SERVER_JSON_THREAD_BUFFER_START = 256U;
+constexpr size_t TPUNKT_SERVER_JSON_THREAD_BUFFER_START = 512;
 
 //===== Monitoring =====//
 

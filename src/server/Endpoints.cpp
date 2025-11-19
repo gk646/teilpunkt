@@ -23,7 +23,6 @@ static const char* GetStatusString(const int status)
             return "102 Processing";
         case 103:
             return "103 Early Hints";
-
         case 200:
             return "200 OK";
         case 201:
@@ -44,7 +43,6 @@ static const char* GetStatusString(const int status)
             return "208 Already Reported";
         case 226:
             return "226 IM Used";
-
         case 300:
             return "300 Multiple Choices";
         case 301:
@@ -61,7 +59,6 @@ static const char* GetStatusString(const int status)
             return "307 Temporary Redirect";
         case 308:
             return "308 Permanent Redirect";
-
         case 400:
             return "400 Bad Request";
         case 401:
@@ -120,7 +117,6 @@ static const char* GetStatusString(const int status)
             return "431 Request Header Fields Too Large";
         case 451:
             return "451 Unavailable For Legal Reasons";
-
         case 500:
             return "500 Internal Server Error";
         case 501:
@@ -143,7 +139,6 @@ static const char* GetStatusString(const int status)
             return "510 Not Extended";
         case 511:
             return "511 Network Authentication Required";
-
         default:
             return "Unknown Status Code";
     }
@@ -151,27 +146,21 @@ static const char* GetStatusString(const int status)
 
 bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
 {
-    size_t tokenLen = 0;
-    const char* tokenStr = nullptr;
-    size_t userLen = 0;
-    const char* userStr = nullptr;
-    uint32_t lookupUser{};
+    const std::string_view tokenCookie = GetCookie(req, TPUNKT_AUTH_SESSION_TOKEN_NAME);
+    const std::string_view userCookie = GetCookie(req, TPUNKT_AUTH_SESSION_USER_NAME);
 
-    // Delete both if either one is missing for consistency
-    if((tokenStr = GetHeader(req, TPUNKT_AUTH_SESSION_ID_NAME, tokenLen)) == nullptr ||
-       (userStr = GetHeader(req, TPUNKT_AUTH_SESSION_USER_NAME, userLen)) == nullptr ||
-       !StringToNumber(userStr, userLen, lookupUser))
+    uint32_t lookupUser = 0;
+    if(tokenCookie.empty() || userCookie.empty() || !StringToNumber(userCookie, lookupUser))
     {
         EndRequest(res, 400, "", false,
                    [](uWS::HttpResponse<true>* res)
                    {
-                       ClearCookie(res, TPUNKT_AUTH_SESSION_ID_NAME);
+                       // Delete both if either one is missing for consistency
+                       ClearCookie(res, TPUNKT_AUTH_SESSION_TOKEN_NAME);
                        ClearCookie(res, TPUNKT_AUTH_SESSION_USER_NAME);
                    });
         return false;
     }
-
-    const SessionToken token{tokenStr, tokenLen};
 
     SessionMetaData metaData;
     if(!GetMetaData(res, req, metaData))
@@ -180,10 +169,11 @@ bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest*
         return false;
     }
 
-    const auto status = GetAuthenticator().sessionAuth(UserID{lookupUser}, token, metaData, user);
+    const SessionToken token{tokenCookie};
+    const AuthStatus status = GetAuthenticator().sessionAuth(UserID{lookupUser}, token, metaData, user);
     if(status != AuthStatus::OK)
     {
-        EndRequest(res, 401, GetAuthStatusStr(status));
+        EndRequest(res, 401, Authenticator::GetStatusStr(status));
         return false;
     }
     return true;
@@ -192,6 +182,28 @@ bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest*
 bool ServerEndpoint::AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     return GetEventLimiter().allowRequest(res, req);
+}
+
+bool ServerEndpoint::IsRequestEmpty(uWS::HttpResponse<true>* res, const std::string_view& data, bool isLast)
+{
+    (void)isLast;
+    if(data.empty())
+    {
+        EndRequest(res, 400, "Empty request body");
+        return true;
+    }
+    return false;
+}
+
+bool ServerEndpoint::IsRequestTooLarge(uWS::HttpResponse<true>* res, const std::string_view& data, bool isLast)
+{
+    (void)data;
+    if(!isLast) // Too long
+    {
+        EndRequest(res, 431, "Sent data too large");
+        return true;
+    }
+    return false;
 }
 
 void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data, const bool close,
@@ -221,33 +233,71 @@ void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, co
 }
 
 
-const char* ServerEndpoint::GetHeader(uWS::HttpRequest* req, const char* keyName, size_t& length)
+std::string_view ServerEndpoint::GetHeader(uWS::HttpRequest* req, const char* key)
 {
-    for(const auto& [ key, value ] : *req)
+    for(const auto& [ keyName, value ] : *req)
     {
         if(keyName == key)
         {
-            length = value.size();
-            return value.data();
+            return value;
         }
     }
-    length = 0;
-    return nullptr;
+    return {};
 }
+
+std::string_view ServerEndpoint::GetCookie(uWS::HttpRequest* req, const char* name)
+{
+    std::string_view fullCookies = GetHeader(req, "cookie");
+    if(fullCookies.empty())
+    {
+        return {};
+    }
+    const std::string_view nameSv(name);
+
+    size_t start = 0;
+    while(start < fullCookies.size())
+    {
+        const size_t nameEnd = fullCookies.find('=', start);
+        if(nameEnd == std::string_view::npos) // Malformed cookie
+        {
+            break;
+        }
+
+        if(fullCookies.substr(start, nameEnd - start) == nameSv)
+        {
+            const size_t valueStart = nameEnd + 1;
+            size_t valueEnd = fullCookies.find(';', valueStart);
+            if(valueEnd == std::string_view::npos)
+            {
+                valueEnd = fullCookies.size();
+            }
+            return fullCookies.substr(valueStart, valueEnd - valueStart);
+        }
+
+        start = fullCookies.find(';', nameEnd) + 2;
+        if(start == std::string_view::npos || start == 0) // No more cookies
+        {
+            break;
+        }
+    }
+
+    // Cookie not found
+    return {};
+}
+
 
 bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, SessionMetaData& metaData)
 {
-    size_t agentLen = 0;
-    const auto* agentStr = GetHeader(req, "user-agent", agentLen);
-    if(agentStr == nullptr)
+    std::string_view agentStr = GetHeader(req, "user-agent");
+    if(agentStr.empty())
     {
         return false;
     }
 
-    metaData.userAgent = UserAgentString{agentStr, agentLen};
+    metaData.userAgent = agentStr;
+    metaData.remoteAddress = res->getRemoteAddress();
 
-    const auto& ipAddr = res->getRemoteAddress();
-    metaData.remoteAddress = HashedIP{ipAddr.data(), ipAddr.size()};
+    // Hash the remote address to only store anonymized data (inplace)
     unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
     constexpr size_t len = metaData.remoteAddress.capacity();
     crypto_generichash(content, len, content, len, nullptr, 0);
@@ -257,12 +307,12 @@ bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest*
 void ServerEndpoint::SetCookie(uWS::HttpResponse<true>* res, const char* key, const char* value,
                                const uint32_t expiration)
 {
-    char buf[ 128 ];
-    constexpr auto* fmt = "%s=%s; Path=/;HttpOnly;Secure;SameSite=Strict;Max-Age=%d";
-    const auto result = snprintf(buf, 128, fmt, key, value, expiration);
+    char buf[ 256 ];
+    constexpr const char* fmt = "%s=%s; Path=/;HttpOnly;Secure;SameSite=Strict;Max-Age=%d";
+    const int result = snprintf(buf, 128, fmt, key, value, expiration);
     if(result < 0)
     {
-        LOG_ERROR("Failed to set cookie:%s", key);
+        LOG_ERROR("Failed to format cookie:%s", key);
         return;
     }
     res->writeHeader("Set-Cookie", buf);
@@ -271,12 +321,12 @@ void ServerEndpoint::SetCookie(uWS::HttpResponse<true>* res, const char* key, co
 void ServerEndpoint::SetUnsafeCookie(uWS::HttpResponse<true>* res, const char* key, const char* value,
                                      const uint32_t expiration)
 {
-    char buf[ 128 ];
-    constexpr auto* fmt = "%s=%s; Path=/;Secure;SameSite=Strict;Max-Age=%d";
-    const auto result = snprintf(buf, 128, fmt, key, value, expiration);
+    char buf[ 256 ];
+    constexpr const char* fmt = "%s=%s; Path=/;Secure;SameSite=Strict;Max-Age=%d";
+    const int result = snprintf(buf, 128, fmt, key, value, expiration);
     if(result < 0)
     {
-        LOG_ERROR("Failed to set cookie:%s", key);
+        LOG_ERROR("Failed to format cookie:%s", key);
         return;
     }
     res->writeHeader("Set-Cookie", buf);
@@ -285,11 +335,11 @@ void ServerEndpoint::SetUnsafeCookie(uWS::HttpResponse<true>* res, const char* k
 void ServerEndpoint::ClearCookie(uWS::HttpResponse<true>* res, const char* key)
 {
     char buf[ 128 ];
-    constexpr auto* fmt = "%s=; Path=/;Secure;SameSite=Strict;Max-Age=0";
-    const auto result = snprintf(buf, 128, fmt, key);
+    constexpr const char* fmt = "%s=; Path=/;Secure;SameSite=Strict;Max-Age=0";
+    const int result = snprintf(buf, 128, fmt, key);
     if(result < 0)
     {
-        LOG_ERROR("Failed to clear cookie:%s", key);
+        LOG_ERROR("Failed to format cookie:%s", key);
         return;
     }
     res->writeHeader("Set-Cookie", buf);

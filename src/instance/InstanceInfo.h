@@ -23,6 +23,7 @@ struct InstanceInfo
 {
     InstanceInfo();
     ~InstanceInfo();
+    static InstanceInfo& Get();
 
     // Returns the file descriptor of the root start dir
     int getRoot() const;
@@ -35,9 +36,6 @@ struct InstanceInfo
     int rootfd = -1;
     SecureBox<InstanceSecret> instanceSecret;
 };
-
-
-InstanceInfo& GetInstanceInfo();
 
 } // namespace tpunkt
 

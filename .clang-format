@@ -35,7 +35,7 @@ PointerAlignment: Left
 AlwaysBreakTemplateDeclarations: Yes
 SpaceAfterTemplateKeyword: true
 ColumnLimit: 120
-ReflowComments: true
+ReflowComments: True
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 
 # Includes

@@ -14,7 +14,7 @@ bool NumberToString(char* buf, size_t len, uint32_t num);
 // Appends additional text
 bool NumberToStringEx(char* buf, size_t len, uint32_t num, const char* add);
 
-bool StringToNumber(const char* buf, size_t len, uint32_t& num);
+bool StringToNumber(const std::string_view& view, uint32_t& num);
 
 bool IsValidFilename(const FileName& name);
 

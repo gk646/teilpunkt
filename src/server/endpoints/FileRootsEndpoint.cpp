@@ -31,30 +31,20 @@ void FileRootsEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
     res->onData(
         [ res, user ](std::string_view data, const bool last)
         {
-            if(!last) // Too long
+            if(IsRequestTooLarge(res, data, last))
             {
-                EndRequest(res, 431, "Sent data too large");
-                return;
-            }
-
-            // Get the target dir
-            DTODirectoryRequest dirRequest;
-            auto error = glz::read_json(dirRequest, data);
-            if(error)
-            {
-                EndRequest(res, 400, "Bad sent JSON");
                 return;
             }
 
             // Get roots
-            auto status = GetStorage().getRoots(user, collector);
+            const auto status = GetStorage().getRoots(user, collector);
             if(status != StorageStatus::OK)
             {
                 EndRequest(res, 400, GetStorageStatusStr(status));
                 return;
             }
 
-            error = glz::write_json(collector, jsonBuffer);
+            auto error = glz::write_json(collector, jsonBuffer);
             if(error)
             {
                 EndRequest(res, 500, "Bad generated JSON");

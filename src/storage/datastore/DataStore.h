@@ -50,7 +50,7 @@ struct WriteHandle final
 //      - Callback might be called before the method returns
 //      - Datastore's store their files in /endpoints/{id}/datastore
 //      - Supports partial reads
-//      - This is any ASYNC interface - return true is good request - callback true is good operation
+//      - This is an ASYNC interface - return true is good request - callback true is good operation
 //      - Operations are NOT threadsafe - must be enforced elsewhere
 //      - Read/Writes are only consistent if close is called for every init
 struct DataStore

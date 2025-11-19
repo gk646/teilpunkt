@@ -5,15 +5,18 @@
 > Work in progress - certain features might not be complete.
 
 
-`teilpunkt`™ _(ger. sharepoint)_ is a _C++23_ **self-hosted, security first, file server** implemented natively for Linux® using modern technologies.
+`teilpunkt`™ _(eng. sharepoint)_ is a _C++23_ **self-hosted, security first, file server** implemented natively for Linux® using modern technologies.
 
 Dependencies:
 
-- [uWebSockets](https://github.com/uNetworking/uWebSockets) _(latest)_: HTTPS server and sockets
-- [libsodium](https://github.com/jedisct1/libsodium) _(latest)_: Crypto Primitives
-- [libsodium.js](https://github.com/jedisct1/libsodium.js) _(latest)_: Crypto Primitives for the Frontend
-- [glaze](https://github.com/stephenberry/glaze) _(latest)_: JSON library
-- [ankerl](https://github.com/martinus/unordered_dense) _(latest)_: Optimized Hashmap
+- **Backend**
+  - [uWebSockets](https://github.com/uNetworking/uWebSockets) _(latest)_: HTTPS server and sockets
+  - [libsodium](https://github.com/jedisct1/libsodium) _(latest)_: Crypto Primitives
+  - [glaze](https://github.com/stephenberry/glaze) _(latest)_: JSON library
+  - [ankerl](https://github.com/martinus/unordered_dense) _(latest)_: Optimized Hashmap
+- **Frontend**
+  - [libsodium.js](https://github.com/jedisct1/libsodium.js) _(0.7.15)_: Crypto Primitives for the Frontend
+  - [qrcodegen.js](https://github.com/nayuki/QR-Code-generator) _(1.8.0)_: QR Code generator
 
 _Note: This project is built only with/for GCC and the Linux® kernel._
 

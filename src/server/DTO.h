@@ -3,7 +3,6 @@
 #ifndef TPUNKT_DTO_H
 #define TPUNKT_DTO_H
 
-#include "auth/Credentials.h"
 #include "datastructures/FixedString.h"
 #include "fwd.h"
 
@@ -35,9 +34,9 @@ struct DTOUserSignupPK final
     } user;
     struct
     {
-        int alg = 0;
+        int alg = -8;
         FixedString<TPUNKT_STORAGE_FILE_LEN> type{"public-key"};
-    } pubKeyCredParams[ 1 ]{{.alg = -8}};
+    } pubKeyCredParams;
 };
 
 //===== Login =====//

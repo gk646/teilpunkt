@@ -53,6 +53,28 @@ document.addEventListener('DOMContentLoaded', () => {
         validateConfirmPassword(confirmPasswordInput);
     });
 
+    async function registerUser(username, password) {
+        await sodiumReady;
+        let hashedPassword = hashPassword(password);
+        const requestBody = JSON.stringify({
+            name: username.trim(),
+            password: hashedPassword,
+        });
+
+        const result = await fetchWithErrorHandling('/api/register/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Auth-Method': 'password'
+            },
+            body: requestBody
+        });
+
+        // Clear sensitive data
+        hashedPassword = null;
+        return result;
+    }
+
     // Handle form submission for password signup
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -85,43 +107,24 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        await sodiumReady;
-
         let usernameValue = userNameInput.value.trim();
         let passwordValue = passwordInput.value.trim();
-        let hashedPassword = hashPassword(passwordValue);
-        let requestBody = JSON.stringify({
-            name: usernameValue,
-            password: hashedPassword,
 
-        });
-        passwordValue = null;
-        usernameValue = null;
         try {
-            let result = fetchWithErrorHandling('/api/register/password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Auth-Method': 'password'
-                },
-                body: requestBody
-            });
-
+            let result = registerUser(usernameValue, passwordValue);
             userNameInput.value = '';
             passwordInput.value = '';
             confirmPasswordInput.value = '';
-            hashedPassword = null;
-            requestBody = null;
-
             await result;
             window.location.href = '/login';
-
         } catch (error) {
-
-            displayAuthError(authError, "The sign has failed. Please check your login details and try again.");
-            console.error('Error during login:', error);
+            displayAuthError(authError, "The sign-up has failed. Please check your details and try again.");
+            console.error('Error during registration:', error);
         }
     });
+
+    //TODO ADD DEBUG USER
+    registerUser("hey", "123123123")
 
     if (isPasskeyAvailable()) {
         passkeyButton.addEventListener('click', async () => {

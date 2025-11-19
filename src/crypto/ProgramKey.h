@@ -5,10 +5,9 @@
 
 // The program key is a ephemeral key
 
-struct DeviceKey {
-
+struct DeviceKey
+{
 };
 
 
-
-#endif //TPUNKT_PROGRAM_KEY_H
+#endif // TPUNKT_PROGRAM_KEY_H

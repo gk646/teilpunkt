@@ -11,7 +11,6 @@ namespace tpunkt
 
 struct InstanceTask final
 {
-
 };
 
 struct MainThread final

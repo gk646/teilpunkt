@@ -49,7 +49,6 @@ int32_t main()
             tpunkt::EventMonitor monitor{};
             tpunkt::InstanceConfig config{};
             tpunkt::CryptoContext crypto{};
-            return 0;
             tpunkt::TaskManager tasks{};
 
             tpunkt::Authenticator auth{};

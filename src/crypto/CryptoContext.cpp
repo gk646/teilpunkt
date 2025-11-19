@@ -16,7 +16,6 @@
 
 namespace tpunkt
 {
-// otpauth://totp/MyApp:alice@example.com?secret=JBSWY3DP&issuer=Me&algorithm=SHA512
 
 static_assert(32 == crypto_auth_hmacsha512_KEYBYTES, "Update key length");
 
@@ -25,14 +24,9 @@ namespace global
 static CryptoContext* CryptoContext;
 }
 
-
 CryptoContext::CryptoContext()
 {
     TPUNKT_MACROS_GLOBAL_ASSIGN(CryptoContext);
-    TimedOneTimeKey key;
-    printf("%s\n", getTOTPCreationString("Lukas", key).c_str());
-    printf("%s\n", getTOTP(key).c_str());
-
     // TODO init tpm or ephemeral key
 }
 
@@ -58,13 +52,12 @@ void CryptoContext::decrypt(void* data, const size_t len)
     (void)len;
 }
 
-
 TimedOneTimeCode CryptoContext::getTOTP(const TimedOneTimeKey& key) const
 {
     unsigned char hmac[ crypto_auth_hmacsha512_BYTES ];
     constexpr int hmac_len = crypto_auth_hmacsha512_BYTES;
 
-    uint64_t timeNum = static_cast<uint64_t>(time(nullptr));
+    auto timeNum = static_cast<uint64_t>(time(nullptr) / 30);
     timeNum /= 30;                       // 30 second interval
 
     unsigned char timeBytes[ 8 + 1 ]{};

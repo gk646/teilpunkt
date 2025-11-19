@@ -44,7 +44,7 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
             auto status = GetAuthenticator().userLogin(authData.name, credentials, user);
             if(status != AuthStatus::OK)
             {
-                EndRequest(res, 400, GetAuthStatusStr(status));
+                EndRequest(res, 400, Authenticator::GetStatusStr(status));
                 return;
             }
 
@@ -59,13 +59,13 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
             status = GetAuthenticator().sessionAdd(user, metaData, token);
             if(status != AuthStatus::OK)
             {
-                EndRequest(res, 400, GetAuthStatusStr(status));
+                EndRequest(res, 400, Authenticator::GetStatusStr(status));
                 return;
             }
 
             const uint32_t expiration = GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_SECS);
             auto reader = token.get();
-            SetCookie(res, TPUNKT_AUTH_SESSION_ID_NAME, reader.get().c_str(), expiration);
+            SetCookie(res, TPUNKT_AUTH_SESSION_TOKEN_NAME, reader.get().c_str(), expiration);
 
             // Set user id cookie
             char numBuf[ 12 ];
