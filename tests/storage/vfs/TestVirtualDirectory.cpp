@@ -76,7 +76,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
         CheckAccess(baseDir, stats, true);
         CheckChange(baseDir, stats, true);
         REQUIRE(baseDir.getStats().fileCount == 1);
-        REQUIRE(baseDir.searchFile(file1) != nullptr);
+        REQUIRE(baseDir.findFile(file1) != nullptr);
     }
 
     // Add existing file
@@ -182,13 +182,13 @@ TEST_CASE("Virtual Directory Simple Dir Operations")
         CheckAccess(baseDir, stats, true);
         CheckChange(baseDir, stats, true);
         REQUIRE(baseDir.getStats().dirCount == 1);
-        REQUIRE(baseDir.searchDir(sub1) != nullptr);
+        REQUIRE(baseDir.findDir(sub1) != nullptr);
     }
 
     // Create subdir with limit bigger than parent
     {
         const DirectoryStats stats = baseDir.getStats();
-        auto dir = baseDir.searchDir(sub1);
+        auto dir = baseDir.findDir(sub1);
         FileID subDir2;
         auto result = dir->dirAdd(getDirInfo("SubDir2", 1000, &baseDir), subDir2);
         REQUIRE_FALSE(result);

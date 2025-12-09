@@ -72,7 +72,7 @@ StorageStatus StorageEndpoint::fileCreate(const UserID actor, const FileID dir, 
     if(parent == nullptr)
     {
         LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_NO_SUCH_FILE, FilesystemEventData{});
-        return StorageStatus::ERR_NO_SUCH_FILE;
+        return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
     // CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock

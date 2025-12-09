@@ -15,24 +15,26 @@ namespace tpunkt
 struct FileCreationInfo final
 {
     FileName name;
-    UserID creator;
+    UserID creator = UserID::INVALID;
 };
 
 struct FileInfo final
 {
     FileName name;
     UserID creator = UserID::INVALID;
-    FileID id;
+    UserID owner = UserID::INVALID;
 };
 
 struct FileStats final
 {
-    Timestamp lastEdit;
-    Timestamp creation;
-    uint32_t changeCount = 0;
+    Timestamp created;
+    Timestamp modified; // Last time the physical file OR metadata changes
+    Timestamp accessed; // Last time the physical file was sent
+
+    uint32_t modificationCount = 0;
     uint32_t accessCount = 0;
 
-    uint64_t size = 0; // Size in bytes
+    uint64_t size = 0;  // Size in bytes
 };
 
 struct FileHistory final
@@ -42,14 +44,18 @@ struct FileHistory final
 
 struct VirtualFile final
 {
-    explicit VirtualFile(const FileCreationInfo& info, EndpointID endpoint);
+    explicit VirtualFile(const FileCreationInfo& info);
+
     VirtualFile(VirtualFile&& other) noexcept;
+    VirtualFile& operator=(VirtualFile&& other) noexcept;
 
     VirtualFile(const VirtualFile&) = delete;
     VirtualFile& operator=(const VirtualFile&) = delete;
 
     //===== Change =====//
 
+    // Changes the name to the given name
+    // Note: Does NOT rename the physical file
     void rename(const FileName& newName);
 
     //===== Info =====//
@@ -59,14 +65,14 @@ struct VirtualFile final
     FileID getID() const;
 
   private:
-    void onAccess() const;
-    void onChange();
+    void onAccess();
+    void onModification();
 
+    FileID file;
     FileInfo info;
-    mutable FileStats stats{};
-    mutable Spinlock lock;
+    FileStats stats{};
     FileHistory history{};
-
+    mutable Spinlock lock;
     friend VirtualDirectory;
 };
 

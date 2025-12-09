@@ -24,6 +24,11 @@ Storage::~Storage()
     TPUNKT_MACROS_GLOBAL_RESET(Storage);
 }
 
+Storage& Storage::GetInstance()
+{
+    TPUNKT_MACROS_GLOBAL_GET(Storage);
+}
+
 StorageStatus Storage::getRoots(UserID user, std::vector<DTODirectoryInfo>& roots)
 {
     for(uint32_t i = 0; i < 10; ++i)
@@ -33,10 +38,6 @@ StorageStatus Storage::getRoots(UserID user, std::vector<DTODirectoryInfo>& root
     return StorageStatus::OK;
 }
 
-Storage& GetStorage()
-{
-    TPUNKT_MACROS_GLOBAL_GET(Storage);
-}
 
 StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointCreateInfo& info)
 {
@@ -122,10 +123,10 @@ StorageStatus Storage::endpointDelete(UserID actor, const EndpointID endpoint)
     return StorageStatus::OK;
 }
 
-uint32_t Storage::getNextID()
+FileID Storage::getNextID()
 {
     SpinlockGuard lock{fileIDLock};
-    return filesID++;
+    return static_cast<FileID>(filesID++);
 }
 
 } // namespace tpunkt

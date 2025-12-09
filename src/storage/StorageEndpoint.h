@@ -23,6 +23,7 @@ enum class StorageStatus : uint8_t
     ERR_NO_UAC_PERM,      // No allowed by uac
     ERR_NO_ADMIN,         // Requires admin but request doesnt have it
     ERR_NO_SUCH_FILE,     // Specified files not found
+    ERR_NO_SUCH_DIR,      // Specified directory not found
     ERR_INVALID_FILE_NAME,
     ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };

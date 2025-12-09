@@ -83,45 +83,12 @@ enum class EndpointID : uint16_t
     INVALID = 0
 };
 
-struct FileID final
+enum class GroupID : uint16_t
 {
-    FileID() = default;
-
-    FileID(const uint32_t uid, const EndpointID endpointId, const bool isDirectory)
-        : uid(uid), endpoint(endpointId), directory(isDirectory)
-    {
-    }
-
-    [[nodiscard]] bool isDirectory() const
-    {
-        return directory;
-    }
-
-    [[nodiscard]] bool isFile() const
-    {
-        return !directory;
-    }
-
-    [[nodiscard]] uint32_t getUID() const
-    {
-        return uid;
-    }
-
-    [[nodiscard]] EndpointID getEndpoint() const
-    {
-        return endpoint;
-    }
-
-    bool operator==(const FileID&) const = default;
-
-  private:
-    uint32_t uid = UINT32_MAX;
-    EndpointID endpoint{UINT16_MAX};
-    bool directory = false;
-    // 1 byte left
+    INVALID = 0
 };
 
-enum class GroupID : uint16_t
+enum class FileID : uint32_t
 {
     INVALID = 0
 };

@@ -23,7 +23,6 @@ struct DirectoryInfo final
     FileName name;
     VirtualDirectory* parent = nullptr; // Only null if it's the root of an endpoint
     bool isHidden = false;
-    FileID id;
 };
 
 struct DirectoryLimits final
@@ -40,34 +39,35 @@ struct DirectoryPerms final
 
 struct DirectoryStats final
 {
-    Timestamp lastEdit;
-    Timestamp lastAccess;
-    Timestamp creation;
+    Timestamp created;
+    Timestamp modified;          // Last time any physical file OR metadata changes
+    Timestamp accessed;          // Last time any physical file was sent
+
+    uint32_t modificationCount = 0;
+    uint32_t accessCount = 0;
 
     uint64_t fileSize = 0;       // Size of all files in bytes
     uint64_t subDirFileSize = 0; // Size of all files in subdirs
 
-    uint32_t accessCount = 0;    // How often directory was accessed
-    uint32_t changeCount = 0;    // How often directory was accessed
-
-    uint32_t fileCount = 0;
-    uint32_t dirCount = 0;
+    uint64_t getTotalSize() const
+    {
+        return fileSize + subDirFileSize;
+    }
 };
 
 struct VirtualDirectory final
 {
     explicit VirtualDirectory(const DirectoryCreationInfo& info, EndpointID endpoint);
-    TPUNKT_MACROS_MOVE_ONLY(VirtualDirectory);
 
     //===== Get =====//
 
     // Returns nullptr of the element identified by the given id - Only local non-recursive search
-    VirtualFile* searchFile(FileID file);
-    VirtualDirectory* searchDir(FileID dir);
+    VirtualFile* findFile(FileID file);
+    VirtualDirectory* findDir(FileID dir);
 
     //===== Contents =====//
 
-    // Returns true and assigns the id if a new file with the given info was added
+    // Adds a new to this directory
     bool fileAdd(const FileCreationInfo& info, FileID& file);
 
     // Returns true if the size of the given file has changed
@@ -90,9 +90,6 @@ struct VirtualDirectory final
     bool dirDelete(FileID dir);
     bool dirDeleteAll();
 
-    std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>>& getDirs();
-    std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>>& getFiles();
-
     //===== Self =====//
 
     void rename(const FileName& name);
@@ -100,33 +97,60 @@ struct VirtualDirectory final
     //===== Info =====//
 
     const DirectoryStats& getStats() const;
-
     const DirectoryLimits& getLimits() const;
-
     FileID getID() const;
 
     //===== DTO =====//
 
   private:
-    VirtualFile* getFile(FileID file);
     bool canHoldSizeChange(uint64_t currSize, uint64_t newSize) const;
 
-    void onAccess() const;
-    void onChange() const;
+    void onAccess();
+    void onModification();
 
     // Called for each parent up to the root
     template <typename Func>
     void iterateParents(Func func) const;
 
+    bool fileDeleteImpl(FileID file);
+
+    FileID id;
     DirectoryInfo info;
-    mutable DirectoryStats stats;
-    mutable Spinlock lock;
+    DirectoryStats stats;
     DirectoryPerms perms;
     DirectoryLimits limits;
 
-    std::forward_list<VirtualFile, SharedBlockAllocator<VirtualFile>> files;
-    std::forward_list<VirtualDirectory, SharedBlockAllocator<VirtualDirectory>> dirs;
+    mutable Spinlock lock;
+
+    std::vector<VirtualFile> files;
+    std::vector<VirtualDirectory> dirs;
 };
+
+template <typename Func>
+void VirtualDirectory::iterateParents(Func func) const
+{
+    VirtualDirectory* current = info.parent;
+
+    // Iterate up with locking
+    while(current != nullptr)
+    {
+        current->lock.lock();
+        const auto changed = func(*current);
+        if(changed)
+        {
+            current->onModification();
+        }
+        current = current->info.parent;
+    }
+
+    // Iterate up to unlock
+    current = info.parent;
+    while(current != nullptr)
+    {
+        current->lock.unlock();
+        current = current->info.parent;
+    }
+}
 
 
 } // namespace tpunkt

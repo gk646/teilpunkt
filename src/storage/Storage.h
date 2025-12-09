@@ -14,9 +14,9 @@ namespace tpunkt
 // Implicitly checks permissions using the UAC
 struct Storage final
 {
-
     Storage();
     ~Storage();
+    static Storage& GetInstance();
 
     //===== Global Functions =====//
 
@@ -46,18 +46,18 @@ struct Storage final
     // Deletes the given endpoint
     StorageStatus endpointDelete(UserID actor, EndpointID endpoint);
 
-    // Returns the next file number
-    uint32_t getNextID();
 
   private:
+    // Returns the next file number
+    FileID getNextID();
+
     std::forward_list<StorageEndpoint, SharedBlockAllocator<StorageEndpoint>> endpoints;
     Spinlock storageLock;
     Spinlock fileIDLock;
     uint32_t endpointID = 0;
     uint32_t filesID = 1;
+    friend VirtualFile;
 };
-
-Storage& GetStorage();
 
 } // namespace tpunkt
 

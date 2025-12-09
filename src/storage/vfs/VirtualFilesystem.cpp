@@ -30,7 +30,7 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
         VirtualDirectory* curr = dirCache.front();
         dirCache.pop_front();
 
-        ptr = curr->searchFile(file);
+        ptr = curr->findFile(file);
         if(ptr != nullptr) [[unlikely]]
         {
             return ptr;
@@ -57,7 +57,7 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
         auto* curr = dirCache.front();
         dirCache.pop_front();
 
-        ptr = curr->searchDir(dir);
+        ptr = curr->findDir(dir);
         if(ptr != nullptr) [[unlikely]]
         {
             return ptr;
