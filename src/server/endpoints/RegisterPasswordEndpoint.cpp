@@ -11,41 +11,41 @@ namespace tpunkt
 
 void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(!AllowRequest(res, req))
+    if(!IsRateLimited(res, req))
     {
         return;
     }
 
-    res->onData(
-        [ res ](std::string_view data, const bool last)
+    const auto handlerFunc = [ res ](std::string_view data, const bool last)
+    {
+        if(!last)
         {
-            if(!last)
-            {
-                EndRequest(res, 431, "Sent data too large");
-                return;
-            }
+            EndRequest(res, 431, "Sent data too large");
+            return;
+        }
 
-            DTOUserSignupPW signupData{};
-            const auto error = glz::read_json(signupData, data);
-            if(error)
-            {
-                EndRequest(res, 400, "Bad JSON");
-                return;
-            }
+        DTOUserSignupPW signupData{};
+        const auto error = glz::read_json(signupData, data);
+        if(error)
+        {
+            EndRequest(res, 400, "Bad JSON");
+            return;
+        }
 
-            Credentials credentials;
-            credentials.type = CredentialsType::PASSWORD;
-            credentials.password = signupData.password;
-            const auto status = GetAuthenticator().userAdd(UserID::SERVER, signupData.name, credentials);
-            if(status != AuthStatus::OK)
-            {
-                EndRequest(res, 400, Authenticator::GetStatusStr(status));
-                return;
-            }
+        Credentials credentials;
+        credentials.type = CredentialsType::PASSWORD;
+        credentials.password = signupData.password;
+        const auto status = GetAuthenticator().userAdd(UserID::SERVER, signupData.name, credentials);
+        if(status != AuthStatus::OK)
+        {
+            EndRequest(res, 400, Authenticator::GetStatusStr(status));
+            return;
+        }
 
-            EndRequest(res, 200);
-        });
+        EndRequest(res, 200);
+    };
 
+    res->onData(handlerFunc);
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
 }
 

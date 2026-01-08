@@ -4,6 +4,7 @@
 #define TPUNKT_PERMISSION_STORAGE_H
 
 #include <vector>
+#include "common/FileID.h"
 #include "fwd.h"
 #include "uac/UserPermissions.h"
 

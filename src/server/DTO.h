@@ -30,7 +30,6 @@ struct DTOUserSignupPK final
         UserName displayName;
         UserName id;
         UserName name;
-
     } user;
     struct
     {

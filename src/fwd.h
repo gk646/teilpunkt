@@ -88,10 +88,6 @@ enum class GroupID : uint16_t
     INVALID = 0
 };
 
-enum class FileID : uint32_t
-{
-    INVALID = 0
-};
 
 } // namespace tpunkt
 

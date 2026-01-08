@@ -3,6 +3,7 @@
 #ifndef TPUNKT_UAC_H
 #define TPUNKT_UAC_H
 
+#include "common/FileID.h"
 #include "datastructures/Spinlock.h"
 #include "fwd.h"
 #include "uac/UserPermissions.h"

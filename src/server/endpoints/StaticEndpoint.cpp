@@ -9,7 +9,7 @@ namespace tpunkt
 
 void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(!AllowRequest(res, req))
+    if(!IsRateLimited(res, req))
     {
         return;
     }

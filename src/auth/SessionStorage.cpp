@@ -105,6 +105,7 @@ bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, Ses
         return false;
     }
 
+
     Session session{metaData};
     token = session.getToken();
     sessionList.push_back(std::move(session));
@@ -115,28 +116,30 @@ bool SessionStorage::add(const UserID user, const SessionMetaData& metaData, Ses
 bool SessionStorage::get(const UserID lookup, const SessionToken& token, const SessionMetaData& metaData, UserID& user)
 {
     UserSessionData* userData = getUserSessionData(lookup);
-    if(userData == nullptr)                 // User is not present yet
+    if(userData == nullptr) // User is not present yet
     {
         return false;
     }
 
-    if(userData->getUser() == lookup)
+    if(userData->getUser() != lookup)
     {
-        auto sessionList = userData->getSessions().get();
-        for(int i = 0; i < sessionList.size(); ++i)
+        return false;
+    }
+
+    auto sessionList = userData->getSessions().get();
+    for(size_t i = 0; i < sessionList.size(); ++i)
+    {
+        auto& session = sessionList[ i ];
+        if(session.getToken() == token) // Found a match
         {
-            auto& session = sessionList[ i ];
-            if(session.getToken() == token) // Found a match
+            if(session.isValid(metaData))
             {
-                if(session.isValid(metaData))
-                {
-                    user = userData->getUser();
-                    return true;
-                }
-                // Metadata does not match
-                sessionList.eraseIndex(i);
-                return false;
+                user = userData->getUser();
+                return true;
             }
+            // Metadata does not match
+            sessionList.eraseIndex(i);
+            return false;
         }
     }
     return false;
@@ -150,7 +153,7 @@ bool SessionStorage::remove(const UserID user, const Timestamp& creation)
         return false;
     }
     auto sessionList = sessionData->getSessions().get();
-    for(int i = 0; i < sessionList.size(); ++i)
+    for(int i = 0; i < (int)sessionList.size(); ++i)
     {
         auto& session = sessionList[ i ];
         if(session.getCreation() == creation)

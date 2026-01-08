@@ -187,9 +187,11 @@ async function initializeFileSystemUI() {
         const roots = await fetchRoots();
         renderSideMenu(roots);
         // Stage 2: Fetch favourites (if needed).
-        const favourites = await fetchFavourites();
+       // const favourites = await fetchFavourites();
         // You could render favourites in a dedicated widget here.
-        console.log('Favourites:', favourites);
+       // console.log('Favourites:', favourites);
+
+
         // Stage 3: Load the initial directory from the first root.
         if (roots.length > 0) {
             navigationStack = [roots[0].file];

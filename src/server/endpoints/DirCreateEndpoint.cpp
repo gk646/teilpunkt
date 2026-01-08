@@ -11,19 +11,19 @@
 namespace tpunkt
 {
 
-void FileDirectoryEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+void DirCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     // Within a single thread this method is threadsafe
     thread_local std::vector<DTODirectoryEntry> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
-    if(!AllowRequest(res, req))
+    if(!IsRateLimited(res, req))
     {
         return;
     }
 
     UserID user{};
-    if(!SessionAuth(res, req, user))
+    if(!HasValidSession(res, req, user))
     {
         return;
     }
@@ -46,7 +46,7 @@ void FileDirectoryEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpReques
             }
 
             StorageEndpoint* endpoint = nullptr;
-            auto status = GetStorage().endpointGet(user, infoRequest.directory.getEndpoint(), endpoint);
+            auto status = Storage::GetInstance().endpointGet(user, {}, endpoint);
             if(status != StorageStatus::OK)
             {
                 EndRequest(res, 400, GetStorageStatusStr(status));

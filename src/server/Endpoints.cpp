@@ -144,7 +144,7 @@ static const char* GetStatusString(const int status)
     }
 }
 
-bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
+bool ServerEndpoint::HasValidSession(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user)
 {
     const std::string_view tokenCookie = GetCookie(req, TPUNKT_AUTH_SESSION_TOKEN_NAME);
     const std::string_view userCookie = GetCookie(req, TPUNKT_AUTH_SESSION_USER_NAME);
@@ -153,7 +153,7 @@ bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest*
     if(tokenCookie.empty() || userCookie.empty() || !StringToNumber(userCookie, lookupUser))
     {
         EndRequest(res, 400, "", false,
-                   [](uWS::HttpResponse<true>* res)
+                   [](uWS::HttpResponse<true>* res) -> void
                    {
                        // Delete both if either one is missing for consistency
                        ClearCookie(res, TPUNKT_AUTH_SESSION_TOKEN_NAME);
@@ -179,7 +179,7 @@ bool ServerEndpoint::SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest*
     return true;
 }
 
-bool ServerEndpoint::AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
+bool ServerEndpoint::IsRateLimited(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     return GetEventLimiter().allowRequest(res, req);
 }
@@ -285,10 +285,9 @@ std::string_view ServerEndpoint::GetCookie(uWS::HttpRequest* req, const char* na
     return {};
 }
 
-
 bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, SessionMetaData& metaData)
 {
-    std::string_view agentStr = GetHeader(req, "user-agent");
+    const std::string_view agentStr = GetHeader(req, "user-agent");
     if(agentStr.empty())
     {
         return false;
@@ -299,7 +298,7 @@ bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest*
 
     // Hash the remote address to only store anonymized data (inplace)
     unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
-    constexpr size_t len = metaData.remoteAddress.capacity();
+    const size_t len = metaData.remoteAddress.size();
     crypto_generichash(content, len, content, len, nullptr, 0);
     return true;
 }

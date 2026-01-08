@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
@@ -11,9 +10,10 @@ namespace tpunkt
 {
 
 // File names must be unique per directory - case-sensitive
+// Not synced == NOT threadsafe
 struct VirtualFilesystem
 {
-    explicit VirtualFilesystem(const DirectoryCreationInfo& info, EndpointID endpoint);
+    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
     TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
     ~VirtualFilesystem();
 
@@ -27,9 +27,8 @@ struct VirtualFilesystem
     VirtualDirectory* getFileDir(FileID file);
 
   private:
-    std::deque<VirtualDirectory*> dirCache;
-    VirtualDirectory* root = nullptr;
-    Spinlock systemLock;
+    VirtualDirectory root;
+    std::deque<VirtualDirectory> iterationCache;
 };
 
 } // namespace tpunkt

@@ -6,7 +6,6 @@
 #include <string_view>
 #include <glaze/json/read.hpp>
 #include <glaze/json/write.hpp>
-#include "auth/Credentials.h"
 
 namespace glz
 {

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #include "server/Endpoints.h"
 #include "server/WebServer.h"
 #include "util/Logging.h"
@@ -15,15 +14,25 @@ void CreateApp(uWS::SSLApp& app)
     app.post("/api/auth/password", AuthPasswordEndpoint::handle);
     //    app.post("/api/auth/passkey-get", AuthPasskeyGetEndpoint::handle);
     // app.post("/api/auth/passkey", AuthPasskeyValidateEndpoint::handle);
+
     // Register
     app.post("/api/register/password", RegisterPasswordEndpoint::handle);
     //    app.get("/api/register/passkey-get", RegisterPasskeyOptionsEndpoint::handle);
     app.post("/api/register/passkey", RegisterPasskeyEndpoint::handle);
-    //  Filesystem
+
+    //  Files
+    app.post("/api/filesystem/file", FileCreateEndpoint::handle);
+    app.del("/api/filesystem/file", FileDeleteEndpoint::handle);
     app.post("/api/filesystem/upload", FileUploadEndpoint::handle);
     app.get("/api/filesystem/download", FileDownloadEndpoint::handle);
-    app.get("/api/filesystem/directory", FileDirectoryEndpoint::handle);
+
+    // Dirs
+    app.post("/api/filesystem/directory", DirCreateEndpoint::handle);
+    app.del("/api/filesystem/directory", DirDeleteEndpoint::handle);
+
+    // Filesystem
     app.get("/api/filesystem/roots", FileRootsEndpoint::handle);
+
     // Misc
     app.get("/*", StaticEndpoint::handle);
 }
@@ -62,24 +71,20 @@ void WebThreadFunc(int threadNum, uWS::SocketContextOptions* options, volatile b
             (void)context;
             auto& receivingApp = GetNextHandler();
             receivingApp.getLoop()->defer([ fd, &receivingApp ]() { receivingApp.adoptSocket(fd); });
-            return (LIBUS_SOCKET_DESCRIPTOR)-1;
+            return -1;
         });
     app->run();
-
     delete app;
 }
-
 
 namespace global
 {
 WebServer* WebServer;
 }
 
-
 WebServer::WebServer(const int threads) : staticFiles(TPUNKT_INSTANCE_STATIC_FILES_DIR), threadCount(threads)
 {
     TPUNKT_MACROS_GLOBAL_ASSIGN(WebServer);
-
     webThreads.reserve(threads + 1);
 
     uWS::SocketContextOptions options{
@@ -116,11 +121,6 @@ WebServer::~WebServer()
     }
 }
 
-WebServer& GetWebServer()
-{
-    TPUNKT_MACROS_GLOBAL_GET(WebServer);
-}
-
 const StaticFileStorage& WebServer::getStaticFileStorage()
 {
     return staticFiles;
@@ -130,6 +130,11 @@ uWS::SSLApp& WebServer::getNextHandler()
 {
     roundRobinNum = (roundRobinNum + 1) % threadCount;
     return *webThreads[ roundRobinNum ].app;
+}
+
+WebServer& GetWebServer()
+{
+    TPUNKT_MACROS_GLOBAL_GET(WebServer);
 }
 
 

@@ -3,6 +3,7 @@
 #ifndef TPUNKT_EVENT_DATA_H
 #define TPUNKT_EVENT_DATA_H
 
+#include "common/FileID.h"
 #include "fwd.h"
 
 namespace tpunkt

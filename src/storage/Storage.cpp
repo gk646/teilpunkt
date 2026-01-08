@@ -33,11 +33,10 @@ StorageStatus Storage::getRoots(UserID user, std::vector<DTODirectoryInfo>& root
 {
     for(uint32_t i = 0; i < 10; ++i)
     {
-        roots.push_back({"TestFile", {i, EndpointID{i}, true}});
+        roots.push_back({"TestFile", {i, true}});
     }
     return StorageStatus::OK;
 }
-
 
 StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointCreateInfo& info)
 {
@@ -49,7 +48,7 @@ StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointC
         return StorageStatus::ERR_NO_ADMIN;
     }
 
-    const auto eid = EndpointID{endpointID++};
+    const auto eid = static_cast<EndpointID>(endpointID++);
     if(StorageEndpoint::CreateDirs(eid))
     {
         endpoints.emplace_front(info, eid, actor);
@@ -123,10 +122,10 @@ StorageStatus Storage::endpointDelete(UserID actor, const EndpointID endpoint)
     return StorageStatus::OK;
 }
 
-FileID Storage::getNextID()
+uint32_t Storage::getNextID()
 {
     SpinlockGuard lock{fileIDLock};
-    return static_cast<FileID>(filesID++);
+    return filesID++;
 }
 
 } // namespace tpunkt

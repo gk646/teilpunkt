@@ -3,6 +3,7 @@
 #ifndef TPUNKT_STORAGE_H
 #define TPUNKT_STORAGE_H
 
+#include <forward_list>
 #include <vector>
 #include "datastructures/Spinlock.h"
 #include "server/DTO.h"
@@ -49,14 +50,15 @@ struct Storage final
 
   private:
     // Returns the next file number
-    FileID getNextID();
+    uint32_t getNextID();
 
-    std::forward_list<StorageEndpoint, SharedBlockAllocator<StorageEndpoint>> endpoints;
+    std::forward_list<StorageEndpoint> endpoints;
     Spinlock storageLock;
     Spinlock fileIDLock;
     uint32_t endpointID = 0;
     uint32_t filesID = 1;
     friend VirtualFile;
+    friend VirtualDirectory;
 };
 
 } // namespace tpunkt

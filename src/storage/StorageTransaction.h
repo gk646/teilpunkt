@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #ifndef TPUNKT_STORAGE_TRANSACTION_H
 #define TPUNKT_STORAGE_TRANSACTION_H
 
@@ -14,6 +13,7 @@ namespace tpunkt
 struct StorageTransaction
 {
     explicit StorageTransaction(DataStore& store);
+    TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
     virtual ~StorageTransaction() = default;
 
     // Commit the operation
@@ -30,10 +30,6 @@ struct StorageTransaction
     DataStore* datastore = nullptr; // Always valid
 
     [[nodiscard]] bool shouldAbort() const;
-    TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
-
-  protected:
-    bool isStarted = false;
 
   private:
     bool isCommited = false;
@@ -42,8 +38,7 @@ struct StorageTransaction
 
 struct CreateFileTransaction final : StorageTransaction
 {
-    explicit CreateFileTransaction(DataStore& store, VirtualDirectory& parent, VirtualFilesystem& system,
-                                   const FileCreationInfo& info, FileID dir);
+    CreateFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info, FileID dir);
     ~CreateFileTransaction() override;
 
     // Queues the create-action
@@ -52,7 +47,6 @@ struct CreateFileTransaction final : StorageTransaction
   private:
     FileCreationInfo info;
     VirtualFilesystem* system = nullptr;
-    VirtualDirectory* parent;
     FileID dir;
     FileID file;
     TPUNKT_MACROS_STRUCT(CreateFileTransaction);

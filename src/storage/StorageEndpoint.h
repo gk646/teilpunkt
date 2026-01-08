@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #ifndef TPUNKT_STORAGE_ENDPOINT_H
 #define TPUNKT_STORAGE_ENDPOINT_H
 
@@ -25,6 +24,7 @@ enum class StorageStatus : uint8_t
     ERR_NO_SUCH_FILE,     // Specified files not found
     ERR_NO_SUCH_DIR,      // Specified directory not found
     ERR_INVALID_FILE_NAME,
+    ERR_NO_UNIQUE_NAME,
     ERR_NO_SUCH_ENDPOINT, // Endpoint not found
 };
 
@@ -43,7 +43,7 @@ struct StorageEndpointCreateInfo final
     StorageEndpointType type{};
 };
 
-struct StorageEndpointInfo final
+struct StorageEndpointData final
 {
     FileName name;
     uint64_t maxSize = 0; // Max size in bytes
@@ -55,7 +55,7 @@ struct StorageEndpointInfo final
 // Datastore stores its files in /endpoints/{id}
 struct StorageEndpoint final
 {
-    explicit StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID endpoint, UserID creator);
+     StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID endpoint, UserID creator);
     TPUNKT_MACROS_MOVE_ONLY(StorageEndpoint);
     ~StorageEndpoint();
 
@@ -87,7 +87,7 @@ struct StorageEndpoint final
 
     //===== Storage Info =====//
 
-    [[nodiscard]] const StorageEndpointInfo& getInfo() const;
+    [[nodiscard]] const StorageEndpointData& getInfo() const;
 
     // True if no active usages
     [[nodiscard]] bool canBeRemoved() const;
@@ -96,8 +96,9 @@ struct StorageEndpoint final
 
   private:
     VirtualFilesystem virtualFilesystem;
-    StorageEndpointInfo info;
+    StorageEndpointData data;
     DataStore* dataStore = nullptr;
+    Spinlock lock;
 };
 
 } // namespace tpunkt

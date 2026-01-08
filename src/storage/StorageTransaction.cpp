@@ -2,12 +2,13 @@
 
 #include <HttpResponse.h>
 #include "storage/StorageTransaction.h"
+#include "storage/vfs/VirtualFilesystem.h"
 #include "vfs/VirtualDirectory.h"
 
 namespace tpunkt
 {
 
-StorageTransaction::StorageTransaction(DataStore& store) : datastore(&store), isStarted(true)
+StorageTransaction::StorageTransaction(DataStore& store) : datastore(&store)
 {
 }
 
@@ -20,6 +21,7 @@ bool StorageTransaction::getIsFinished() const
 {
     return isFinished;
 }
+
 void StorageTransaction::setFinished()
 {
     isFinished = true;
@@ -27,75 +29,62 @@ void StorageTransaction::setFinished()
 
 bool StorageTransaction::shouldAbort() const
 {
-    return isStarted && (!isFinished || !isCommited);
+    return !isFinished || !isCommited;
 }
 
-CreateFileTransaction::CreateFileTransaction(DataStore& store, VirtualDirectory& parent, VirtualFilesystem& system,
-                                             const FileCreationInfo& info, const FileID dir)
-    : StorageTransaction(store), info(info), system(&system), parent(&parent), dir(dir)
+CreateFileTransaction::CreateFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info,
+                                             const FileID dir)
+    : StorageTransaction(store), info(info), system(&system), dir(dir)
 {
 }
 
 CreateFileTransaction::~CreateFileTransaction()
 {
-    if(!isStarted)
+    if(shouldAbort())
     {
-        LOG_ERROR("Transaction not started");
-        response->end("Transaction not started");
+        VirtualDirectory* createDir = system->getDir(dir);
+        if(createDir == nullptr)
+        {
+            LOG_WARNING("Failed to revert transaction: Directory already deleted");
+        }
+        else if(!createDir->fileDelete(file))
+        {
+            LOG_WARNING("Failed to revert transaction: Filed already deleted");
+        }
+
+        const auto callback = [ & ](const bool success)
+        {
+            if(!success)
+            {
+                // TODO requeue task - make sure to delete
+                LOG_ERROR("Failed to revert transaction: Datastore failed to remove file");
+            }
+            else
+            {
+                auto endFunc = [ & ]
+                {
+                    response->writeStatus("500");
+                    response->end();
+                };
+                loop->defer(endFunc);
+            }
+        };
+        datastore->deleteFile(file.getUID(), callback);
     }
     else
     {
-        if(shouldAbort())
+        auto endFunc = [ & ]
         {
-            (void)parent->fileDelete(file);
-
-            auto cb = [ & ](const bool success)
-            {
-                if(!success)
-                {
-                    // TODO requeue task - make sure to delete
-                    LOG_ERROR("Failed to delete file - requeuing");
-                }
-                else
-                {
-                    auto endFunc = [ & ]
-                    {
-                        response->writeStatus("500");
-                        response->end();
-                    };
-                    loop->defer(endFunc);
-                }
-            };
-
-            datastore->deleteFile(file.getUID(), cb);
-        }
-        else
-        {
-            auto endFunc = [ & ]
-            {
-                response->writeStatus("200 OK");
-                response->end();
-            };
-            loop->defer(endFunc);
-        }
+            response->writeStatus("200 OK");
+            response->end();
+        };
+        loop->defer(endFunc);
     }
 }
 
 bool CreateFileTransaction::start(ResultCb callback)
 {
-    isStarted = true;
-
-    if(!parent->fileAdd(info, file))
-    {
-        return false;
-    }
-
-    if(!datastore->createFile(file.getUID(), callback))
-    {
-        return false;
-    }
-
-    return true;
+    return datastore->createFile(file.getUID(), callback);
 }
 
 } // namespace tpunkt

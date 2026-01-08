@@ -3,7 +3,7 @@
 #ifndef TPUNKT_WRAPPED_KEY_H
 #define TPUNKT_WRAPPED_KEY_H
 
-#include "fwd.h"
+#include "common/FileID.h"
 
 namespace tpunkt
 {

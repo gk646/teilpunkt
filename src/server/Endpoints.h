@@ -13,14 +13,13 @@ struct ServerEndpoint
 {
     // Returns true and assigns user if request has a valid session cookie
     // IFF false automatically ends the request with either 400 or 401
-    static bool SessionAuth(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user);
+    static bool HasValidSession(uWS::HttpResponse<true>* res, uWS::HttpRequest* req, UserID& user);
 
     // Returns true if the request is allowed
-    static bool AllowRequest(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+    static bool IsRateLimited(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 
     // Returns true if request is empty or too large
     static bool IsRequestEmpty(uWS::HttpResponse<true>* res, const std::string_view& data, bool isLast);
-
     static bool IsRequestTooLarge(uWS::HttpResponse<true>* res, const std::string_view& data, bool isLast);
 
     using ResponseFunc = void (*)(uWS::HttpResponse<true>* res);
@@ -83,7 +82,17 @@ struct RegisterPasskeyEndpoint final : ServerEndpoint
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-//===== Filesystem =====//
+//===== Files =====//
+
+struct FileCreateEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct FileDeleteEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
 
 struct FileUploadEndpoint final : ServerEndpoint
 {
@@ -95,7 +104,14 @@ struct FileDownloadEndpoint final : ServerEndpoint
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-struct FileDirectoryEndpoint final : ServerEndpoint
+//===== Download =====//
+
+struct DirCreateEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct DirDeleteEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
@@ -107,12 +123,10 @@ struct FileRootsEndpoint final : ServerEndpoint
 
 //===== Misc =====//
 
-
 struct StaticEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
-
 
 } // namespace tpunkt
 

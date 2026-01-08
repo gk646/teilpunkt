@@ -3,6 +3,7 @@
 #ifndef TPUNKT_VIRTUAL_FILE_H
 #define TPUNKT_VIRTUAL_FILE_H
 
+#include "common/FileID.h"
 #include "datastructures/FixedString.h"
 #include "datastructures/Spinlock.h"
 #include "datastructures/Timestamp.h"
@@ -46,12 +47,6 @@ struct VirtualFile final
 {
     explicit VirtualFile(const FileCreationInfo& info);
 
-    VirtualFile(VirtualFile&& other) noexcept;
-    VirtualFile& operator=(VirtualFile&& other) noexcept;
-
-    VirtualFile(const VirtualFile&) = delete;
-    VirtualFile& operator=(const VirtualFile&) = delete;
-
     //===== Change =====//
 
     // Changes the name to the given name
@@ -72,7 +67,6 @@ struct VirtualFile final
     FileInfo info;
     FileStats stats{};
     FileHistory history{};
-    mutable Spinlock lock;
     friend VirtualDirectory;
 };
 

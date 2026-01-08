@@ -123,7 +123,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
     {
         {
             const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileExists("File1");
+            auto result = baseDir.fileNameExists("File1");
             REQUIRE(result);
             CheckAccess(baseDir, stats, true);
             CheckChange(baseDir, stats, false);
@@ -131,7 +131,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
 
         {
             const DirectoryStats stats = baseDir.getStats();
-            auto result = baseDir.fileExists("File111");
+            auto result = baseDir.fileNameExists("File111");
             REQUIRE_FALSE(result);
             CheckAccess(baseDir, stats, true);
             CheckChange(baseDir, stats, false);
@@ -198,12 +198,12 @@ TEST_CASE("Virtual Directory Simple Dir Operations")
 
     {
         const DirectoryStats stats = baseDir.getStats();
-        auto result = baseDir.dirExists("Sub1");
+        auto result = baseDir.dirNameExists("Sub1");
         REQUIRE(result);
         CheckAccess(baseDir, stats, true);
         CheckChange(baseDir, stats, false);
 
-        result = baseDir.dirExists("Sub11");
+        result = baseDir.dirNameExists("Sub11");
         REQUIRE_FALSE(result);
     }
 

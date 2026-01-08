@@ -17,13 +17,13 @@ void FileRootsEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
     thread_local std::vector<DTODirectoryInfo> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
-    if(!AllowRequest(res, req))
+    if(!IsRateLimited(res, req))
     {
         return;
     }
 
     UserID user{};
-    if(!SessionAuth(res, req, user))
+    if(!HasValidSession(res, req, user))
     {
         return;
     }
@@ -37,7 +37,7 @@ void FileRootsEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
             }
 
             // Get roots
-            const auto status = GetStorage().getRoots(user, collector);
+            const auto status = Storage::GetInstance().getRoots(user, collector);
             if(status != StorageStatus::OK)
             {
                 EndRequest(res, 400, GetStorageStatusStr(status));

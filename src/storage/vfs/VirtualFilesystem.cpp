@@ -1,16 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
-#include "instance/InstanceConfig.h"
-#include "storage/Storage.h"
 #include "storage/vfs/VirtualFilesystem.h"
 
 namespace tpunkt
 {
 
-VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info, const EndpointID endpoint)
+VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info) : root(info)
 {
-    root = SharedBlockAllocator<VirtualDirectory>{}.allocate(1);
-    new(root) VirtualDirectory(info, endpoint);
 }
 
 VirtualFilesystem::~VirtualFilesystem()
@@ -19,58 +14,58 @@ VirtualFilesystem::~VirtualFilesystem()
 
 VirtualFile* VirtualFilesystem::getFile(const FileID file)
 {
-    SpinlockGuard guard{systemLock};
-
-    dirCache.clear();
-    dirCache.push_back(root);
-
-    VirtualFile* ptr = nullptr;
-    while(!dirCache.empty()) [[likely]]
+    iterationCache.clear(); // For non recursive iteration
+    for(auto& dir : root.getDirs())
     {
-        VirtualDirectory* curr = dirCache.front();
-        dirCache.pop_front();
-
-        ptr = curr->findFile(file);
-        if(ptr != nullptr) [[unlikely]]
-        {
-            return ptr;
-        }
-
-        for(auto& dir : curr->getDirs())
-        {
-            dirCache.push_back(&dir);
-        }
+        iterationCache.push_back(dir);
     }
 
+    while(!iterationCache.empty())
+    {
+        auto& first = iterationCache.front();
+        for(auto& itFile : first.getFiles())
+        {
+            if(itFile.getID() == file)
+            {
+                return &itFile;
+            }
+        }
+        for(auto& dir : first.getDirs())
+        {
+            iterationCache.push_back(dir);
+        }
+        iterationCache.pop_front();
+    }
     return nullptr;
 }
 
 VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
 {
-    SpinlockGuard guard{systemLock};
-    dirCache.clear();
-    dirCache.push_back(root);
-
-    VirtualDirectory* ptr = nullptr;
-    while(!dirCache.empty()) [[likely]]
+    iterationCache.clear();
+    for(auto& itDir : root.getDirs())
     {
-        auto* curr = dirCache.front();
-        dirCache.pop_front();
-
-        ptr = curr->findDir(dir);
-        if(ptr != nullptr) [[unlikely]]
-        {
-            return ptr;
-        }
-
-        for(auto& savedDir : curr->getDirs())
-        {
-            dirCache.push_back(&savedDir);
-        }
+        iterationCache.push_back(itDir);
     }
 
+    while(!iterationCache.empty())
+    {
+        auto& first = iterationCache.front();
+        for(auto& itDir : first.getDirs())
+        {
+            if(itDir.getID() == dir)
+            {
+                return &itDir;
+            }
+            iterationCache.push_back(itDir);
+
+        }
+        iterationCache.pop_front();
+    }
     return nullptr;
 }
 
+VirtualDirectory* VirtualFilesystem::getFileDir(FileID file)
+{
+}
 
 } // namespace tpunkt

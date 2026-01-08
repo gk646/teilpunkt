@@ -14,67 +14,67 @@ namespace tpunkt
 
 void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(!AllowRequest(res, req))
+    if(!IsRateLimited(res, req))
     {
         return;
     }
 
-    res->onData(
-        [ res, req ](std::string_view data, const bool last)
+    const auto handlerFunc = [ res, req ](std::string_view data, const bool last)
+    {
+        if(!last)
         {
-            if(!last)
-            {
-                EndRequest(res, 431, "Sent data too large");
-                return;
-            }
+            EndRequest(res, 431, "Sent data too large");
+            return;
+        }
 
-            DTOUserLoginPW authData{};
-            const auto error = glz::read_json(authData, data);
-            if(error)
-            {
-                EndRequest(res, 400, "Bad JSON");
-                return;
-            }
+        DTOUserLoginPW authData{};
+        const auto error = glz::read_json(authData, data);
+        if(error)
+        {
+            EndRequest(res, 400, "Bad JSON");
+            return;
+        }
 
-            UserID user{};
-            Credentials credentials{};
-            credentials.type = CredentialsType::PASSWORD;
-            credentials.password = authData.password;
+        UserID user{};
+        Credentials credentials{};
+        credentials.type = CredentialsType::PASSWORD;
+        credentials.password = authData.password;
 
-            auto status = GetAuthenticator().userLogin(authData.name, credentials, user);
-            if(status != AuthStatus::OK)
-            {
-                EndRequest(res, 400, Authenticator::GetStatusStr(status));
-                return;
-            }
+        auto status = GetAuthenticator().userLogin(authData.name, credentials, user);
+        if(status != AuthStatus::OK)
+        {
+            EndRequest(res, 400, Authenticator::GetStatusStr(status));
+            return;
+        }
 
-            SessionMetaData metaData{};
-            if(!GetMetaData(res, req, metaData))
-            {
-                EndRequest(res, 400, "Missing headers");
-                return;
-            }
+        SessionMetaData metaData{};
+        if(!GetMetaData(res, req, metaData))
+        {
+            EndRequest(res, 400, "Missing headers");
+            return;
+        }
 
-            SecureWrapper<SessionToken> token;
-            status = GetAuthenticator().sessionAdd(user, metaData, token);
-            if(status != AuthStatus::OK)
-            {
-                EndRequest(res, 400, Authenticator::GetStatusStr(status));
-                return;
-            }
+        SecureWrapper<SessionToken> token;
+        status = GetAuthenticator().sessionAdd(user, metaData, token);
+        if(status != AuthStatus::OK)
+        {
+            EndRequest(res, 400, Authenticator::GetStatusStr(status));
+            return;
+        }
 
-            const uint32_t expiration = GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_SECS);
-            auto reader = token.get();
-            SetCookie(res, TPUNKT_AUTH_SESSION_TOKEN_NAME, reader.get().c_str(), expiration);
+        const uint32_t expiration = GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_SECS);
+        auto reader = token.get();
+        SetCookie(res, TPUNKT_AUTH_SESSION_TOKEN_NAME, reader.get().c_str(), expiration);
 
-            // Set user id cookie
-            char numBuf[ 12 ];
-            NumberToString(numBuf, 12, static_cast<uint32_t>(user));
-            SetUnsafeCookie(res, TPUNKT_AUTH_SESSION_USER_NAME, numBuf, expiration);
+        // Set user id cookie
+        char numBuf[ 12 ];
+        NumberToString(numBuf, 12, static_cast<uint32_t>(user));
+        SetUnsafeCookie(res, TPUNKT_AUTH_SESSION_USER_NAME, numBuf, expiration);
 
-            EndRequest(res, 200);
-        });
+        EndRequest(res, 200);
+    };
 
+    res->onData(handlerFunc);
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
 }
 

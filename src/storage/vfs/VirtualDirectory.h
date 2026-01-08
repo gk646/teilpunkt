@@ -3,7 +3,8 @@
 #ifndef TPUNKT_VIRTUAL_DIRECTORY_H
 #define TPUNKT_VIRTUAL_DIRECTORY_H
 
-#include <forward_list>
+#include <vector>
+#include "common/FileID.h"
 #include "datastructures/BlockAllocator.h"
 #include "storage/vfs/VirtualFile.h"
 
@@ -57,7 +58,7 @@ struct DirectoryStats final
 
 struct VirtualDirectory final
 {
-    explicit VirtualDirectory(const DirectoryCreationInfo& info, EndpointID endpoint);
+    VirtualDirectory(const DirectoryCreationInfo& info);
 
     //===== Get =====//
 
@@ -67,14 +68,11 @@ struct VirtualDirectory final
 
     //===== Contents =====//
 
-    // Adds a new to this directory
+    // Adds a new file to this directory
     bool fileAdd(const FileCreationInfo& info, FileID& file);
 
     // Returns true if the size of the given file has changed
     bool fileChange(FileID file, uint64_t newFileSize);
-
-    // Returns true if a file with the given name exists
-    bool fileExists(const FileName& name) const;
 
     // Returns true if the given file is deleted - deletes all its subdirs and subfiles
     bool fileDelete(FileID fileid);
@@ -84,7 +82,9 @@ struct VirtualDirectory final
     bool dirAdd(const DirectoryCreationInfo& info, FileID& dir);
 
     // Returns true if a directory with the given name exists
-    bool dirExists(const FileName& name) const;
+    [[nodiscard]] bool dirNameExists(const FileName& name) const;
+    // Returns true if a file with the given name exists
+    [[nodiscard]] bool fileNameExists(const FileName& name) const;
 
     // Returns true if a directory was removed
     bool dirDelete(FileID dir);
@@ -96,14 +96,16 @@ struct VirtualDirectory final
 
     //===== Info =====//
 
-    const DirectoryStats& getStats() const;
-    const DirectoryLimits& getLimits() const;
-    FileID getID() const;
+    [[nodiscard]] const DirectoryStats& getStats() const;
+    [[nodiscard]] const DirectoryLimits& getLimits() const;
+    [[nodiscard]] FileID getID() const;
+    std::vector<VirtualFile>& getFiles();
+    std::vector<VirtualDirectory>& getDirs();
 
     //===== DTO =====//
 
   private:
-    bool canHoldSizeChange(uint64_t currSize, uint64_t newSize) const;
+    [[nodiscard]] bool canHoldSizeChange(uint64_t currSize, uint64_t newSize) const;
 
     void onAccess();
     void onModification();
@@ -119,9 +121,6 @@ struct VirtualDirectory final
     DirectoryStats stats;
     DirectoryPerms perms;
     DirectoryLimits limits;
-
-    mutable Spinlock lock;
-
     std::vector<VirtualFile> files;
     std::vector<VirtualDirectory> dirs;
 };
@@ -134,7 +133,6 @@ void VirtualDirectory::iterateParents(Func func) const
     // Iterate up with locking
     while(current != nullptr)
     {
-        current->lock.lock();
         const auto changed = func(*current);
         if(changed)
         {
@@ -147,7 +145,6 @@ void VirtualDirectory::iterateParents(Func func) const
     current = info.parent;
     while(current != nullptr)
     {
-        current->lock.unlock();
         current = current->info.parent;
     }
 }

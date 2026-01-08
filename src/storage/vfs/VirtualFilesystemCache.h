@@ -5,6 +5,7 @@
 
 #include <list>
 #include <ankerl/unordered_dense.h>
+#include "common/FileID.h"
 #include "fwd.h"
 
 namespace tpunkt

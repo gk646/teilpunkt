@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <cstdio>
-#include <sys/stat.h>
 #include "crypto/WrappedKey.h"
 #include "datastructures/FixedString.h"
 #include "datastructures/SecureEraser.h"
@@ -36,12 +35,16 @@ const char* GetStorageStatusStr(const StorageStatus status)
             return "No such endpoint";
         case StorageStatus::OK:
             return "OK";
+        case StorageStatus::ERR_NO_SUCH_DIR:
+            return "No such directory";
+        case StorageStatus::ERR_NO_UNIQUE_NAME:
+            return "No unique name";
     }
     return nullptr;
 }
 
 StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const EndpointID endpoint, const UserID creator)
-    : virtualFilesystem(DirectoryCreationInfo{info.name, info.maxSize, nullptr, creator}, endpoint)
+    : virtualFilesystem({.name = info.name, .maxSize = info.maxSize, .parent = nullptr, .creator = creator})
 {
     switch(info.type)
     {
@@ -49,7 +52,7 @@ StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const En
             dataStore = new LocalFileSystemDatastore(endpoint);
             break;
         case StorageEndpointType::REMOTE_FILE_SYSTEM:
-            LOG_CRITICAL("Not supported");
+            LOG_CRITICAL("REMOTE_FILE_SYSTEM Not supported");
             break;
     }
 }
@@ -61,31 +64,36 @@ StorageEndpoint::~StorageEndpoint()
 StorageStatus StorageEndpoint::fileCreate(const UserID actor, const FileID dir, const FileCreationInfo& info,
                                           CreateFileTransaction& action)
 {
+    SpinlockGuard guard{lock};
+    if(!IsValidFilename(info.name))
+    {
+        LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        return StorageStatus::ERR_INVALID_FILE_NAME;
+    }
+
     if(GetUAC().userCanAction(actor, dir, PermissionFlag::CREATE) != UACStatus::OK)
     {
         LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
-    VirtualDirectory* parent = virtualFilesystem.getDir(dir);
-
-    if(parent == nullptr)
+    VirtualDirectory* directory = virtualFilesystem.getDir(dir);
+    if(directory == nullptr)
     {
         LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
-    // CooperativeSpinlockGuard guard{parent->lock, false}; // Read lock
-
-    if(parent->fileExists(info.name) || !IsValidFilename(info.name))
+    FileID newId{};
+    if(directory->fileAdd(info, newId))
     {
         LOG_EVENT(actor, Filesystem, FileSystemCreateFile, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
-        return StorageStatus::ERR_INVALID_FILE_NAME;
+        return StorageStatus::ERR_NO_UNIQUE_NAME;
     }
 
-    new(&action) CreateFileTransaction{*dataStore, *parent, virtualFilesystem, info, dir};
-
+    new(&action) CreateFileTransaction{*dataStore, virtualFilesystem, info, dir};
     LOG_EVENT(actor, Filesystem, FileSystemCreateFile, INFO_SUCCESS, FilesystemEventData{});
+
     return StorageStatus::OK;
 }
 
@@ -121,9 +129,9 @@ StorageStatus StorageEndpoint::dirGetInfo(UserID user, FileID dir, std::vector<D
     return StorageStatus::OK;
 }
 
-const StorageEndpointInfo& StorageEndpoint::getInfo() const
+const StorageEndpointData& StorageEndpoint::getInfo() const
 {
-    return info;
+    return data;
 }
 
 bool StorageEndpoint::CreateDirs(EndpointID eid)
