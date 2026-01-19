@@ -37,14 +37,22 @@ struct DataStore;
 struct ReadFileTransaction;
 struct StorageTransaction;
 struct CreateFileTransaction;
-struct DTOFileInfo;
-struct DTOFileDownload;
 struct FileCreationInfo;
 struct VirtualFilesystem;
 struct VirtualFile;
-struct DTODirectoryInfo;
-struct DTOFileStats;
-struct DTOSessionInfo;
+struct FileInfo;
+struct FileStats;
+
+namespace DTO
+{
+
+struct DirectoryInfo;
+struct DirectoryEntry;
+struct SessionInfo;
+struct FileDownload;
+
+} // namespace DTO
+
 struct SessionMetaData;
 
 //===== Fixed String =====//

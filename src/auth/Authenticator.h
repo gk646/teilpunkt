@@ -23,11 +23,11 @@ enum class AuthStatus : uint8_t
     ERR_NO_ADMIN,          // Action requires admin but actor is not
 };
 
-
 // Every method is atomic
 struct Authenticator final
 {
     static const char* GetStatusStr(AuthStatus status);
+    static Authenticator& GetInstance();
 
     //===== User Management =====//
 
@@ -58,7 +58,7 @@ struct Authenticator final
     AuthStatus sessionAuth(UserID lookup, const SessionToken& token, const SessionMetaData& metaData, UserID& user);
 
     // Collects info of all session from the given user
-    AuthStatus sessionGetInfo(UserID actor, std::vector<DTOSessionInfo>& collector);
+    AuthStatus sessionGetInfo(UserID actor, std::vector<DTO::SessionInfo>& collector);
 
     //===== User Data =====//
     // Part of the authenticator as data access needs the same atomicity as adding/deleting users
@@ -80,8 +80,6 @@ struct Authenticator final
     UserStorage userStore;       // Saves all userdata
     TPUNKT_MACROS_STRUCT(Authenticator);
 };
-
-Authenticator& GetAuthenticator();
 
 } // namespace tpunkt
 

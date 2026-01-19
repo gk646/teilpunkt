@@ -29,9 +29,10 @@ void CreateApp(uWS::SSLApp& app)
     // Dirs
     app.post("/api/filesystem/directory", DirCreateEndpoint::handle);
     app.del("/api/filesystem/directory", DirDeleteEndpoint::handle);
+    app.post("/api/filesystem/directoryLookup", DirLookupEndpoint::handle);
 
     // Filesystem
-    app.get("/api/filesystem/roots", FileRootsEndpoint::handle);
+    app.get("/api/filesystem/roots", DirRootsEndpoint::handle);
 
     // Misc
     app.get("/*", StaticEndpoint::handle);

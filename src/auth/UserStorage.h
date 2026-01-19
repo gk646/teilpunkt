@@ -10,12 +10,11 @@
 
 namespace tpunkt
 {
+
 // Contains primitives to access user data - every function does only what it advertises
 // Returns only a simple status code - true on success - false on failure
 struct UserStorage final
 {
-    UserStorage();
-    ~UserStorage();
 
     // Returns true if a new user with is added - name must be unique
     bool add(const UserName& name, const Credentials& credentials);
@@ -33,9 +32,13 @@ struct UserStorage final
     [[nodiscard]] bool nameExists(const UserName& name) const;
 
   private:
+    UserStorage();
+    ~UserStorage();
+
     std::vector<SecureBox<User>> users;
     SecureWrapper<uint32_t> currUserID; // Chosen randomly once - then incremented for each new user
     TPUNKT_MACROS_STRUCT(UserStorage);
+    friend Authenticator;
 };
 
 } // namespace tpunkt

@@ -69,8 +69,6 @@ struct UserSessionData final
 // Stores and manages all session data
 struct SessionStorage final
 {
-    SessionStorage() = default;
-
     // Returns true if either a new session was created or an existing reused and token is set to the session token
     bool add(UserID user, const SessionMetaData& metaData, SessionToken& token);
 
@@ -80,13 +78,16 @@ struct SessionStorage final
     // Returns true if the session of the user with the given timestamp was removed
     bool remove(UserID user, const Timestamp& creation);
 
-    void getInfo(UserID user, std::vector<DTOSessionInfo>& collector);
+    void getInfo(UserID user, std::vector<DTO::SessionInfo>& collector);
 
   private:
+    SessionStorage() = default;
+
     UserSessionData* getUserSessionData(UserID userID);
 
     std::vector<UserSessionData> sessions;
     TPUNKT_MACROS_STRUCT(SessionStorage);
+    friend Authenticator;
 };
 
 } // namespace tpunkt

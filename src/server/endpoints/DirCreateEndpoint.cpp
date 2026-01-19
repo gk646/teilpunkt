@@ -14,7 +14,7 @@ namespace tpunkt
 void DirCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     // Within a single thread this method is threadsafe
-    thread_local std::vector<DTODirectoryEntry> collector;
+    thread_local std::vector<DTO::DirectoryEntry> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
     if(!IsRateLimited(res, req))
@@ -37,7 +37,7 @@ void DirCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
                 return;
             }
 
-            DTODirectoryRequest infoRequest;
+            DTO::DirectoryRequest infoRequest;
             auto error = glz::read_json(infoRequest, data);
             if(error)
             {

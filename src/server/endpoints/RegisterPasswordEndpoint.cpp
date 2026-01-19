@@ -24,7 +24,7 @@ void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpReq
             return;
         }
 
-        DTOUserSignupPW signupData{};
+        DTO::UserSignupPW signupData{};
         const auto error = glz::read_json(signupData, data);
         if(error)
         {
@@ -35,7 +35,7 @@ void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpReq
         Credentials credentials;
         credentials.type = CredentialsType::PASSWORD;
         credentials.password = signupData.password;
-        const auto status = GetAuthenticator().userAdd(UserID::SERVER, signupData.name, credentials);
+        const auto status = Authenticator::GetInstance().userAdd(UserID::SERVER, signupData.name, credentials);
         if(status != AuthStatus::OK)
         {
             EndRequest(res, 400, Authenticator::GetStatusStr(status));

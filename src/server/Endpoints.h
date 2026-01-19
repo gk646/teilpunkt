@@ -48,23 +48,6 @@ struct ServerEndpoint
     static void ClearCookie(uWS::HttpResponse<true>* res, const char* key);
 };
 
-//===== Auth =====//
-
-struct AuthPasswordEndpoint final : ServerEndpoint
-{
-    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
-};
-
-struct AuthPasskeyGetEndpoint final : ServerEndpoint
-{
-    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
-};
-
-struct AuthPasskeyValidateEndpoint final : ServerEndpoint
-{
-    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
-};
-
 //===== Register =====//
 
 struct RegisterPasswordEndpoint final : ServerEndpoint
@@ -78,6 +61,23 @@ struct RegisterPasskeyOptionsEndpoint final : ServerEndpoint
 };
 
 struct RegisterPasskeyEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+//===== Auth =====//
+
+struct AuthPasswordEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct AuthPasskeyGetEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct AuthPasskeyValidateEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
@@ -104,7 +104,7 @@ struct FileDownloadEndpoint final : ServerEndpoint
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-//===== Download =====//
+//===== Directories =====//
 
 struct DirCreateEndpoint final : ServerEndpoint
 {
@@ -116,7 +116,12 @@ struct DirDeleteEndpoint final : ServerEndpoint
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };
 
-struct FileRootsEndpoint final : ServerEndpoint
+struct DirLookupEndpoint final : ServerEndpoint
+{
+    static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
+};
+
+struct DirRootsEndpoint final : ServerEndpoint
 {
     static void handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req);
 };

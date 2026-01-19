@@ -26,7 +26,6 @@ UACStatus UserAccessControl::userCanWrite(UserID user, FileID file, uint64_t new
 {
     SpinlockGuard guard{uacLock};
 
-
     return UACStatus::OK;
 }
 

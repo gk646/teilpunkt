@@ -21,9 +21,9 @@ struct Storage final
 
     //===== Global Functions =====//
 
-    StorageStatus getRoots(UserID user, std::vector<DTODirectoryInfo>& roots);
+    StorageStatus getRoots(UserID user, std::vector<DTO::DirectoryInfo>& roots);
 
-    StorageStatus getDir(UserID user, FileID dir, std::vector<DTODirectoryEntry>& entries);
+    StorageStatus getDir(UserID user, FileID dir, std::vector<DTO::DirectoryEntry>& entries);
 
     // Also works across endpoints
     StorageStatus move(UserID user, const std::vector<FileID>& files, FileID dest);

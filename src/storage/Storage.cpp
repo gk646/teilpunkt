@@ -29,7 +29,7 @@ Storage& Storage::GetInstance()
     TPUNKT_MACROS_GLOBAL_GET(Storage);
 }
 
-StorageStatus Storage::getRoots(UserID user, std::vector<DTODirectoryInfo>& roots)
+StorageStatus Storage::getRoots(UserID user, std::vector<DTO::DirectoryInfo>& roots)
 {
     for(uint32_t i = 0; i < 10; ++i)
     {
@@ -42,7 +42,7 @@ StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointC
 {
     SpinlockGuard lock{storageLock};
     // TODO Use a permission table to reuse roles
-    if(GetAuthenticator().getIsAdmin(actor) != AuthStatus::OK)
+    if(Authenticator::GetInstance().getIsAdmin(actor) != AuthStatus::OK)
     {
         LOG_EVENT(actor, Filesystem, StorageEndpointCreate, FAIL_NO_ADMIN, FilesystemEventData{});
         return StorageStatus::ERR_NO_ADMIN;
@@ -65,7 +65,7 @@ StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointC
 
 StorageStatus Storage::endpointCreateFrom(const UserID actor, CreateInfo info, const char* file, bool recurse)
 {
-    if(GetAuthenticator().getIsAdmin(actor) != AuthStatus::OK)
+    if(Authenticator::GetInstance().getIsAdmin(actor) != AuthStatus::OK)
     {
         LOG_EVENT(actor, Filesystem, StorageEndpointCreateFrom, FAIL_NO_ADMIN, FilesystemEventData{});
         return StorageStatus::ERR_NO_ADMIN;

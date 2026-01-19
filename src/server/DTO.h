@@ -6,18 +6,18 @@
 #include "datastructures/FixedString.h"
 #include "fwd.h"
 
-namespace tpunkt
+namespace tpunkt::DTO
 {
 
 //===== Signup =====//
 
-struct DTOUserSignupPW final
+struct UserSignupPW final
 {
     UserName name;
     UserPassword password;
 };
 
-struct DTOUserSignupPK final
+struct UserSignupPK final
 {
     FixedString<TPUNKT_CRYPTO_KEY_LEN> challenge;
     struct
@@ -40,7 +40,7 @@ struct DTOUserSignupPK final
 
 //===== Login =====//
 
-struct DTOUserLoginPW final
+struct UserLoginPW final
 {
     UserName name;
     UserPassword password;
@@ -48,7 +48,7 @@ struct DTOUserLoginPW final
 
 //===== User =====//
 
-struct DTOSessionInfo final
+struct SessionInfo final
 {
     UserAgentString userAgent;
     uint64_t creationUnix = 0;
@@ -57,14 +57,17 @@ struct DTOSessionInfo final
 
 //===== Directories =====//
 
-struct DTODirectoryInfo
+struct DirectoryInfo
 {
     FileName name;
     FileID fid;
 };
 
-struct DTODirectoryEntry final
+struct DirectoryEntry final
 {
+    static DirectoryEntry FromFile(const VirtualFile& file);
+    static DirectoryEntry FromDir(const VirtualDirectory& dir);
+
     FileName name;
     FileID fid;
 
@@ -80,7 +83,7 @@ struct DTODirectoryEntry final
 
 //===== Requests =====//
 
-struct DTODirectoryRequest final
+struct DirectoryRequest final
 {
     // The user is already gained through auth with the cookie
     FileID directory;
@@ -88,7 +91,7 @@ struct DTODirectoryRequest final
 
 //===== Task Management =====//
 
-struct DTOTaskInfo final
+struct TaskInfo final
 {
     TaskName name;                 // Name of the task
     uint64_t addedUnixNanos = 0;
@@ -98,7 +101,7 @@ struct DTOTaskInfo final
     uint32_t taskID = 0;
 };
 
-struct DTOThreadInfo final
+struct ThreadInfo final
 {
     uint64_t startUnixNanos = 0;   // Thread start
     uint32_t threadID = 0;
@@ -106,14 +109,15 @@ struct DTOThreadInfo final
     bool isWorking = false;
 };
 
-struct DTOTaskManagerInfo final
+struct TaskManagerInfo final
 {
     uint32_t threadsCurrent = 0;   // Current threads in use
     uint32_t threadsMax = 0;       // Global maximum of used threads
     uint32_t threadsAvailable = 0; // Max available
 };
 
+} // namespace tpunkt::DTO
 
-} // namespace tpunkt
+
 
 #endif // TPUNKT_DTO_H

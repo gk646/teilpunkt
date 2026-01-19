@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include "datastructures/FixedString.h"
+#include "datastructures/Spinlock.h"
 #include "server/DTO.h"
 #include "storage/datastore/DataStore.h"
 #include "storage/StorageTransaction.h"
@@ -55,9 +56,9 @@ struct StorageEndpointData final
 // Datastore stores its files in /endpoints/{id}
 struct StorageEndpoint final
 {
-     StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID endpoint, UserID creator);
+    StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID endpoint, UserID creator);
     TPUNKT_MACROS_MOVE_ONLY(StorageEndpoint);
-    ~StorageEndpoint();
+    ~StorageEndpoint() = default;
 
     //===== File Manipulation =====//
 
@@ -69,8 +70,8 @@ struct StorageEndpoint final
 
     //===== File Info =====//
 
-    StorageStatus infoFile(User user, DTOFileInfo& info);
-    StorageStatus infoDir(User user, DTODirectoryInfo& info);
+    StorageStatus infoFile(User user, FileInfo& info);
+    StorageStatus infoDir(User user, DTO::DirectoryInfo& info);
 
     //===== Dir Manipulation =====//
 
@@ -80,8 +81,8 @@ struct StorageEndpoint final
     StorageStatus dirChange();
     StorageStatus dirRename();
 
-    // Collects all files in the given dir the user has access to
-    StorageStatus dirGetInfo(UserID user, FileID dir, std::vector<DTODirectoryEntry>& entries);
+    // Collects all entries in the given dir the user has access to
+    StorageStatus dirGetInfo(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries);
 
     StorageStatus clear();
 

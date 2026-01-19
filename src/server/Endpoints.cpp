@@ -170,7 +170,7 @@ bool ServerEndpoint::HasValidSession(uWS::HttpResponse<true>* res, uWS::HttpRequ
     }
 
     const SessionToken token{tokenCookie};
-    const AuthStatus status = GetAuthenticator().sessionAuth(UserID{lookupUser}, token, metaData, user);
+    const AuthStatus status = Authenticator::GetInstance().sessionAuth(UserID{lookupUser}, token, metaData, user);
     if(status != AuthStatus::OK)
     {
         EndRequest(res, 401, Authenticator::GetStatusStr(status));

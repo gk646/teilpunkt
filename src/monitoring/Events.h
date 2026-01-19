@@ -45,10 +45,11 @@ enum class EventAction : uint8_t
     StorageEndpointGet,
     StorageEndpointDelete,
     // Virtual File System
-    FileSystemCreateFile,
-    FilesystemWriteFile,
-    FilesystemRemoveFile,
-    FilesystemAddDirectory,
+    FileSystemFileCreate,
+    FilesystemFileWrite,
+    FilesystemFileRemove,
+    FilesystemDirectoryAdd,
+    FilesystemDirectoryRead,
     // TaskManager
     ThreadAdd,
     ThreadRemove,

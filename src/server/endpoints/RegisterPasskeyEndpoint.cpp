@@ -24,7 +24,7 @@ void RegisterPasskeyEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequ
                 return;
             }
 
-            DTOUserSignupPK pubKey;
+            DTO::UserSignupPK pubKey;
             randombytes_buf(pubKey.challenge.data(), pubKey.challenge.capacity());
         });
 

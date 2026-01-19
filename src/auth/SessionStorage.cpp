@@ -153,7 +153,7 @@ bool SessionStorage::remove(const UserID user, const Timestamp& creation)
         return false;
     }
     auto sessionList = sessionData->getSessions().get();
-    for(int i = 0; i < (int)sessionList.size(); ++i)
+    for(size_t i = 0; i < sessionList.size(); ++i)
     {
         auto& session = sessionList[ i ];
         if(session.getCreation() == creation)
@@ -165,7 +165,7 @@ bool SessionStorage::remove(const UserID user, const Timestamp& creation)
     return false;
 }
 
-void SessionStorage::getInfo(const UserID user, std::vector<DTOSessionInfo>& collector)
+void SessionStorage::getInfo(const UserID user, std::vector<DTO::SessionInfo>& collector)
 {
     collector.clear();
     UserSessionData* sessionData = getUserSessionData(user);
@@ -176,7 +176,7 @@ void SessionStorage::getInfo(const UserID user, std::vector<DTOSessionInfo>& col
     auto sessionList = sessionData->getSessions().get();
     for(auto& session : sessionList)
     {
-        DTOSessionInfo info;
+        DTO::SessionInfo info;
         info.creationUnix = session.getCreation().getNanos();
         info.expirationUnix = session.getExpiration().getNanos();
         info.userAgent = session.getUserAgent();

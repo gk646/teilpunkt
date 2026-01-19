@@ -27,7 +27,7 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
             return;
         }
 
-        DTOUserLoginPW authData{};
+        DTO::UserLoginPW authData{};
         const auto error = glz::read_json(authData, data);
         if(error)
         {
@@ -40,7 +40,7 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
         credentials.type = CredentialsType::PASSWORD;
         credentials.password = authData.password;
 
-        auto status = GetAuthenticator().userLogin(authData.name, credentials, user);
+        auto status = Authenticator::GetInstance().userLogin(authData.name, credentials, user);
         if(status != AuthStatus::OK)
         {
             EndRequest(res, 400, Authenticator::GetStatusStr(status));
@@ -55,7 +55,7 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
         }
 
         SecureWrapper<SessionToken> token;
-        status = GetAuthenticator().sessionAdd(user, metaData, token);
+        status = Authenticator::GetInstance().sessionAdd(user, metaData, token);
         if(status != AuthStatus::OK)
         {
             EndRequest(res, 400, Authenticator::GetStatusStr(status));

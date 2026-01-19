@@ -170,13 +170,13 @@ bool TaskManager::threadRemove(const UserID actor)
     return false;
 }
 
-bool TaskManager::infoTasks(UserID actor, std::vector<DTOTaskInfo>& collector)
+bool TaskManager::infoTasks(UserID actor, std::vector<DTO::TaskInfo>& collector)
 {
     // TODO add logging
     SpinlockGuard guard{taskLock};
     for(auto& val : tasks)
     {
-        DTOTaskInfo info;
+        DTO::TaskInfo info;
         info.name = val.name;
         info.addedUnixNanos = val.added.getNanos();
 

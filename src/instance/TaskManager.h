@@ -41,11 +41,11 @@ struct TaskManager final
 
     //===== Info =====//
 
-    bool infoTasks(UserID actor, std::vector<DTOTaskInfo>& collector);
+    bool infoTasks(UserID actor, std::vector<DTO::TaskInfo>& collector);
 
-    bool infoThreads(UserID actor, std::vector<DTOThreadInfo>& collector);
+    bool infoThreads(UserID actor, std::vector<DTO::ThreadInfo>& collector);
 
-    bool infoManager(UserID actor, DTOTaskManagerInfo& info);
+    bool infoManager(UserID actor, DTO::TaskManagerInfo& info);
 
   private:
     // Takes ownership

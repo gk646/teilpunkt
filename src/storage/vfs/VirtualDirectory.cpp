@@ -8,7 +8,8 @@ namespace tpunkt
 {
 
 VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
-    : id(Storage::GetInstance().getNextID(), true), info(info.name, info.parent, false), limits(info.maxSize, false)
+    : fid(Storage::GetInstance().getNextID(), true), info(FileInfo{info.name, info.creator, info.creator}, info.parent),
+      limits(info.maxSize, false)
 {
 }
 
@@ -96,7 +97,7 @@ bool VirtualDirectory::fileChange(const FileID file, const uint64_t newFileSize)
         return false;
     }
 
-    stats.fileSize = stats.fileSize - currFileSize + newFileSize;
+    stats.base.size = stats.base.size - currFileSize + newFileSize;
     changeFile->stats.size = newFileSize;
     changeFile->onModification();
     onModification();
@@ -139,7 +140,7 @@ bool VirtualDirectory::fileDeleteImpl(FileID file)
     if(std::erase_if(files, [ file ](const VirtualFile& f) -> bool { return f.getID() == file; }) > 0)
     {
         onModification();
-        stats.fileSize -= changeFileStats.size;
+        stats.base.size -= changeFileStats.size;
         auto changeFunc = [ & ](VirtualDirectory& dir) -> bool
         {
             dir.stats.subDirFileSize -= changeFileStats.size;
@@ -174,7 +175,7 @@ bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& cInfo, FileID& dir)
 
 bool VirtualDirectory::dirNameExists(const FileName& name) const
 {
-    return std::ranges::any_of(dirs, [ & ](auto& dir) { return dir.info.name == name; });
+    return std::ranges::any_of(dirs, [ & ](auto& dir) { return dir.info.base.name == name; });
 }
 
 bool VirtualDirectory::dirDelete(const FileID dir)
@@ -186,7 +187,7 @@ bool VirtualDirectory::dirDelete(const FileID dir)
         return false;
     }
 
-    const auto result = std::erase_if(dirs, [ & ](const VirtualDirectory& e) { return e.id == dir; }) > 0;
+    const auto result = std::erase_if(dirs, [ & ](const VirtualDirectory& e) { return e.fid == dir; }) > 0;
     if(result)
     {
         onModification();
@@ -197,7 +198,7 @@ bool VirtualDirectory::dirDelete(const FileID dir)
 void VirtualDirectory::rename(const FileName& name)
 {
     onModification();
-    info.name = name;
+    info.base.name = name;
 }
 
 const DirectoryStats& VirtualDirectory::getStats() const
@@ -212,7 +213,7 @@ const DirectoryLimits& VirtualDirectory::getLimits() const
 
 FileID VirtualDirectory::getID() const
 {
-    return id;
+    return fid;
 }
 
 std::vector<VirtualFile>& VirtualDirectory::getFiles()
@@ -224,26 +225,42 @@ std::vector<VirtualDirectory>& VirtualDirectory::getDirs()
     return dirs;
 }
 
+void VirtualDirectory::collectEntries(std::vector<DTO::DirectoryEntry>& entries) const
+{
+    entries.clear();
+    entries.reserve(files.size() + dirs.size() + 1);
+
+    for(auto& file : files)
+    {
+        entries.push_back(DTO::DirectoryEntry::FromFile(file));
+    }
+    for(auto& dir : dirs)
+    {
+        entries.push_back(DTO::DirectoryEntry::FromDir(dir));
+    }
+}
+
+
 //===== Private =====//
 
 // Locking is assumed for those functions
 
 bool VirtualDirectory::canHoldSizeChange(const uint64_t currSize, const uint64_t newSize) const
 {
-    return (stats.fileSize + stats.subDirFileSize - currSize + newSize) < limits.sizeLimit;
+    return (stats.base.size + stats.subDirFileSize - currSize + newSize) < limits.sizeLimit;
 }
 
 void VirtualDirectory::onAccess()
 {
-    stats.accessCount++;
-    stats.accessed = Timestamp::Now();
+    stats.base.accessCount++;
+    stats.base.accessed = Timestamp::Now();
 }
 
 void VirtualDirectory::onModification()
 {
     onAccess();
-    stats.modificationCount++;
-    stats.modified = Timestamp::Now();
+    stats.base.modificationCount++;
+    stats.base.modified = Timestamp::Now();
 }
 
 

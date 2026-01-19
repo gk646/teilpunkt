@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "auth/Authenticator.h"
 #include "storage/Storage.h"
 #include "storage/vfs/VirtualFile.h"
 
@@ -7,7 +8,7 @@ namespace tpunkt
 {
 
 VirtualFile::VirtualFile(const FileCreationInfo& info)
-    : file(Storage::GetInstance().getNextID(), false), info(info.name, info.creator), stats(Timestamp::Now())
+    : fid(Storage::GetInstance().getNextID(), false), info(info.name, info.creator), stats(Timestamp::Now())
 {
 }
 
@@ -29,8 +30,9 @@ const FileStats& VirtualFile::getStats() const
 
 FileID VirtualFile::getID() const
 {
-    return file;
+    return fid;
 }
+
 
 void VirtualFile::onAccess()
 {

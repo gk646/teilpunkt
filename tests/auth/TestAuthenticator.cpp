@@ -187,7 +187,7 @@ TEST_CASE("Sessions Add, Remove and Auth")
     }
 
     {
-        std::vector<DTOSessionInfo> collector;
+        std::vector<DTO::SessionInfo> collector;
         auto status = GetAuthenticator().sessionGetInfo(user, collector);
         REQUIRE(status == AuthStatus::OK);
         REQUIRE(collector.size() == 1);
@@ -209,7 +209,7 @@ TEST_CASE("Sessions Add, Remove and Auth")
         REQUIRE(status == AuthStatus::ERR_UNSUCCESSFUL);
 
         // Automatically deletes session
-        std::vector<DTOSessionInfo> collector;
+        std::vector<DTO::SessionInfo> collector;
         status = GetAuthenticator().sessionGetInfo(user, collector);
         REQUIRE(status == AuthStatus::OK);
         REQUIRE(collector.empty());
@@ -224,7 +224,7 @@ TEST_CASE("Sessions Add, Remove and Auth")
 
     Timestamp creation;
     {
-        std::vector<DTOSessionInfo> collector;
+        std::vector<DTO::SessionInfo> collector;
         auto status = GetAuthenticator().sessionGetInfo(user, collector);
         REQUIRE(status == AuthStatus::OK);
         REQUIRE(collector.size() == 1);

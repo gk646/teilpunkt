@@ -8,21 +8,6 @@ namespace tpunkt
 constexpr size_t PW_HASH_OPS_LVL = crypto_pwhash_OPSLIMIT_MODERATE;
 constexpr size_t PW_HASH_MEM_LVL = crypto_pwhash_MEMLIMIT_INTERACTIVE;
 
-UserStorage::UserStorage()
-{
-    auto idReader = currUserID.get();
-    do
-    {
-        idReader.get() = randombytes_random() / 2U; // At least 2.1 billion entries - non zero
-    } while(idReader.get() == 0U);
-    // IO
-}
-
-UserStorage::~UserStorage()
-{
-    // IO
-}
-
 bool UserStorage::add(const UserName& name, const Credentials& credentials)
 {
     Credentials newCredentials = credentials;
@@ -57,6 +42,25 @@ bool UserStorage::add(const UserName& name, const Credentials& credentials)
     idReader.get()++; // Increment for next user
 
     return true;
+}
+
+bool UserStorage::remove(const UserID user)
+{
+    for(auto& userBox : users)
+    {
+        bool found = false;
+        {
+            auto boxReader = userBox.get();
+            found = boxReader.get().userID == user;
+        }
+        if(found)
+        {
+            userBox = std::move(users.back());
+            users.pop_back();
+            return true;
+        }
+    }
+    return false;
 }
 
 bool UserStorage::login(const UserName& name, const Credentials& credentials, UserID& user) const
@@ -135,25 +139,6 @@ bool UserStorage::changeCredentials(const UserID user, const UserName& newName, 
     return false;
 }
 
-bool UserStorage::remove(const UserID user)
-{
-    for(auto& userBox : users)
-    {
-        bool found = false;
-        {
-            auto boxReader = userBox.get();
-            found = boxReader.get().userID == user;
-        }
-        if(found)
-        {
-            userBox = std::move(users.back());
-            users.pop_back();
-            return true;
-        }
-    }
-    return false;
-}
-
 bool UserStorage::nameExists(const UserName& name) const
 {
     for(const auto& box : users)
@@ -166,6 +151,21 @@ bool UserStorage::nameExists(const UserName& name) const
         }
     }
     return false;
+}
+
+UserStorage::UserStorage()
+{
+    auto idReader = currUserID.get();
+    do
+    {
+        idReader.get() = randombytes_random() / 2U; // At least 2.1 billion entries - non zero
+    } while(idReader.get() == 0U);
+    // IO
+}
+
+UserStorage::~UserStorage()
+{
+    // IO
 }
 
 } // namespace tpunkt

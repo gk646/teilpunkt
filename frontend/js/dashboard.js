@@ -1,28 +1,28 @@
-import { fetchRoots, fetchFavourites, fetchDirectory } from './filesystem';
-import { getIconHTML } from './icons.js';
+import {fetchDirectory, fetchRoots} from './filesystem.js';
+import {getIconHTML, getOptionsIconHTML, getShareIconHTML} from './icons.js';
 
 // DOM elements
 const sideMenu = document.getElementById('sideMenu');
 const mainContent = document.getElementById('mainContent');
 const profileButton = document.getElementById('profileButton');
+const addFileButton = document.getElementById('addFileButton');
+const addFileModal = document.getElementById('addFileModal');
+const closeModal = document.querySelector('.close');
+const addFileForm = document.getElementById('addFileForm');
 
 // Global navigation state: an array of directory IDs representing the breadcrumb.
 let navigationStack = [];
 
-/**
- * Render the side menu using the roots array.
- */
+// Render the side menu using the roots array.
 export function renderSideMenu(roots) {
     const ul = document.createElement('ul');
     roots.forEach((root, index) => {
         const li = document.createElement('li');
-        li.textContent = root.name; // expects root DTO to have a name property
+        li.textContent = root.name;
         li.addEventListener('click', () => {
-            // Mark as active.
             ul.querySelectorAll('li').forEach(item => item.classList.remove('active'));
             li.classList.add('active');
-            // Reset navigation stack to the root.
-            navigationStack = [root.file]; // assuming 'file' is the directory identifier
+            navigationStack = [root.file];
             loadDirectory(root.file);
         });
         if (index === 0) li.classList.add('active');
@@ -32,14 +32,11 @@ export function renderSideMenu(roots) {
     sideMenu.appendChild(ul);
 }
 
-/**
- * Load a directory by its ID.
- * Fetches the directory data and renders the breadcrumb and file list.
- */
+// Load a directory by its ID.
+// Fetches the directory data and renders the breadcrumb and file list.
 export async function loadDirectory(directoryId) {
     try {
         const directoryData = await fetchDirectory(directoryId);
-        // Update navigation stack based on the directory data.
         updateNavigationStack(directoryData);
         renderBreadcrumb();
         renderDirectoryContents(directoryData.entries);
@@ -48,21 +45,15 @@ export async function loadDirectory(directoryId) {
     }
 }
 
-/**
- * Update the global navigation stack.
- * This example assumes that the directoryData object has an 'id' property.
- */
+// Update the global navigation stack.
+// This example assumes that the directoryData object has an 'id' property.
 function updateNavigationStack(directoryData) {
-    // For a new root, we start fresh. Otherwise, navigationStack already contains the path.
     if (navigationStack.length === 0) {
         navigationStack.push(directoryData.id);
     }
-    // In a more complete implementation, you might update the navigation based on directoryData.fullPath.
 }
 
-/**
- * Render the breadcrumb navigation.
- */
+// Render the breadcrumb navigation.
 export function renderBreadcrumb() {
     const container = document.createElement('div');
     container.className = 'breadcrumb-container';
@@ -72,7 +63,6 @@ export function renderBreadcrumb() {
         upButton.className = 'up-button';
         upButton.textContent = 'Up';
         upButton.addEventListener('click', () => {
-            // Navigate to the parent directory.
             navigationStack.pop();
             loadDirectory(navigationStack[navigationStack.length - 1]);
         });
@@ -83,7 +73,7 @@ export function renderBreadcrumb() {
     breadcrumb.className = 'breadcrumb';
     navigationStack.forEach((dirId, index) => {
         const span = document.createElement('span');
-        span.textContent = dirId; // In a full implementation, map the ID to a friendly name.
+        span.textContent = dirId;
         span.addEventListener('click', () => {
             navigationStack = navigationStack.slice(0, index + 1);
             loadDirectory(dirId);
@@ -95,7 +85,6 @@ export function renderBreadcrumb() {
     });
     container.appendChild(breadcrumb);
 
-    // Insert or replace breadcrumb at the top of mainContent.
     const existingCrumb = document.querySelector('.breadcrumb-container');
     if (existingCrumb) {
         mainContent.replaceChild(container, existingCrumb);
@@ -104,9 +93,7 @@ export function renderBreadcrumb() {
     }
 }
 
-/**
- * Render the directory contents (files and subdirectories).
- */
+// Render the directory contents (files and subdirectories).
 export function renderDirectoryContents(entries) {
     const fileBrowser = document.createElement('div');
     fileBrowser.className = 'file-browser';
@@ -117,35 +104,28 @@ export function renderDirectoryContents(entries) {
         fileItem.addEventListener('click', (e) => {
             if (e.target.closest('.file-action')) return;
             if (entry.type === 'folder') {
-                navigationStack.push(entry.file); // assuming 'file' is the directory ID.
+                navigationStack.push(entry.file);
                 loadDirectory(entry.file);
             } else {
                 alert(`You selected file: ${entry.name}`);
             }
         });
 
-        // File icon.
         const iconContainer = document.createElement('div');
         iconContainer.className = 'file-icon';
         iconContainer.innerHTML = getIconHTML(entry.type);
 
-        // File name.
         const fileName = document.createElement('div');
         fileName.className = 'file-name';
         fileName.textContent = entry.name;
 
-        // File actions: Options and share buttons.
         const actionsContainer = document.createElement('div');
         actionsContainer.className = 'file-actions';
 
         const optionsButton = document.createElement('button');
         optionsButton.className = 'file-action';
         optionsButton.title = 'Options';
-        optionsButton.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="var(--text)">
-                                 <circle cx="5" cy="12" r="2"/>
-                                 <circle cx="12" cy="12" r="2"/>
-                                 <circle cx="19" cy="12" r="2"/>
-                               </svg>`;
+        optionsButton.innerHTML = getOptionsIconHTML();
         optionsButton.addEventListener('click', (e) => {
             e.stopPropagation();
             alert(`Options for ${entry.name}`);
@@ -154,9 +134,7 @@ export function renderDirectoryContents(entries) {
         const shareButton = document.createElement('button');
         shareButton.className = 'file-action';
         shareButton.title = 'Share';
-        shareButton.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="var(--text)">
-                                <path d="M3.9 12c0-1.1.9-2 2-2h3v2H5.9a.9.9 0 00-.9.9c0 .5.4.9.9.9H8v2H5.9c-1.1 0-2-.9-2-2zM15 10h-3V8h3c1.1 0 2 .9 2 2s-.9 2-2 2h-3v-2h3c.55 0 1-.45 1-1s-.45-1-1-1zM8.4 11.7l6.3-6.3 1.4 1.4-6.3 6.3-1.4-1.4zm7.2 0l-6.3 6.3-1.4-1.4 6.3-6.3 1.4 1.4z"/>
-                              </svg>`;
+        shareButton.innerHTML = getShareIconHTML();
         shareButton.addEventListener('click', (e) => {
             e.stopPropagation();
             alert(`Share ${entry.name}`);
@@ -171,7 +149,6 @@ export function renderDirectoryContents(entries) {
         fileBrowser.appendChild(fileItem);
     });
 
-    // Clear previous listing but preserve breadcrumb.
     const breadcrumbContainer = document.querySelector('.breadcrumb-container');
     mainContent.innerHTML = '';
     if (breadcrumbContainer) {
@@ -180,25 +157,38 @@ export function renderDirectoryContents(entries) {
     mainContent.appendChild(fileBrowser);
 }
 
-
 async function initializeFileSystemUI() {
     try {
-        // Stage 1: Fetch available roots.
         const roots = await fetchRoots();
         renderSideMenu(roots);
-        // Stage 2: Fetch favourites (if needed).
-       // const favourites = await fetchFavourites();
-        // You could render favourites in a dedicated widget here.
-       // console.log('Favourites:', favourites);
-
-
-        // Stage 3: Load the initial directory from the first root.
         if (roots.length > 0) {
-            navigationStack = [roots[0].file];
-            loadDirectory(roots[0].file);
+            navigationStack = [roots[0].name];
+            loadDirectory(roots[0].fid);
         }
     } catch (error) {
         console.error('Failed to initialize file system UI:', error);
+    }
+}
+
+// Show the add file modal
+function showAddFileModal() {
+    addFileModal.style.display = 'block';
+}
+
+// Hide the add file modal
+function hideAddFileModal() {
+    addFileModal.style.display = 'none';
+}
+
+// Handle form submission for adding a new file or folder
+function handleAddFileFormSubmit(e) {
+    e.preventDefault();
+    const fileName = document.getElementById('fileName').value;
+    const fileType = document.getElementById('fileType').value;
+    console.log(`Creating new ${fileType}: ${fileName}`);
+    hideAddFileModal();
+    if (navigationStack.length > 0) {
+        loadDirectory(navigationStack[navigationStack.length - 1]);
     }
 }
 
@@ -206,5 +196,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeFileSystemUI();
     profileButton.addEventListener('click', () => {
         alert('Profile settings would appear here.');
+    });
+
+    addFileButton.addEventListener('click', showAddFileModal);
+    closeModal.addEventListener('click', hideAddFileModal);
+    addFileForm.addEventListener('submit', handleAddFileFormSubmit);
+
+    window.addEventListener('click', (e) => {
+        if (e.target === addFileModal) {
+            hideAddFileModal();
+        }
     });
 });

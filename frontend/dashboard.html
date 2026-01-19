@@ -30,6 +30,28 @@
     <main class="main-content" id="mainContent">
         <!-- Breadcrumb (with Up button) and file browser will be rendered here -->
     </main>
+
+    <!-- Add File Button -->
+    <div class="add-file-container">
+        <button class="add-file-button" id="addFileButton">+</button>
+    </div>
+</div>
+
+<div id="addFileModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add New File</h2>
+        <form id="addFileForm">
+            <label for="fileName">File Name:</label>
+            <input type="text" id="fileName" name="fileName" required>
+            <label for="fileType">File Type:</label>
+            <select id="fileType" name="fileType">
+                <option value="file">File</option>
+                <option value="folder">Folder</option>
+            </select>
+            <button type="submit">Create</button>
+        </form>
+    </div>
 </div>
 </body>
 </html>

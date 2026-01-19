@@ -5,7 +5,6 @@
 
 #include <vector>
 #include "common/FileID.h"
-#include "datastructures/BlockAllocator.h"
 #include "storage/vfs/VirtualFile.h"
 
 namespace tpunkt
@@ -21,9 +20,8 @@ struct DirectoryCreationInfo final
 
 struct DirectoryInfo final
 {
-    FileName name;
+    FileInfo base;
     VirtualDirectory* parent = nullptr; // Only null if it's the root of an endpoint
-    bool isHidden = false;
 };
 
 struct DirectoryLimits final
@@ -32,27 +30,14 @@ struct DirectoryLimits final
     bool isReadOnly = false;
 };
 
-struct DirectoryPerms final
-{
-    UserID creator = UserID::INVALID;
-    UserID owner = UserID::INVALID;
-};
-
 struct DirectoryStats final
 {
-    Timestamp created;
-    Timestamp modified;          // Last time any physical file OR metadata changes
-    Timestamp accessed;          // Last time any physical file was sent
-
-    uint32_t modificationCount = 0;
-    uint32_t accessCount = 0;
-
-    uint64_t fileSize = 0;       // Size of all files in bytes
+    FileStats base;
     uint64_t subDirFileSize = 0; // Size of all files in subdirs
 
-    uint64_t getTotalSize() const
+    [[nodiscard]] uint64_t getTotalSize() const
     {
-        return fileSize + subDirFileSize;
+        return base.size + subDirFileSize;
     }
 };
 
@@ -101,6 +86,7 @@ struct VirtualDirectory final
     [[nodiscard]] FileID getID() const;
     std::vector<VirtualFile>& getFiles();
     std::vector<VirtualDirectory>& getDirs();
+    void collectEntries(std::vector<DTO::DirectoryEntry>& entries) const;
 
     //===== DTO =====//
 
@@ -116,13 +102,13 @@ struct VirtualDirectory final
 
     bool fileDeleteImpl(FileID file);
 
-    FileID id;
+    FileID fid;
     DirectoryInfo info;
     DirectoryStats stats;
-    DirectoryPerms perms;
     DirectoryLimits limits;
     std::vector<VirtualFile> files;
     std::vector<VirtualDirectory> dirs;
+    friend DTO::DirectoryEntry;
 };
 
 template <typename Func>

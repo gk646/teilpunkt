@@ -5,7 +5,6 @@
 
 #include "common/FileID.h"
 #include "datastructures/FixedString.h"
-#include "datastructures/Spinlock.h"
 #include "datastructures/Timestamp.h"
 #include "fwd.h"
 
@@ -29,8 +28,8 @@ struct FileInfo final
 struct FileStats final
 {
     Timestamp created;
-    Timestamp modified; // Last time the physical file OR metadata changes
-    Timestamp accessed; // Last time the physical file was sent
+    Timestamp modified; // Last time the physical file OR metadata changed
+    Timestamp accessed; // Last time the physical file was sent (or attempted)
 
     uint32_t modificationCount = 0;
     uint32_t accessCount = 0;
@@ -55,19 +54,20 @@ struct VirtualFile final
 
     //===== Info =====//
 
-    const FileInfo& getInfo() const;
-    const FileStats& getStats() const;
-    FileID getID() const;
+    [[nodiscard]] const FileInfo& getInfo() const;
+    [[nodiscard]] const FileStats& getStats() const;
+    [[nodiscard]] FileID getID() const;
 
   private:
     void onAccess();
     void onModification();
 
-    FileID file;
+    FileID fid;
     FileInfo info;
     FileStats stats{};
     FileHistory history{};
     friend VirtualDirectory;
+    friend DTO::DirectoryEntry;
 };
 
 } // namespace tpunkt

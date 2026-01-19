@@ -79,6 +79,6 @@ export const isPasskeyAvailable = () => {
 
 export const redirectDashBoardLoggedIn = () => {
     if (document.cookie.split(';').some(cookie => cookie.trim().startsWith(USER_ID_COOKIE + '='))) {
-        window.location.replace('/dashboard.html');
+        //window.location.replace('/dashboard.html');
     }
 }

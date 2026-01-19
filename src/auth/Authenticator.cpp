@@ -13,6 +13,11 @@ namespace global
 static Authenticator* Authenticator;
 }
 
+Authenticator& Authenticator::GetInstance()
+{
+    TPUNKT_MACROS_GLOBAL_GET(Authenticator);
+}
+
 const char* Authenticator::GetStatusStr(const AuthStatus status)
 {
     switch(status)
@@ -84,7 +89,7 @@ AuthStatus Authenticator::userLogin(const UserName& name, Credentials& consumed,
 AuthStatus Authenticator::userRemove(const UserID actor, const UserID user)
 {
     SpinlockGuard lock{authLock};
-    if(actor != user && GetAuthenticator().getIsAdmin(actor) != AuthStatus::OK)
+    if(actor != user && getIsAdmin(actor) != AuthStatus::OK)
     {
         LOG_EVENT(actor, Users, UserRemove, FAIL_NO_ADMIN, AuthenticationEventData{});
         return AuthStatus::ERR_NO_ADMIN;
@@ -176,7 +181,7 @@ AuthStatus Authenticator::sessionAuth(const UserID lookup, const SessionToken& s
     return AuthStatus::OK;
 }
 
-AuthStatus Authenticator::sessionGetInfo(const UserID actor, std::vector<DTOSessionInfo>& collector)
+AuthStatus Authenticator::sessionGetInfo(const UserID actor, std::vector<DTO::SessionInfo>& collector)
 {
     SpinlockGuard lock{authLock};
     sessionStore.getInfo(actor, collector);
@@ -211,9 +216,5 @@ Authenticator::~Authenticator()
     TPUNKT_MACROS_GLOBAL_RESET(Authenticator);
 }
 
-Authenticator& GetAuthenticator()
-{
-    TPUNKT_MACROS_GLOBAL_GET(Authenticator);
-}
 
 } // namespace tpunkt
