@@ -32,7 +32,7 @@ const char* GetStorageStatusStr(const StorageStatus status)
         case StorageStatus::ERR_INVALID_FILE_NAME:
             return "Invalid file name";
         case StorageStatus::ERR_NO_SUCH_ENDPOINT:
-            return "No such endpoint";
+            return "No such storage endpoint";
         case StorageStatus::OK:
             return "OK";
         case StorageStatus::ERR_NO_SUCH_DIR:
@@ -44,7 +44,8 @@ const char* GetStorageStatusStr(const StorageStatus status)
 }
 
 StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const EndpointID endpoint, const UserID creator)
-    : virtualFilesystem({.name = info.name, .maxSize = info.maxSize, .parent = nullptr, .creator = creator})
+    : virtualFilesystem(
+          {.name = info.name, .maxSize = info.maxSize, .parent = nullptr, .creator = creator, .endpoint = endpoint})
 {
     switch(info.type)
     {
@@ -142,9 +143,14 @@ const StorageEndpointData& StorageEndpoint::getInfo() const
     return data;
 }
 
+bool StorageEndpoint::canBeRemoved() const
+{
+    return lock.isLocked();
+}
+
 bool StorageEndpoint::CreateDirs(EndpointID eid)
 {
-    if(!CreateRelDir(TPUNKT_STORAGE_ENDPOINT_DIR, false))
+    if(!CreateRelDir(TPUNKT_STORAGE_ENDPOINT_DIR, true))
     {
         return false;
     }
@@ -152,7 +158,7 @@ bool StorageEndpoint::CreateDirs(EndpointID eid)
     const auto endpointID = static_cast<int>(eid);
     FixedString<64> dir;
     (void)snprintf(dir.data(), dir.capacity(), "%s/%d", TPUNKT_STORAGE_ENDPOINT_DIR, endpointID);
-    if(!CreateRelDir(dir.c_str(), false))
+    if(!CreateRelDir(dir.c_str(), true))
     {
         RemoveRelDir(TPUNKT_STORAGE_ENDPOINT_DIR);
         return false;

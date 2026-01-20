@@ -33,17 +33,16 @@ struct to<JSON, tpunkt::FixedString<length>>
     }
 };
 
-static_assert(sizeof(tpunkt::FileID) <= sizeof(uint64_t), "FileID too big!");
 
 template <>
 struct from<JSON, tpunkt::FileID>
 {
     template <auto Opts>
-    static void op(tpunkt::FileID value, auto&&... args)
+    static void op(tpunkt::FileID& value, auto&&... args)
     {
         uint64_t num{};
         parse<JSON>::op<Opts>(num, args...);
-        memcpy(&value, &num, sizeof(uint64_t));
+        value = tpunkt::FileID::FromNum(num);
     }
 };
 
@@ -51,10 +50,9 @@ template <>
 struct to<JSON, tpunkt::FileID>
 {
     template <auto Opts>
-    static void op(tpunkt::FileID& value, auto&&... args) noexcept
+    static void op(const tpunkt::FileID& value, auto&&... args) noexcept
     {
-        uint64_t num{};
-        memcpy(&value, &num, sizeof(uint64_t));
+        uint64_t num = tpunkt::FileID::ToNum(value);
         serialize<JSON>::op<Opts>(num, args...);
     }
 };

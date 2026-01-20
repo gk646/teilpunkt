@@ -2,7 +2,6 @@
 #ifndef TPUNKT_STORAGE_ENDPOINT_H
 #define TPUNKT_STORAGE_ENDPOINT_H
 
-#include <cstdint>
 #include "datastructures/FixedString.h"
 #include "datastructures/Spinlock.h"
 #include "server/DTO.h"
@@ -57,8 +56,8 @@ struct StorageEndpointData final
 struct StorageEndpoint final
 {
     StorageEndpoint(const StorageEndpointCreateInfo& info, EndpointID endpoint, UserID creator);
-    TPUNKT_MACROS_MOVE_ONLY(StorageEndpoint);
     ~StorageEndpoint() = default;
+    TPUNKT_MACROS_DEL_CTORS(StorageEndpoint);
 
     //===== File Manipulation =====//
 
@@ -100,6 +99,7 @@ struct StorageEndpoint final
     StorageEndpointData data;
     DataStore* dataStore = nullptr;
     Spinlock lock;
+    friend Storage;
 };
 
 } // namespace tpunkt

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #ifndef TPUNKT_VIRTUAL_FILE_H
 #define TPUNKT_VIRTUAL_FILE_H
 
@@ -16,6 +15,7 @@ struct FileCreationInfo final
 {
     FileName name;
     UserID creator = UserID::INVALID;
+    EndpointID endpoint;
 };
 
 struct FileInfo final

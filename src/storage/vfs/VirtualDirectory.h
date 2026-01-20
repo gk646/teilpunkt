@@ -16,6 +16,7 @@ struct DirectoryCreationInfo final
     uint64_t maxSize = 0;
     VirtualDirectory* parent = nullptr;
     UserID creator = UserID::INVALID;
+    EndpointID endpoint;
 };
 
 struct DirectoryInfo final
@@ -109,6 +110,7 @@ struct VirtualDirectory final
     std::vector<VirtualFile> files;
     std::vector<VirtualDirectory> dirs;
     friend DTO::DirectoryEntry;
+    friend DTO::DirectoryInfo;
 };
 
 template <typename Func>

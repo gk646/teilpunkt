@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #ifndef TPUNKT_STORAGE_H
 #define TPUNKT_STORAGE_H
 
@@ -47,16 +46,10 @@ struct Storage final
     // Deletes the given endpoint
     StorageStatus endpointDelete(UserID actor, EndpointID endpoint);
 
-
   private:
-    // Returns the next file number
-    uint32_t getNextID();
-
     std::forward_list<StorageEndpoint> endpoints;
     Spinlock storageLock;
-    Spinlock fileIDLock;
-    uint32_t endpointID = 0;
-    uint32_t filesID = 1;
+    uint16_t endpointID = 1;
     friend VirtualFile;
     friend VirtualDirectory;
 };

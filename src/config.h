@@ -75,6 +75,6 @@ constexpr auto* TPUNKT_INSTANCE_CERT_DIR = "../key/cert.pem";
 constexpr size_t TPUNKT_INSTANCE_CONFIG_STRING_LEN = 24;
 
 // Creation flags for folders and files - only owner can read/write
-#define TPUNKT_INSTANCE_FILE_MODE 0600
+#define TPUNKT_INSTANCE_FILE_MODE 0700
 
 #endif // TPUNKT_CONFIG_H

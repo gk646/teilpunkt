@@ -4,15 +4,20 @@
 #include "storage/vfs/VirtualDirectory.h"
 #include "storage/vfs/VirtualFile.h"
 
-namespace tpunkt
+namespace tpunkt::DTO
 {
 
-namespace DTO
+DirectoryInfo DirectoryInfo::FromDir(const VirtualDirectory& dir)
 {
+    DirectoryInfo info{};
+    info.name = dir.info.base.name;
+    info.fid = dir.fid;
+    return info;
+}
 
 DirectoryEntry DirectoryEntry::FromFile(const VirtualFile& file)
 {
-    DirectoryEntry entry;
+    DirectoryEntry entry{};
     entry.name = file.info.name;
     entry.fid = file.fid;
 
@@ -33,7 +38,7 @@ DirectoryEntry DirectoryEntry::FromFile(const VirtualFile& file)
 
 DirectoryEntry DirectoryEntry::FromDir(const VirtualDirectory& dir)
 {
-    DirectoryEntry entry;
+    DirectoryEntry entry{};
     entry.name = dir.info.base.name;
     entry.fid = dir.fid;
 
@@ -52,6 +57,4 @@ DirectoryEntry DirectoryEntry::FromDir(const VirtualDirectory& dir)
     return entry;
 }
 
-} // namespace DTO
-
-} // namespace tpunkt
+} // namespace tpunkt::DTO

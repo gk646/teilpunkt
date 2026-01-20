@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #include <sodium/randombytes.h>
 #include "auth/SessionStorage.h"
 #include "instance/InstanceConfig.h"
@@ -13,8 +12,8 @@ Session::Session(const SessionMetaData& metaData)
       expiration(Timestamp::Now(GetInstanceConfig().getNumber(NumberParamKey::USER_SESSION_EXPIRATION_SECS)))
 {
     randombytes_buf(token.data(), token.capacity());
-    sodium_base64_ENCODED_LEN(24, sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
-    sodium_bin2base64(token.data(), token.capacity(), token.udata(), 23, sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
+    sodium_bin2base64(token.data(), token.capacity(), token.udata(), TPUNKT_CRYPTO_SESSION_ID_LEN,
+                      sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
 }
 
 Session::Session(Session&& other) noexcept
@@ -22,18 +21,16 @@ Session::Session(Session&& other) noexcept
 {
 }
 
-bool Session::isValid(const SessionMetaData& metaData) const
+bool Session::isValid(const SessionMetaData& newMetaData) const
 {
-    if(this->metaData != metaData)
+    if(metaData != newMetaData)
     {
         return false;
     }
-
     if(expiration.isInPast())
     {
         return false;
     }
-
     return true;
 }
 

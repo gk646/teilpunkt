@@ -59,6 +59,8 @@ struct SessionInfo final
 
 struct DirectoryInfo
 {
+    static DirectoryInfo FromDir(const VirtualDirectory& dir);
+
     FileName name;
     FileID fid;
 };
@@ -117,7 +119,6 @@ struct TaskManagerInfo final
 };
 
 } // namespace tpunkt::DTO
-
 
 
 #endif // TPUNKT_DTO_H

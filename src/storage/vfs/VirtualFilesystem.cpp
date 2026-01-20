@@ -8,13 +8,11 @@ VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info) : root(i
 {
 }
 
-VirtualFilesystem::~VirtualFilesystem()
-{
-}
+VirtualFilesystem::~VirtualFilesystem() = default;
 
 VirtualFile* VirtualFilesystem::getFile(const FileID file)
 {
-    iterationCache.clear(); // For non recursive iteration
+    iterationCache.clear(); // For non-recursive iteration
     for(auto& dir : root.getDirs())
     {
         iterationCache.push_back(dir);
@@ -57,7 +55,6 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
                 return &itDir;
             }
             iterationCache.push_back(itDir);
-
         }
         iterationCache.pop_front();
     }
@@ -66,6 +63,11 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
 
 VirtualDirectory* VirtualFilesystem::getFileDir(FileID file)
 {
+}
+
+VirtualDirectory& VirtualFilesystem::getRoot()
+{
+    return root;
 }
 
 } // namespace tpunkt

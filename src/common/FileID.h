@@ -2,18 +2,18 @@
 #ifndef TPUNKT_TEILPUNKT_FILEID_H
 #define TPUNKT_TEILPUNKT_FILEID_H
 
-#include <cstdint>
+#include "fwd.h"
 
 namespace tpunkt
 {
 
 struct FileID final
 {
-    FileID() = default;
+    static FileID FromNum(uint64_t num);
+    static uint64_t ToNum(FileID fid);
 
-    FileID(const uint32_t uid, const bool isDirectory) : uid(uid), directory(isDirectory)
-    {
-    }
+    FileID() = default;
+    FileID(EndpointID endpoint, bool isDirectory);
 
     [[nodiscard]] bool isDirectory() const
     {
@@ -30,13 +30,20 @@ struct FileID final
         return uid;
     }
 
+    [[nodiscard]] EndpointID getEndpoint() const
+    {
+        return static_cast<EndpointID>(endpoint);
+    }
+
     bool operator==(const FileID&) const = default;
 
   private:
-    uint32_t uid = UINT32_MAX;
-    bool directory = false;
-    // 3 byte left
+    uint32_t uid = UINT32_MAX;                 // unique descriptor
+    EndpointID endpoint = EndpointID::INVALID; // which endpoint
+    bool directory = false;                    // If directory or file
 };
+
+static_assert(sizeof(FileID) <= sizeof(uint64_t), "FileID too big!");
 
 } // namespace tpunkt
 

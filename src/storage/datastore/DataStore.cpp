@@ -52,7 +52,7 @@ bool DataStore::CreateDirs(EndpointID endpoint)
         LOG_CRITICAL("Failed to format datastore directory name");
     }
 
-    if(CreateRelDir(dir.data(), true))
+    if(!CreateRelDir(dir.data(), true))
     {
         return false;
     }

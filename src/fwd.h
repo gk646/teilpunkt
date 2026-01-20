@@ -3,7 +3,7 @@
 #ifndef TPUNKT_FWD_H
 #define TPUNKT_FWD_H
 
-#include <cstdint>
+#include <sodium/utils.h>
 #include "config.h"
 
 namespace uWS
@@ -41,6 +41,7 @@ struct FileCreationInfo;
 struct VirtualFilesystem;
 struct VirtualFile;
 struct FileInfo;
+struct StorageEndpoint;
 struct FileStats;
 
 namespace DTO
@@ -59,7 +60,10 @@ struct SessionMetaData;
 
 template <size_t len>
 struct FixedString;
-using SessionToken = FixedString<TPUNKT_CRYPTO_SESSION_ID_LEN>;
+
+// Needs to hold that many bytes encoded as base64
+using SessionToken =
+    FixedString<sodium_base64_ENCODED_LEN(TPUNKT_CRYPTO_SESSION_ID_LEN, sodium_base64_VARIANT_ORIGINAL_NO_PADDING)>;
 using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
 using UserPassword = FixedString<TPUNKT_AUTH_PASSWORD_LEN>;
 using UserPasskey = FixedString<TPUNKT_AUTH_PASSKEY_LEN>;

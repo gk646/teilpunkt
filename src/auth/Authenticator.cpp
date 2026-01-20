@@ -202,6 +202,10 @@ AuthStatus Authenticator::getIsAdmin(UserID user)
 {
     SpinlockGuard lock{authLock};
     // TODO
+    if(user == UserID::SERVER)
+    {
+        return AuthStatus::OK;
+    }
     LOG_FATAL("Not implemented");
     return AuthStatus::INVALID;
 }

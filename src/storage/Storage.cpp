@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #include "auth/Authenticator.h"
 #include "instance/InstanceConfig.h"
 #include "storage/Storage.h"
@@ -17,6 +16,10 @@ Storage::Storage()
 {
     TPUNKT_MACROS_GLOBAL_ASSIGN(Storage);
     LOG_INFO("Startup Disk Usage: %2d%%", GetDiskUsage());
+
+    // TODO - properly detect first startup
+    CreateInfo info{.name = "Default", .maxSize = 10000, .type = StorageEndpointType::LOCAL_FILE_SYSTEM};
+    endpointCreate(UserID::SERVER, info);
 }
 
 Storage::~Storage()
@@ -31,10 +34,14 @@ Storage& Storage::GetInstance()
 
 StorageStatus Storage::getRoots(UserID user, std::vector<DTO::DirectoryInfo>& roots)
 {
-    for(uint32_t i = 0; i < 10; ++i)
+    roots.clear();
+
+    // TODO fix
+    for(StorageEndpoint& endpoint : endpoints)
     {
-        roots.push_back({"TestFile", {i, true}});
+        roots.push_back(DTO::DirectoryInfo::FromDir(endpoint.virtualFilesystem.getRoot()));
     }
+
     return StorageStatus::OK;
 }
 
@@ -120,12 +127,6 @@ StorageStatus Storage::endpointDelete(UserID actor, const EndpointID endpoint)
     }
     LOG_EVENT(actor, Filesystem, StorageEndpointDelete, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
-}
-
-uint32_t Storage::getNextID()
-{
-    SpinlockGuard lock{fileIDLock};
-    return filesID++;
 }
 
 } // namespace tpunkt

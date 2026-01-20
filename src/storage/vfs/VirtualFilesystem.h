@@ -3,6 +3,7 @@
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
 #include <deque>
+#include "fwd.h"
 #include "storage/vfs/VirtualDirectory.h"
 #include "storage/vfs/VirtualFilesystemCache.h"
 
@@ -13,10 +14,6 @@ namespace tpunkt
 // Not synced == NOT threadsafe
 struct VirtualFilesystem
 {
-    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
-    TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
-    ~VirtualFilesystem();
-
     //===== Lookup =====//
 
     // Full lookup
@@ -26,9 +23,16 @@ struct VirtualFilesystem
     // Returns the directory this file is in
     VirtualDirectory* getFileDir(FileID file);
 
+    VirtualDirectory& getRoot();
+
   private:
+    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
+    TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
+    ~VirtualFilesystem();
+
     VirtualDirectory root;
     std::deque<VirtualDirectory> iterationCache;
+    friend StorageEndpoint;
 };
 
 } // namespace tpunkt

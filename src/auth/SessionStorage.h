@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #ifndef TPUNKT_SESSION_STORAGE_H
 #define TPUNKT_SESSION_STORAGE_H
 
@@ -7,7 +6,6 @@
 #include "datastructures/FixedString.h"
 #include "datastructures/SecureList.h"
 #include "datastructures/Timestamp.h"
-#include "fwd.h"
 
 namespace tpunkt
 {
@@ -42,7 +40,7 @@ struct Session final
 
     [[nodiscard]] const UserAgentString& getUserAgent() const;
 
-    bool isExpired() const;
+    [[nodiscard]] bool isExpired() const;
 
   private:
     SessionToken token;       // Actual set cookie

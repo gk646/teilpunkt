@@ -8,7 +8,8 @@ namespace tpunkt
 {
 
 VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
-    : fid(Storage::GetInstance().getNextID(), true), info(FileInfo{info.name, info.creator, info.creator}, info.parent),
+    : fid(info.endpoint, true),
+      info(FileInfo{.name = info.name, .creator = info.creator, .owner = info.creator}, info.parent),
       limits(info.maxSize, false)
 {
 }
