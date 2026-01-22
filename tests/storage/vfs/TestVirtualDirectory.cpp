@@ -18,7 +18,7 @@ FileCreationInfo getFileInfo(const FileName& name)
     return {.name = name, .creator = getUserID()};
 }
 
-DirectoryCreationInfo getDirInfo(const char* name, const uint64_t maxSize, VirtualDirectory* parent)
+DirCreationInfo getDirInfo(const char* name, const uint64_t maxSize, VirtualDirectory* parent)
 {
     return {.name = FileName{name}, .maxSize = maxSize, .parent = parent, .creator = getUserID()};
 }
@@ -91,7 +91,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
     // Change within limit bigger
     {
         const DirectoryStats stats = baseDir.getStats();
-        auto result = baseDir.fileChange(file1, 100);
+        auto result = baseDir.fileChangeSize(file1, 100);
         REQUIRE(result);
 
         CheckAccess(baseDir, stats, true);
@@ -102,7 +102,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
     // Change outside limit
     {
         const DirectoryStats stats = baseDir.getStats();
-        auto result = baseDir.fileChange(file1, 1000);
+        auto result = baseDir.fileChangeSize(file1, 1000);
         REQUIRE_FALSE(result);
         CheckAccess(baseDir, stats, true);
         CheckChange(baseDir, stats, false);
@@ -112,7 +112,7 @@ TEST_CASE("VirtualDirectory Simple File Operations")
     // Change within limit smaller
     {
         const DirectoryStats stats = baseDir.getStats();
-        auto result = baseDir.fileChange(file1, 10);
+        auto result = baseDir.fileChangeSize(file1, 10);
         REQUIRE(result);
         CheckAccess(baseDir, stats, true);
         CheckChange(baseDir, stats, true);

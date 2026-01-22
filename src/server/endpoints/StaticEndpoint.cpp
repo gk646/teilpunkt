@@ -9,7 +9,7 @@ namespace tpunkt
 
 void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(!IsRateLimited(res, req))
+    if(IsRateLimited(res, req))
     {
         return;
     }
@@ -17,7 +17,7 @@ void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     const auto request = req->getUrl();
 
     const StaticFile* file = nullptr;
-    if(strncmp(request.data(), "/", request.size()) == 0)
+    if(request == "/")
     {
         file = GetWebServer().getStaticFileStorage().getFile("/index.html", 11);
     }
@@ -29,7 +29,7 @@ void StaticEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
     if(file != nullptr)
     {
         res->writeHeader("Content-Type", file->type);
-        EndRequest(res, 200, file->content);
+        EndRequest(res, 200, {file->content, file->size});
     }
     else
     {

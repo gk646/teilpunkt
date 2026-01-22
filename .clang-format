@@ -52,7 +52,7 @@ IncludeCategories:
 
 IncludeIsMainRegex: 'absdf'
 IncludeBlocks: Merge
-SortIncludes: CaseInsensitive
+SortIncludes: Never
 
 
 InsertNewlineAtEOF: true

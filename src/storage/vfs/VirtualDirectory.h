@@ -10,19 +10,18 @@
 namespace tpunkt
 {
 
-struct DirectoryCreationInfo final
+struct DirCreationInfo final
 {
     FileName name;
-    uint64_t maxSize = 0;
-    VirtualDirectory* parent = nullptr;
     UserID creator = UserID::INVALID;
-    EndpointID endpoint;
+    FileID parent;
+    uint64_t maxSize = 0;
 };
 
 struct DirectoryInfo final
 {
     FileInfo base;
-    VirtualDirectory* parent = nullptr; // Only null if it's the root of an endpoint
+    FileID parent;
 };
 
 struct DirectoryLimits final
@@ -44,7 +43,7 @@ struct DirectoryStats final
 
 struct VirtualDirectory final
 {
-    VirtualDirectory(const DirectoryCreationInfo& info);
+    VirtualDirectory(const DirCreationInfo& info);
 
     //===== Get =====//
 
@@ -58,14 +57,14 @@ struct VirtualDirectory final
     bool fileAdd(const FileCreationInfo& info, FileID& file);
 
     // Returns true if the size of the given file has changed
-    bool fileChange(FileID file, uint64_t newFileSize);
+    bool fileChangeSize(FileID file, uint64_t newFileSize);
 
     // Returns true if the given file is deleted - deletes all its subdirs and subfiles
     bool fileDelete(FileID fileid);
     bool fileDeleteAll();
 
     // Returns true and assigns dir if a new directory was added
-    bool dirAdd(const DirectoryCreationInfo& info, FileID& dir);
+    bool dirAdd(const DirCreationInfo& info, FileID& dir);
 
     // Returns true if a directory with the given name exists
     [[nodiscard]] bool dirNameExists(const FileName& name) const;
@@ -74,7 +73,6 @@ struct VirtualDirectory final
 
     // Returns true if a directory was removed
     bool dirDelete(FileID dir);
-    bool dirDeleteAll();
 
     //===== Self =====//
 
@@ -96,11 +94,6 @@ struct VirtualDirectory final
 
     void onAccess();
     void onModification();
-
-    // Called for each parent up to the root
-    template <typename Func>
-    void iterateParents(Func func) const;
-
     bool fileDeleteImpl(FileID file);
 
     FileID fid;
@@ -112,31 +105,6 @@ struct VirtualDirectory final
     friend DTO::DirectoryEntry;
     friend DTO::DirectoryInfo;
 };
-
-template <typename Func>
-void VirtualDirectory::iterateParents(Func func) const
-{
-    VirtualDirectory* current = info.parent;
-
-    // Iterate up with locking
-    while(current != nullptr)
-    {
-        const auto changed = func(*current);
-        if(changed)
-        {
-            current->onModification();
-        }
-        current = current->info.parent;
-    }
-
-    // Iterate up to unlock
-    current = info.parent;
-    while(current != nullptr)
-    {
-        current = current->info.parent;
-    }
-}
-
 
 } // namespace tpunkt
 

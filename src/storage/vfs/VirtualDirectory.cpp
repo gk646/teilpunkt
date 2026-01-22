@@ -7,8 +7,8 @@
 namespace tpunkt
 {
 
-VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
-    : fid(info.endpoint, true),
+VirtualDirectory::VirtualDirectory(const DirCreationInfo& info)
+    : fid(info.parent.getEndpoint(), true),
       info(FileInfo{.name = info.name, .creator = info.creator, .owner = info.creator}, info.parent),
       limits(info.maxSize, false)
 {
@@ -50,7 +50,7 @@ bool VirtualDirectory::fileAdd(const FileCreationInfo& createInfo, FileID& file)
     return true;
 }
 
-bool VirtualDirectory::fileChange(const FileID file, const uint64_t newFileSize)
+bool VirtualDirectory::fileChangeSize(const FileID file, const uint64_t newFileSize)
 {
     VirtualFile* changeFile = findFile(file);
     if(changeFile == nullptr) [[unlikely]]
@@ -61,39 +61,10 @@ bool VirtualDirectory::fileChange(const FileID file, const uint64_t newFileSize)
     const uint64_t currFileSize = changeFile->getStats().size;
     if(currFileSize == newFileSize) [[unlikely]]
     {
-        return false;
+        return true;
     }
 
     if(!canHoldSizeChange(currFileSize, newFileSize)) [[unlikely]]
-    {
-        return false;
-    }
-
-    bool fitsIntoAll = true;
-    VirtualDirectory* current = info.parent;
-
-    while(current != nullptr)
-    {
-        if(!current->canHoldSizeChange(currFileSize, newFileSize)) [[unlikely]]
-        {
-            fitsIntoAll = false;
-        }
-        current = current->info.parent;
-    }
-
-    current = info.parent;
-    while(current != nullptr)
-    {
-        if(fitsIntoAll)
-        {
-            current->stats.subDirFileSize = (current->stats.subDirFileSize - currFileSize) + newFileSize;
-            current->onModification();
-        }
-        current = current->info.parent;
-    }
-
-    // Return early
-    if(!fitsIntoAll)
     {
         return false;
     }
@@ -147,7 +118,7 @@ bool VirtualDirectory::fileDeleteImpl(FileID file)
             dir.stats.subDirFileSize -= changeFileStats.size;
             return true;
         };
-        iterateParents(changeFunc);
+        // iterateParents(changeFunc);
         return true;
     }
     return false;
@@ -155,22 +126,17 @@ bool VirtualDirectory::fileDeleteImpl(FileID file)
 
 //===== Directories =====//
 
-bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& cInfo, FileID& dir)
+bool VirtualDirectory::dirAdd(const DirCreationInfo& cInfo, FileID& dir)
 {
-    if(cInfo.maxSize >= limits.sizeLimit) [[unlikely]]
-    {
-        return false;
-    }
-
     if(dirNameExists(cInfo.name)) [[unlikely]]
     {
         return false;
     }
 
     onModification();
-    VirtualDirectory newDir{cInfo};
     auto& newDirRef = dirs.emplace_back(cInfo);
     dir = newDirRef.getID();
+
     return true;
 }
 
@@ -231,20 +197,15 @@ void VirtualDirectory::collectEntries(std::vector<DTO::DirectoryEntry>& entries)
     entries.clear();
     entries.reserve(files.size() + dirs.size() + 1);
 
-    for(auto& file : files)
+    for(const auto& file : files)
     {
         entries.push_back(DTO::DirectoryEntry::FromFile(file));
     }
-    for(auto& dir : dirs)
+    for(const auto& dir : dirs)
     {
         entries.push_back(DTO::DirectoryEntry::FromDir(dir));
     }
 }
-
-
-//===== Private =====//
-
-// Locking is assumed for those functions
 
 bool VirtualDirectory::canHoldSizeChange(const uint64_t currSize, const uint64_t newSize) const
 {

@@ -10,7 +10,7 @@ namespace tpunkt
 
 void RegisterPasskeyEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(!IsRateLimited(res, req))
+    if(IsRateLimited(res, req))
     {
         return;
     }

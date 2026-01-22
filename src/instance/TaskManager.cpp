@@ -133,26 +133,28 @@ void TaskManager::workerTask(const ThreadID tid, TaskManager* manager)
 
 bool TaskManager::threadAdd(const UserID actor)
 {
+    constexpr auto event = EventAction::ThreadAdd;
     SpinlockGuard guard{threadLock};
     const auto maxThreads = std::thread::hardware_concurrency();
     if(threads.size() >= maxThreads - 1)
     {
-        LOG_EVENT(actor, Server, ThreadAdd, FAIL_TOO_MANY, ServerEventData{});
+        LOG_EVENT_SERVER(actor, event, FAIL_TOO_MANY, ServerEventData{});
         return false;
     }
 
     auto& [ tid, status, thread ] = threads.emplace_back(threadID++);
     thread = std::thread(workerTask, tid, this);
-    LOG_EVENT(actor, Server, ThreadAdd, INFO_SUCCESS, ServerEventData{});
+    LOG_EVENT_SERVER(actor, event, INFO_SUCCESS, ServerEventData{});
     return true;
 }
 
 bool TaskManager::threadRemove(const UserID actor)
 {
+    constexpr auto event = EventAction::ThreadRemove;
     SpinlockGuard guard{threadLock};
     if(threads.size() == 1)
     {
-        LOG_EVENT(actor, Server, ThreadRemove, FAIL_INVALID_OPERATION, ServerEventData{});
+        LOG_EVENT_SERVER(actor, event, FAIL_INVALID_OPERATION, ServerEventData{});
         return false;
     }
 
@@ -163,10 +165,10 @@ bool TaskManager::threadRemove(const UserID actor)
         thread.join();
         threads.pop_back();
         threadID--;
-        LOG_EVENT(actor, Server, ThreadRemove, INFO_SUCCESS, ServerEventData{});
+        LOG_EVENT_SERVER(actor, event, INFO_SUCCESS, ServerEventData{});
         return true;
     }
-    LOG_EVENT(actor, Server, ThreadRemove, ERROR_OPERATION_FAILED, ServerEventData{});
+    LOG_EVENT_SERVER(actor, event, ERROR_OPERATION_FAILED, ServerEventData{});
     return false;
 }
 

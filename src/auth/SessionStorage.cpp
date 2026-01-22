@@ -162,14 +162,15 @@ bool SessionStorage::remove(const UserID user, const Timestamp& creation)
     return false;
 }
 
-void SessionStorage::getInfo(const UserID user, std::vector<DTO::SessionInfo>& collector)
+bool SessionStorage::getInfo(const UserID user, std::vector<DTO::SessionInfo>& collector)
 {
     collector.clear();
     UserSessionData* sessionData = getUserSessionData(user);
     if(sessionData == nullptr) [[unlikely]]
     {
-        return;
+        return false;
     }
+
     auto sessionList = sessionData->getSessions().get();
     for(auto& session : sessionList)
     {
@@ -179,6 +180,8 @@ void SessionStorage::getInfo(const UserID user, std::vector<DTO::SessionInfo>& c
         info.userAgent = session.getUserAgent();
         collector.push_back(info);
     }
+
+    return true;
 }
 
 UserSessionData* SessionStorage::getUserSessionData(const UserID userID)

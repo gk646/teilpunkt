@@ -7,6 +7,18 @@
     background: var(--background);
 }
 
+/* Main Content */
+.main-content {
+    margin-left: 280px; /* side panel width (250) plus gap (30) */
+    margin-right: 20px; /* reserved space for a right panel */
+    margin-top: 110px; /* header height plus menu bar height */
+    padding: 20px;
+    overflow-y: auto;
+    height: calc(100vh - 110px);
+    background: var(--background);
+    border-radius: 8px;
+}
+
 /* Header Right */
 .header-right {
     display: flex;
@@ -65,39 +77,26 @@
     color: var(--text-active);
 }
 
-/* Second Menu Bar */
 .menu-bar {
     display: flex;
-    justify-content: flex-start; /* Align items to the start (left) */
+    justify-content: flex-start;
     align-items: center;
     padding: 10px 20px;
     background: var(--foreground);
     box-shadow: 0 2px 10px var(--shadow-dark);
     position: fixed;
     top: 75px; /* below header */
-    left: 300px; /* to the right of the side menu (250px + 20px gap) */
+    left: 280px; /* to the right of the side menu (250px + 30px gap) */
     right: 0;
     z-index: 999;
-    border-radius: 0 0 0 8px;
     height: 50px;
 }
 
-/* Main Content */
-.main-content {
-    margin-left: 280px; /* side panel width (250) plus gap (30) */
-    margin-right: 20px; /* reserved space for a right panel */
-    margin-top: 110px;  /* header height plus menu bar height */
-    padding: 20px;
-    overflow-y: auto;
-    height: calc(100vh - 110px);
-    background: var(--background);
-    border-radius: 8px;
-}
+
 /* Breadcrumb and Up Button */
 .breadcrumb-container {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
     font-size: 0.9rem;
     color: var(--text-active);
 }
@@ -126,59 +125,6 @@
     text-decoration: underline;
 }
 
-/* File Browser (Details View) */
-.file-browser {
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid var(--background-selected);
-    border-radius: 8px;
-    overflow: hidden;
-    margin-top: 20px; /* gap between side panel and file list */
-}
-
-.file-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    background: var(--foreground);
-    border-bottom: 1px solid var(--background-selected);
-    transition: background 0.2s ease;
-    cursor: pointer;
-    border-radius: 0; /* rows touch seamlessly */
-}
-
-.file-item:hover {
-    background: var(--background-selected);
-}
-
-.file-icon {
-    margin-right: 15px;
-}
-
-.file-name {
-    flex-grow: 1;
-    font-size: 1rem;
-    color: var(--text);
-    word-break: break-all;
-}
-
-/* File Actions */
-.file-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.file-action {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    transition: transform 0.2s ease;
-}
-
-.file-action:hover {
-    transform: scale(1.1);
-}
 
 /* Add File Button */
 .add-file-button {
@@ -228,38 +174,69 @@
     color: black;
 }
 
+
+/* File Browser (Details View) */
+
+.file-browser {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--background-selected);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px; /* gap between side panel and file list */
+}
+
 .file-item {
     display: flex;
     align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+    padding: 15px 10px; /* Increased padding for better spacing */
+    background: var(--foreground);
+    border-bottom: 1px solid var(--background-selected);
+    transition: background 0.2s ease;
     cursor: pointer;
+    border-radius: 0; /* rows touch seamlessly */
 }
 
 .file-item:hover {
-    background-color: #f5f5f5;
+    background: var(--background-selected);
 }
 
 .file-icon {
-    margin-right: 10px;
+    margin-right: 20px; /* Increased margin for better spacing */
+    font-size: 1.5rem; /* Larger icon size */
+    width: 40px; /* Fixed width for icon container */
+    height: 40px; /* Fixed height for icon container */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .file-name {
     flex-grow: 1;
+    font-size: 1.1rem; /* Slightly larger font size */
+    color: var(--text);
+    word-break: break-all;
+    padding: 0 10px; /* Additional padding around the file name */
+    font : var(--font-family);
 }
 
+/* File Actions */
 .file-actions {
     display: flex;
-    gap: 10px;
+    gap: 15px; /* Increased gap between action buttons */
+    margin-left: 10px; /* Additional margin to separate actions from the name */
 }
 
 .file-action {
-    background: none;
+    background: transparent;
     border: none;
     cursor: pointer;
-    padding: 5px;
+    padding: 8px; /* Increased padding for better click area */
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    font-size: 1.2rem; /* Larger icon size for actions */
 }
 
 .file-action:hover {
+    transform: scale(1.1);
     opacity: 0.7;
 }

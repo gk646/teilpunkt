@@ -42,7 +42,7 @@ void EventMonitor::logAuditTrace<EventType::APIRequest, APIRequestEventData>(Use
 }
 
 template <>
-void EventMonitor::logAuditTrace<EventType::Users, AuthenticationEventData>(UserID actor, EventAction action,
+void EventMonitor::logAuditTrace<EventType::Auth, AuthenticationEventData>(UserID actor, EventAction action,
                                                                             EventStatus status,
                                                                             AuthenticationEventData data)
 {

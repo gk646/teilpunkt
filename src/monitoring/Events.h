@@ -12,7 +12,7 @@ enum class EventType : uint8_t
 {
     INVALID,
     APIRequest, // API requests
-    Users,      // Register, Login and user information retrieval
+    Auth,      // Register, Login and user information retrieval
     Filesystem, // File-related operations
     Sessions,   // Authentication & session handling
     Instance,   // Instance events like settings, config
@@ -48,8 +48,8 @@ enum class EventAction : uint8_t
     FileSystemFileCreate,
     FilesystemFileWrite,
     FilesystemFileRemove,
-    FilesystemDirectoryAdd,
-    FilesystemDirectoryRead,
+    FilesystemDirCreate,
+    FilesystemDirRead,
     // TaskManager
     ThreadAdd,
     ThreadRemove,
@@ -61,7 +61,8 @@ enum class EventStatus : uint8_t
     // Info
     INFO,                   //----------------
     INFO_SUCCESS,           // Success
-    INFO_FAIL_UNSPECIFIED,  // Something failed but It's further not specified
+
+    FAIL_UNSPECIFIED,  // Something failed but It's further not specified
     FAIL_INVALID_CREDENTIALS,
     FAIL_INVALID_TOKEN,
     FAIL_CONFIG_RESTRICTED, // Prevented due to instance config
@@ -70,11 +71,13 @@ enum class EventStatus : uint8_t
     FAIL_USERNAME_EXISTS,
     FAIL_NO_SUCH_ENDPOINT,
     FAIL_NO_SUCH_FILE,
+    FAIL_NO_SUCH_USER,
     FAIL_SESSION_EXISTS,
     FAIL_INVALID_ARGUMENTS, // Failed cause arguments had wrong values
     FAIL_INVALID_OPERATION, // Illogic operation or impossible
     FAIL_TOO_MANY,
     WARNING,                //----------------
+
     // Warnings
     WARN_FAILED_UNSPECIFIED, // Internal operation failed
     ERROR,

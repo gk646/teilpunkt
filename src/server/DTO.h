@@ -9,7 +9,7 @@
 namespace tpunkt::DTO
 {
 
-//===== Signup =====//
+//===== Authentication =====//
 
 struct UserSignupPW final
 {
@@ -38,7 +38,6 @@ struct UserSignupPK final
     } pubKeyCredParams;
 };
 
-//===== Login =====//
 
 struct UserLoginPW final
 {
@@ -46,16 +45,21 @@ struct UserLoginPW final
     UserPassword password;
 };
 
-//===== User =====//
 
-struct SessionInfo final
+//===== Filesystem =====//
+
+
+struct DirectoryRequest final
 {
-    UserAgentString userAgent;
-    uint64_t creationUnix = 0;
-    uint64_t expirationUnix = 0;
+    // The user is already gained through auth with the cookie
+    FileID directory;
 };
 
-//===== Directories =====//
+struct CreateRequest final
+{
+    FileName name;
+    FileID directory;
+};
 
 struct DirectoryInfo
 {
@@ -72,6 +76,7 @@ struct DirectoryEntry final
 
     FileName name;
     FileID fid;
+    bool isFile;
 
     UserName creator;
     UserName owner;
@@ -83,13 +88,20 @@ struct DirectoryEntry final
     uint64_t sizeBytes = 0;
 };
 
+//===== User =====//
+
+struct SessionInfo final
+{
+    UserAgentString userAgent;
+    uint64_t creationUnix = 0;
+    uint64_t expirationUnix = 0;
+};
+
+//===== Directories =====//
+
+
 //===== Requests =====//
 
-struct DirectoryRequest final
-{
-    // The user is already gained through auth with the cookie
-    FileID directory;
-};
 
 //===== Task Management =====//
 

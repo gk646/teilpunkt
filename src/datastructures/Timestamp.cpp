@@ -32,10 +32,6 @@ bool Timestamp::operator<(const Timestamp& rhs) const
     return timestamp < rhs.timestamp;
 }
 
-Timestamp::Timestamp(const uint64_t& timestamp) : timestamp(timestamp)
-{
-}
-
 Timestamp Timestamp::operator-(const Timestamp& rhs) const
 {
     if(timestamp < rhs.timestamp)
@@ -115,6 +111,10 @@ Timestamp Timestamp::Now(const uint64_t addSeconds)
     Timestamp result{};
     result.addSecs(addSeconds);
     return result;
+}
+
+Timestamp::Timestamp(const uint64_t& timestamp) : timestamp(timestamp)
+{
 }
 
 } // namespace tpunkt

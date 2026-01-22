@@ -26,12 +26,12 @@ struct VirtualFilesystem
     VirtualDirectory& getRoot();
 
   private:
-    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
+    explicit VirtualFilesystem(const DirCreationInfo& info);
     TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
     ~VirtualFilesystem();
 
     VirtualDirectory root;
-    std::deque<VirtualDirectory> iterationCache;
+    std::deque<VirtualDirectory*> iterationCache;
     friend StorageEndpoint;
 };
 

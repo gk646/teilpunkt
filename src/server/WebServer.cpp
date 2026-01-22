@@ -27,9 +27,9 @@ void CreateApp(uWS::SSLApp& app)
     app.get("/api/filesystem/download", FileDownloadEndpoint::handle);
 
     // Dirs
-    app.post("/api/filesystem/directory", DirCreateEndpoint::handle);
-    app.del("/api/filesystem/directory", DirDeleteEndpoint::handle);
-    app.post("/api/filesystem/directoryLookup", DirLookupEndpoint::handle);
+    app.post("/api/filesystem/dir", DirCreateEndpoint::handle);
+    app.del("/api/filesystem/dir", DirDeleteEndpoint::handle);
+    app.post("/api/filesystem/dirLookup", DirLookupEndpoint::handle);
 
     // Filesystem
     app.get("/api/filesystem/roots", DirRootsEndpoint::handle);
@@ -45,7 +45,7 @@ uWS::SSLApp& GetNextHandler()
     return GetWebServer().getNextHandler();
 }
 
-void WebThreadFunc(int threadNum, uWS::SocketContextOptions* options, volatile bool* isStarted)
+void WebThreadFunc(size_t threadNum, const uWS::SocketContextOptions* options, volatile bool* isStarted)
 {
     auto& app = GetWebServer().webThreads[ threadNum ].app;
     app = new uWS::SSLApp(*options);
@@ -83,7 +83,7 @@ namespace global
 WebServer* WebServer;
 }
 
-WebServer::WebServer(const int threads) : staticFiles(TPUNKT_INSTANCE_STATIC_FILES_DIR), threadCount(threads)
+WebServer::WebServer(const size_t threads) : staticFiles(TPUNKT_INSTANCE_STATIC_FILES_DIR), threadCount(threads)
 {
     TPUNKT_MACROS_GLOBAL_ASSIGN(WebServer);
     webThreads.reserve(threads + 1);
@@ -92,7 +92,7 @@ WebServer::WebServer(const int threads) : staticFiles(TPUNKT_INSTANCE_STATIC_FIL
         .key_file_name = TPUNKT_INSTANCE_KEY_DIR, .cert_file_name = TPUNKT_INSTANCE_CERT_DIR, .passphrase = "1234"};
 
     volatile bool isStarted = true;
-    for(int i = 0; i < threads; ++i)
+    for(size_t i = 0; i < threads; ++i)
     {
         auto& back = webThreads.emplace_back(WebThread{.thread = {}, .app = {}, .threadNum = i});
         back.thread = std::thread(WebThreadFunc, i, &options, &isStarted);

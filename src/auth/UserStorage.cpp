@@ -3,6 +3,8 @@
 #include <sodium/randombytes.h>
 #include "auth/UserStorage.h"
 
+#include <algorithm>
+
 namespace tpunkt
 {
 constexpr size_t PW_HASH_OPS_LVL = crypto_pwhash_OPSLIMIT_MODERATE;
@@ -141,17 +143,36 @@ bool UserStorage::changeCredentials(const UserID user, const UserName& newName, 
 
 bool UserStorage::nameExists(const UserName& name) const
 {
+    return std::ranges::any_of(users,
+                               [ & ](const SecureBox<User>& box)
+                               {
+                                   const auto boxReader = box.get();
+                                   const auto& user = boxReader.get();
+                                   return user.name == name;
+                               });
+}
+
+bool UserStorage::getName(UserID user, UserName& data) const
+{
+    if(user == UserID::SERVER)
+    {
+        data = "Server";
+        return true;
+    }
+
     for(const auto& box : users)
     {
         const auto boxReader = box.get();
-        const auto& user = boxReader.get();
-        if(user.name == name)
+        const auto& savedUser = boxReader.get();
+        if(savedUser.userID == user)
         {
+            data = savedUser.name;
             return true;
         }
     }
     return false;
 }
+
 
 UserStorage::UserStorage()
 {

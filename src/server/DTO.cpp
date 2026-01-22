@@ -20,6 +20,7 @@ DirectoryEntry DirectoryEntry::FromFile(const VirtualFile& file)
     DirectoryEntry entry{};
     entry.name = file.info.name;
     entry.fid = file.fid;
+    entry.isFile = true;
 
     const FileInfo& info = file.info;
     const FileStats& stats = file.stats;
@@ -41,6 +42,7 @@ DirectoryEntry DirectoryEntry::FromDir(const VirtualDirectory& dir)
     DirectoryEntry entry{};
     entry.name = dir.info.base.name;
     entry.fid = dir.fid;
+    entry.isFile = false;
 
     const FileInfo& info = dir.info.base;
     const FileStats& stats = dir.stats.base;

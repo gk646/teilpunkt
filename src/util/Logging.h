@@ -49,7 +49,6 @@ Logger& GetLogger();
 #define LOG_CRITICAL(msg, ...)                                                                                         \
     tpunkt::GetLogger().logEx(tpunkt::LogLevel::CRITICAL, __PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
 #define LOG_FATAL(msg, ...) tpunkt::GetLogger().logFatal(__PRETTY_FUNCTION__, __FILE__, __LINE__, msg, ##__VA_ARGS__)
-
 #define LOG_EVENT(actor, type, action, status, data)                                                                   \
     do                                                                                                                 \
     {                                                                                                                  \
@@ -61,8 +60,12 @@ Logger& GetLogger();
         {                                                                                                              \
             LOG_INFO(#type " : " #action " : " #status);                                                               \
         }                                                                                                              \
-        GetEventMonitor().logAuditTrace<EventType::type>(actor, EventAction::action, EventStatus::status, data);       \
+        GetEventMonitor().logAuditTrace<EventType::type>(actor, action, EventStatus::status, data);                    \
     } while(false)
 
+// Special logs
+#define LOG_EVENT_FILESYS(actor, action, status, data) LOG_EVENT(actor, Filesystem, action, status, data)
+#define LOG_EVENT_AUTH(actor, action, status, data) LOG_EVENT(actor, Auth, action, status, data)
+#define LOG_EVENT_SERVER(actor, action, status, data) LOG_EVENT(actor, Server, action, status, data)
 
 #endif // TPUNKT_LOGGER_H

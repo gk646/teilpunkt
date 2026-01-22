@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
-
 #include <cstdio>
 #include "crypto/WrappedKey.h"
 #include "datastructures/FixedString.h"
-#include "datastructures/SecureEraser.h"
 #include "storage/datastore/LocalFileSystem.h"
 #include "storage/StorageEndpoint.h"
-#include "storage/StorageTransaction.h"
 #include "uac/UserAccessControl.h"
 #include "util/Logging.h"
 #include "util/Strings.h"
@@ -43,9 +40,15 @@ const char* GetStorageStatusStr(const StorageStatus status)
     return nullptr;
 }
 
+StorageEndpointData::StorageEndpointData(const StorageEndpointCreateInfo& info, UserID creator, EndpointID endpoint)
+    : name(info.name), maxSize(info.maxSize), type(info.type), creator(creator), endpoint(endpoint)
+{
+}
+
 StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const EndpointID endpoint, const UserID creator)
-    : virtualFilesystem(
-          {.name = info.name, .maxSize = info.maxSize, .parent = nullptr, .creator = creator, .endpoint = endpoint})
+    : virtualFilesystem(DirCreationInfo{
+          .name = info.name, .creator = creator, .parent = FileID::Root(endpoint), .maxSize = info.maxSize}),
+      data(info, creator, endpoint)
 {
     switch(info.type)
     {
@@ -56,42 +59,43 @@ StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const En
             LOG_CRITICAL("REMOTE_FILE_SYSTEM Not supported");
             break;
     }
+
+    // TODO remove
+    FileCreationInfo fileInfo{.name = "test.txt", .creator = UserID::SERVER, .endpoint = endpoint};
+    fileCreate(UserID::SERVER, virtualFilesystem.getRoot().getID(), fileInfo);
 }
 
-
-StorageStatus StorageEndpoint::fileCreate(const UserID actor, const FileID dir, const FileCreationInfo& info,
-                                          CreateFileTransaction& action)
+StorageStatus StorageEndpoint::fileCreate(const UserID actor, const FileID dir, const FileCreationInfo& info)
 {
+    constexpr EventAction action = EventAction::FileSystemFileCreate;
     SpinlockGuard guard{lock};
     if(!IsValidFilename(info.name))
     {
-        LOG_EVENT(actor, Filesystem, FileSystemFileCreate, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_INVALID_FILE_NAME;
     }
 
     if(GetUAC().userCanAction(actor, dir, PermissionFlag::CREATE) != UACStatus::OK)
     {
-        LOG_EVENT(actor, Filesystem, FileSystemFileCreate, FAIL_NO_UAC, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, action, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
     VirtualDirectory* directory = virtualFilesystem.getDir(dir);
     if(directory == nullptr)
     {
-        LOG_EVENT(actor, Filesystem, FileSystemFileCreate, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, action, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
     FileID newId{};
-    if(directory->fileAdd(info, newId))
+    if(!directory->fileAdd(info, newId))
     {
-        LOG_EVENT(actor, Filesystem, FileSystemFileCreate, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_NO_UNIQUE_NAME;
     }
 
-    new(&action) CreateFileTransaction{*dataStore, virtualFilesystem, info, dir};
-    LOG_EVENT(actor, Filesystem, FileSystemFileCreate, INFO_SUCCESS, FilesystemEventData{});
-
+    LOG_EVENT_FILESYS(actor, action, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
@@ -117,28 +121,66 @@ StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, 
     return StorageStatus::OK;
 }
 
-StorageStatus StorageEndpoint::dirGetInfo(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries)
+StorageStatus StorageEndpoint::fileRename(UserID user, FileID file, const FileName& newName)
 {
-    SpinlockGuard guard{lock};
-    if(GetUAC().userCanAction(actor, dir, PermissionFlag::READ) != UACStatus::OK)
+}
+
+StorageStatus StorageEndpoint::dirCreate(UserID actor, FileID dir, const DirCreationInfo& info)
+{
+    constexpr EventAction action = EventAction::FilesystemDirCreate;
+    if(!IsValidFilename(info.name))
     {
-        LOG_EVENT(actor, Filesystem, FilesystemDirectoryRead, FAIL_NO_UAC, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        return StorageStatus::ERR_INVALID_FILE_NAME;
+    }
+
+    if(GetUAC().userCanAction(actor, dir, PermissionFlag::CREATE) != UACStatus::OK)
+    {
+        LOG_EVENT_FILESYS(actor, action, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
     VirtualDirectory* directory = virtualFilesystem.getDir(dir);
     if(directory == nullptr)
     {
-        LOG_EVENT(actor, Filesystem, FilesystemDirectoryRead, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, action, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        return StorageStatus::ERR_NO_SUCH_DIR;
+    }
+
+    FileID newId{};
+    if(!directory->dirAdd(info, newId))
+    {
+        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        return StorageStatus::ERR_NO_UNIQUE_NAME;
+    }
+
+    LOG_EVENT_FILESYS(actor, action, INFO_SUCCESS, FilesystemEventData{});
+    return StorageStatus::OK;
+}
+
+StorageStatus StorageEndpoint::dirGetEntries(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries)
+{
+    constexpr EventAction action = EventAction::FilesystemDirRead;
+    SpinlockGuard guard{lock};
+    if(GetUAC().userCanAction(actor, dir, PermissionFlag::READ) != UACStatus::OK)
+    {
+        LOG_EVENT_FILESYS(actor, action, FAIL_NO_UAC, FilesystemEventData{});
+        return StorageStatus::ERR_NO_UAC_PERM;
+    }
+
+    const VirtualDirectory* directory = virtualFilesystem.getDir(dir);
+    if(directory == nullptr)
+    {
+        LOG_EVENT_FILESYS(actor, action, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
     directory->collectEntries(entries);
-    LOG_EVENT(actor, Filesystem, FilesystemDirectoryRead, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, action, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
-const StorageEndpointData& StorageEndpoint::getInfo() const
+const StorageEndpointData& StorageEndpoint::getData() const
 {
     return data;
 }

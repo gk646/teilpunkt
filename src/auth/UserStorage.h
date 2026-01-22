@@ -31,6 +31,8 @@ struct UserStorage final
     // Returns true if a user with the given name exists
     [[nodiscard]] bool nameExists(const UserName& name) const;
 
+    [[nodiscard]] bool getName(UserID user, UserName& data) const;
+
   private:
     UserStorage();
     ~UserStorage();

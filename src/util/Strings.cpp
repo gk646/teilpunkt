@@ -8,34 +8,24 @@
 namespace tpunkt
 {
 
-bool NumberToString(char* buf, const size_t len, const uint32_t num)
+bool NumberToString(char* buf, const size_t len, const uint64_t num, const char* add)
 {
     if((buf == nullptr) || len == 0) [[unlikely]]
     {
         return false;
     }
 
-    const auto result = std::to_chars(buf, buf + len - 1, num);
+    const auto result = std::to_chars(buf, buf + len - 1U, num);
     if(result.ec != std::errc()) [[unlikely]]
     {
         return false;
     }
 
     *result.ptr = '\0';
-    return true;
-}
 
-bool NumberToStringEx(char* buf, const size_t len, const uint32_t num, const char* add)
-{
-    if((buf == nullptr) || (add == nullptr) || len == 0) [[unlikely]]
+    if(add == nullptr)
     {
-        return false;
-    }
-
-    const auto result = std::to_chars(buf, buf + len - 1, num);
-    if(result.ec != std::errc()) [[unlikely]]
-    {
-        return false;
+        return true;
     }
 
     const size_t numLen = static_cast<uint64_t>(result.ptr - buf);
@@ -55,7 +45,7 @@ bool NumberToStringEx(char* buf, const size_t len, const uint32_t num, const cha
     return true;
 }
 
-bool StringToNumber(const std::string_view& view, uint32_t& num)
+bool StringToNumber(const std::string_view& view, uint64_t& num)
 {
     return std::from_chars(view.data(), view.data() + view.size(), num).ec == std::errc{};
 }

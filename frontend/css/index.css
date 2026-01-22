@@ -26,33 +26,6 @@ body {
     z-index: 1000;
 }
 
-.header .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary);
-}
-
-.header .nav a {
-    text-decoration: none;
-    color: var(--text-active);
-    padding: 10px 15px;
-    border-radius: 5px;
-    transition: background 0.3s ease, color 0.3s ease;
-}
-
-.header .nav a:hover {
-    background: var(--background-selected);
-}
-
-.header .btn-primary {
-    background: var(--primary);
-    color: var(--foreground);
-}
-
-.header .btn-primary:hover {
-    background: var(--secondary);
-}
-
 /* Hero Section Styles */
 .main-content {
     display: flex;

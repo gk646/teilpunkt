@@ -149,8 +149,8 @@ bool ServerEndpoint::HasValidSession(uWS::HttpResponse<true>* res, uWS::HttpRequ
     const std::string_view tokenCookie = GetCookie(req, TPUNKT_AUTH_SESSION_TOKEN_NAME);
     const std::string_view userCookie = GetCookie(req, TPUNKT_AUTH_SESSION_USER_NAME);
 
-    uint32_t lookupUser = 0;
-    if(tokenCookie.empty() || userCookie.empty() || !StringToNumber(userCookie, lookupUser))
+    uint64_t userNum = 0;
+    if(tokenCookie.empty() || userCookie.empty() || !StringToNumber(userCookie, userNum))
     {
         EndRequest(res, 400, "", false,
                    [](uWS::HttpResponse<true>* res) -> void
@@ -170,7 +170,8 @@ bool ServerEndpoint::HasValidSession(uWS::HttpResponse<true>* res, uWS::HttpRequ
     }
 
     const SessionToken token{tokenCookie};
-    const AuthStatus status = Authenticator::GetInstance().sessionAuth(UserID{lookupUser}, token, metaData, user);
+    const UserID lookupUser = UserID{static_cast<uint32_t>(userNum)};
+    const AuthStatus status = Authenticator::GetInstance().sessionAuth(lookupUser, token, metaData, user);
     if(status != AuthStatus::OK)
     {
         EndRequest(res, 401, Authenticator::GetStatusStr(status));
@@ -181,7 +182,7 @@ bool ServerEndpoint::HasValidSession(uWS::HttpResponse<true>* res, uWS::HttpRequ
 
 bool ServerEndpoint::IsRateLimited(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    return GetEventLimiter().allowRequest(res, req);
+    return !GetEventLimiter().allowRequest(res, req);
 }
 
 bool ServerEndpoint::IsRequestEmpty(uWS::HttpResponse<true>* res, const std::string_view& data, bool isLast)
@@ -206,7 +207,7 @@ bool ServerEndpoint::IsRequestTooLarge(uWS::HttpResponse<true>* res, const std::
     return false;
 }
 
-void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const char* data, const bool close,
+void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, std::string_view data, const bool close,
                                 const ResponseFunc func)
 {
     res->writeStatus(GetStatusString(code));

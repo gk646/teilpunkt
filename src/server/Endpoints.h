@@ -26,7 +26,7 @@ struct ServerEndpoint
 
     // Ends the request with the given parameters - optionally executes the given function before ending
     // Callback is needed as writing any header sets status to "200OK"
-    static void EndRequest(uWS::HttpResponse<true>* res, int code, const char* data = "", bool close = false,
+    static void EndRequest(uWS::HttpResponse<true>* res, int code, std::string_view data = {}, bool close = false,
                            ResponseFunc func = nullptr);
 
     // Returns a view of the header value if exists, else empty

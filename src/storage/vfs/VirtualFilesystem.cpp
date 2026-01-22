@@ -4,7 +4,7 @@
 namespace tpunkt
 {
 
-VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info) : root(info)
+VirtualFilesystem::VirtualFilesystem(const DirCreationInfo& info) : root(info)
 {
 }
 
@@ -15,22 +15,22 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
     iterationCache.clear(); // For non-recursive iteration
     for(auto& dir : root.getDirs())
     {
-        iterationCache.push_back(dir);
+        iterationCache.push_back(&dir);
     }
 
     while(!iterationCache.empty())
     {
         auto& first = iterationCache.front();
-        for(auto& itFile : first.getFiles())
+        for(auto& itFile : first->getFiles())
         {
             if(itFile.getID() == file)
             {
                 return &itFile;
             }
         }
-        for(auto& dir : first.getDirs())
+        for(auto& dir : first->getDirs())
         {
-            iterationCache.push_back(dir);
+            iterationCache.push_back(&dir);
         }
         iterationCache.pop_front();
     }
@@ -39,30 +39,28 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
 
 VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
 {
-    iterationCache.clear();
-    for(auto& itDir : root.getDirs())
+    if(dir == root.getID())
     {
-        iterationCache.push_back(itDir);
+        return &root;
     }
+
+    iterationCache.clear();
+    iterationCache.push_back(&root);
 
     while(!iterationCache.empty())
     {
         auto& first = iterationCache.front();
-        for(auto& itDir : first.getDirs())
+        for(auto& itDir : first->getDirs())
         {
             if(itDir.getID() == dir)
             {
                 return &itDir;
             }
-            iterationCache.push_back(itDir);
+            iterationCache.push_back(&itDir);
         }
         iterationCache.pop_front();
     }
     return nullptr;
-}
-
-VirtualDirectory* VirtualFilesystem::getFileDir(FileID file)
-{
 }
 
 VirtualDirectory& VirtualFilesystem::getRoot()

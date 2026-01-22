@@ -47,11 +47,12 @@ StorageStatus Storage::getRoots(UserID user, std::vector<DTO::DirectoryInfo>& ro
 
 StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointCreateInfo& info)
 {
+    constexpr auto event = EventAction::StorageEndpointCreate;
     SpinlockGuard lock{storageLock};
     // TODO Use a permission table to reuse roles
     if(Authenticator::GetInstance().getIsAdmin(actor) != AuthStatus::OK)
     {
-        LOG_EVENT(actor, Filesystem, StorageEndpointCreate, FAIL_NO_ADMIN, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, event, FAIL_NO_ADMIN, FilesystemEventData{});
         return StorageStatus::ERR_NO_ADMIN;
     }
 
@@ -62,19 +63,20 @@ StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointC
     }
     else
     {
-        LOG_EVENT(actor, Filesystem, StorageEndpointCreate, INFO_FAIL_UNSPECIFIED, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, event, FAIL_UNSPECIFIED, FilesystemEventData{});
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT(actor, Filesystem, StorageEndpointCreate, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
 StorageStatus Storage::endpointCreateFrom(const UserID actor, CreateInfo info, const char* file, bool recurse)
 {
+    constexpr auto event = EventAction::StorageEndpointCreateFrom;
     if(Authenticator::GetInstance().getIsAdmin(actor) != AuthStatus::OK)
     {
-        LOG_EVENT(actor, Filesystem, StorageEndpointCreateFrom, FAIL_NO_ADMIN, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, event, FAIL_NO_ADMIN, FilesystemEventData{});
         return StorageStatus::ERR_NO_ADMIN;
     }
 
@@ -90,42 +92,46 @@ StorageStatus Storage::endpointCreateFrom(const UserID actor, CreateInfo info, c
     LOG_FATAL("Not implemented");
 
     // TODO
-    LOG_EVENT(actor, Filesystem, StorageEndpointCreateFrom, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
-StorageStatus Storage::endpointGet(UserID actor, const EndpointID endpointId, StorageEndpoint*& ept)
+StorageStatus Storage::endpointGet(UserID actor, const EndpointID endpoint, StorageEndpoint*& ept)
 {
+    constexpr auto event = EventAction::StorageEndpointGet;
     SpinlockGuard lock{storageLock};
     StorageEndpoint* endpointPtr = nullptr;
+
     for(auto& savedEp : endpoints)
     {
-        if(savedEp.getInfo().eid == endpointId)
+        if(savedEp.getData().endpoint == endpoint)
         {
             endpointPtr = &savedEp;
+            break;
         }
     }
     if(endpointPtr == nullptr) [[unlikely]]
     {
-        LOG_EVENT(actor, Filesystem, StorageEndpointGet, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, event, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
     ept = endpointPtr;
-    LOG_EVENT(actor, Filesystem, StorageEndpointGet, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
 StorageStatus Storage::endpointDelete(UserID actor, const EndpointID endpoint)
 {
+    constexpr auto event = EventAction::StorageEndpointDelete;
     SpinlockGuard lock{storageLock};
     const auto res =
-        endpoints.remove_if([ & ](const StorageEndpoint& ept) { return ept.getInfo().eid == endpoint; }) > 0;
+        endpoints.remove_if([ & ](const StorageEndpoint& ept) { return ept.getData().endpoint == endpoint; }) > 0;
     if(!res)
     {
-        LOG_EVENT(actor, Filesystem, StorageEndpointDelete, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, event, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
-    LOG_EVENT(actor, Filesystem, StorageEndpointDelete, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 

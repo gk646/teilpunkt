@@ -18,7 +18,7 @@ struct from<JSON, tpunkt::FixedString<length>>
     {
         std::array<char, length + 1> arr;
         parse<JSON>::op<Opts>(arr, args...);
-        value.assign(arr.data(), length);
+        value.assign(arr.data(), length + 1);
     }
 };
 
@@ -28,8 +28,7 @@ struct to<JSON, tpunkt::FixedString<length>>
     template <auto Opts>
     static void op(tpunkt::FixedString<length>& value, auto&&... args) noexcept
     {
-        std::string_view str(value.c_str(), value.size());
-        serialize<JSON>::op<Opts>(str, args...);
+        serialize<JSON>::op<Opts>(value.view(), args...);
     }
 };
 
@@ -40,9 +39,9 @@ struct from<JSON, tpunkt::FileID>
     template <auto Opts>
     static void op(tpunkt::FileID& value, auto&&... args)
     {
-        uint64_t num{};
-        parse<JSON>::op<Opts>(num, args...);
-        value = tpunkt::FileID::FromNum(num);
+        std::array<char, 32> arr;
+        parse<JSON>::op<Opts>(arr, args...);
+        value = tpunkt::FileID::FromString(arr.data());
     }
 };
 
@@ -52,8 +51,8 @@ struct to<JSON, tpunkt::FileID>
     template <auto Opts>
     static void op(const tpunkt::FileID& value, auto&&... args) noexcept
     {
-        uint64_t num = tpunkt::FileID::ToNum(value);
-        serialize<JSON>::op<Opts>(num, args...);
+        tpunkt::FixedString<32> str = tpunkt::FileID::ToString(value);
+        serialize<JSON>::op<Opts>(str, args...);
     }
 };
 

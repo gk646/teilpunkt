@@ -41,7 +41,7 @@ struct Storage final
     StorageStatus endpointCreateFrom(UserID actor, CreateInfo info, const char* file, bool recurse);
 
     // Only valid if returns StorageStatus::OK
-    StorageStatus endpointGet(UserID actor, EndpointID endpointId, StorageEndpoint*& ept);
+    StorageStatus endpointGet(UserID actor, EndpointID endpoint, StorageEndpoint*& ept);
 
     // Deletes the given endpoint
     StorageStatus endpointDelete(UserID actor, EndpointID endpoint);

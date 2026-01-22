@@ -8,6 +8,7 @@
 #include <sodium/utils.h>
 #include "datastructures/Iterator.h"
 #include "util/Logging.h"
+#include "util/Strings.h"
 
 namespace tpunkt
 {
@@ -17,6 +18,14 @@ template <size_t length>
 struct FixedString final
 {
     FixedString() = default;
+
+    explicit FixedString(uint64_t num, const char* suffix = nullptr)
+    {
+        if(!NumberToString(arr, length, num, suffix))
+        {
+            LOG_CRITICAL("Failed to create FixedString out of number");
+        }
+    }
 
     explicit FixedString(const std::string_view& string)
     {
@@ -38,6 +47,12 @@ struct FixedString final
     {
         *this = other;
     }
+
+    [[nodiscard]] std::string_view view() const
+    {
+        return std::string_view{arr};
+    }
+
 
     template <size_t oLength>
     FixedString& operator=(const FixedString<oLength>& other)
@@ -180,6 +195,18 @@ struct FixedString final
     [[nodiscard]] bool isEmpty() const
     {
         return size() == 0;
+    }
+
+    bool push_back(const char newc)
+    {
+        const auto curr_size = size();
+        if(curr_size + 1 < capacity())
+        {
+            arr[ curr_size ] = newc;
+            arr[ curr_size + 1 ] = '\0';
+            return true;
+        }
+        return false;
     }
 
   private:

@@ -106,11 +106,11 @@ static void iterateDirectory(const char* dir, int& index, StaticFile* staticFile
                 // Content
                 char* content = TPUNKT_ALLOC(content, static_cast<size_t>(statbuf.st_size) + 1u);
                 (void)fread(content, static_cast<size_t>(statbuf.st_size), 1, file);
-                content[ statbuf.st_size ] = '\0';
+                content[ statbuf.st_size  ] = '\0';
                 (void)fclose(file);
 
                 auto& staticFile = staticFiles[ index ];
-                staticFile.size = static_cast<int>(statbuf.st_size);
+                staticFile.size = static_cast<size_t>(statbuf.st_size);
                 staticFile.name = name;
                 staticFile.content = content;
                 staticFile.type = getMimeType(staticFile.name);

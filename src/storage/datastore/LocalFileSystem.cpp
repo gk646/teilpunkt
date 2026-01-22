@@ -41,13 +41,8 @@ LocalFileSystemDatastore::~LocalFileSystemDatastore()
 
 bool LocalFileSystemDatastore::createFile(const uint32_t fileID, ResultCb callback)
 {
-    char buf[ MAX_DIGITS ];
-    if(!NumberToString(buf, MAX_DIGITS, fileID))
-    {
-        RET_AND_CB_FALSE();
-    }
-
-    const int file = openat(dirfd, buf, O_CREAT | O_EXCL | O_WRONLY, TPUNKT_INSTANCE_FILE_MODE);
+    FixedString<MAX_DIGITS> name{fileID};
+    const int file = openat(dirfd, name.c_str(), O_CREAT | O_EXCL | O_WRONLY, TPUNKT_INSTANCE_FILE_MODE);
     if(file == -1) [[unlikely]]
     {
         LOG_ERROR("Creating file failed: %s", strerror(errno));
@@ -65,13 +60,8 @@ bool LocalFileSystemDatastore::createFile(const uint32_t fileID, ResultCb callba
 
 bool LocalFileSystemDatastore::deleteFile(const uint32_t fileID, ResultCb callback)
 {
-    char buf[ MAX_DIGITS ];
-    if(!NumberToString(buf, MAX_DIGITS, fileID))
-    {
-        RET_AND_CB_FALSE();
-    }
-
-    const int ret = unlinkat(dirfd, buf, 0);
+    FixedString<MAX_DIGITS> name{fileID};
+    const int ret = unlinkat(dirfd, name.c_str(), 0);
     if(ret == -1) [[unlikely]]
     {
         LOG_ERROR("Deleting file failed: %s", strerror(errno));
@@ -90,13 +80,8 @@ bool LocalFileSystemDatastore::initRead(const uint32_t fileID, const size_t begi
         return false;
     }
 
-    char buf[ MAX_DIGITS ];
-    if(!NumberToString(buf, MAX_DIGITS, fileID))
-    {
-        return false;
-    }
-
-    const int file = openat(dirfd, buf, O_RDONLY | O_EXCL);
+    FixedString<MAX_DIGITS> name{fileID};
+    const int file = openat(dirfd, name.c_str(), O_RDONLY | O_EXCL);
     if(file == -1) [[unlikely]]
     {
         LOG_ERROR("Opening file failed: %s", strerror(errno));
@@ -203,25 +188,19 @@ bool LocalFileSystemDatastore::closeRead(ReadHandle& handle, ResultCb callback)
 
 bool LocalFileSystemDatastore::initWrite(const uint32_t fileID, WriteHandle& handle)
 {
-    char buf[ MAX_DIGITS ];
-    if(!NumberToString(buf, MAX_DIGITS, fileID))
-    {
-        return false;
-    }
-    const int target = openat(dirfd, buf, O_WRONLY);
+    FixedString<MAX_DIGITS> targetName{fileID};
+    const int target = openat(dirfd, targetName.c_str(), O_WRONLY);
     if(target == -1) [[unlikely]]
     {
+        LOG_ERROR("Opening target file failed: %s", strerror(errno));
         return false;
     }
 
-    if(!NumberToStringEx(buf, MAX_DIGITS, fileID, "T"))
-    {
-        return false;
-    }
-    const int tempFile = openat(dirfd, buf, O_CREAT | O_TRUNC | O_WRONLY, TPUNKT_INSTANCE_FILE_MODE);
+    FixedString<MAX_DIGITS> tempName{fileID, "T"};
+    const int tempFile = openat(dirfd, tempName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, TPUNKT_INSTANCE_FILE_MODE);
     if(tempFile == -1) [[unlikely]]
     {
-        LOG_ERROR("Opening target file failed: %s", strerror(errno));
+        LOG_ERROR("Opening temp file failed: %s", strerror(errno));
         return false;
     }
 
@@ -283,38 +262,26 @@ bool LocalFileSystemDatastore::closeWrite(WriteHandle& handle, const bool revert
     }
 
     bool success = true;
-    char buf[ MAX_DIGITS ];
-
     if(revert)              // Revert the transaction - only need to delete temp file
     {
-        if(!NumberToStringEx(buf, MAX_DIGITS, handle.fileID, "T"))
-        {
-            success = false;
-        }
-        else if(unlinkat(dirfd, buf, 0) == -1)
+        FixedString<MAX_DIGITS> tempName{handle.fileID, "T"};
+        if(unlinkat(dirfd, tempName.c_str(), 0) == -1)
         {
             LOG_ERROR("Deleting temp file failed: %s", strerror(errno));
             success = false;
         }
     }
-    else // Apply transaction - rename temp
+    else                    // Apply transaction - rename temp
     {
-        if(!NumberToString(buf, MAX_DIGITS, handle.fileID))
-        {
-            success = false;
-        }
-        else if(unlinkat(dirfd, buf, 0) == -1)
+        FixedString<MAX_DIGITS> name{handle.fileID};
+        if(unlinkat(dirfd, name.c_str(), 0) == -1)
         {
             LOG_ERROR("Deleting target file failed: %s", strerror(errno));
             success = false;
         }
 
-        char tempBuf[ MAX_DIGITS ];
-        if(!NumberToStringEx(tempBuf, MAX_DIGITS, handle.fileID, "T"))
-        {
-            success = false;
-        }
-        else if(renameat(dirfd, tempBuf, dirfd, buf) == -1)
+        FixedString<MAX_DIGITS> tempName{handle.fileID, "T"};
+        if(renameat(dirfd, tempName.c_str(), dirfd, name.c_str()) == -1)
         {
             LOG_ERROR("Renaming temp file to target file failed: %s", strerror(errno));
             success = false;

@@ -1,6 +1,6 @@
 :root {
     /* Font */
-    --font-family: 'Roboto', Arial, sans-serif;
+    --font-family: 'Roboto', sans-serif;
 
     /* Text Colors */
     --text-passive: #a3a8a8; /* Background text or non-selected text */
@@ -46,10 +46,39 @@
 }
 
 /* General Reset */
-body, h1, h2, p, input, button, form {
+body, h1, h2, p, input, a, form {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    --font-family: 'Roboto', sans-serif;
+    transition: background 0.3s ease, color 0.3s ease;
+
+}
+
+a {
+    font-weight: bold;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    color: var(--text-active);
+}
+
+
+
+
+button {
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    color: var(--foreground);
+}
+
+.HighlightButton {
+    background: var(--primary);
+    color: var(--foreground);
+}
+
+.HighlightButton:hover {
+    background: var(--secondary);
 }
 
 
@@ -275,8 +304,6 @@ button:hover {
     font-size: 1rem;
     font-weight: bold;
     border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .auth-btn:hover {
@@ -321,7 +348,6 @@ input.invalid {
     display: inline-block;
     background-color: var(--error);
     color: var(--text);
-    font-family: var(--font-family), serif;
     padding: 10px 20px;
     border-radius: 5px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);

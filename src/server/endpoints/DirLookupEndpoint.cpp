@@ -17,7 +17,7 @@ void DirLookupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
     thread_local std::vector<DTO::DirectoryEntry> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
-    if(!IsRateLimited(res, req))
+    if(IsRateLimited(res, req))
     {
         return;
     }
@@ -40,8 +40,8 @@ void DirLookupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
                 return;
             }
 
-            DTO::DirectoryRequest infoRequest;
-            auto error = glz::read_json(infoRequest, data);
+            DTO::DirectoryRequest request;
+            auto error = glz::read_json(request, data);
             if(error)
             {
                 EndRequest(res, 400, "Sent bad JSON");
@@ -49,14 +49,14 @@ void DirLookupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
             }
 
             StorageEndpoint* endpoint = nullptr;
-            auto status = Storage::GetInstance().endpointGet(user, {}, endpoint);
+            auto status = Storage::GetInstance().endpointGet(user, request.directory.getEndpoint(), endpoint);
             if(status != StorageStatus::OK)
             {
                 EndRequest(res, 400, GetStorageStatusStr(status));
                 return;
             }
 
-            status = endpoint->dirGetInfo(user, infoRequest.directory, collector);
+            status = endpoint->dirGetEntries(user, request.directory, collector);
             if(status != StorageStatus::OK)
             {
                 EndRequest(res, 400, GetStorageStatusStr(status));
@@ -72,7 +72,6 @@ void DirLookupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
 
             EndRequest(res, 200, jsonBuffer.c_str());
         });
-
 
     res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
 }

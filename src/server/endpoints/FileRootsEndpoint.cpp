@@ -17,7 +17,7 @@ void DirRootsEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* re
     thread_local std::vector<DTO::DirectoryInfo> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
-    if(!IsRateLimited(res, req))
+    if(IsRateLimited(res, req))
     {
         return;
     }

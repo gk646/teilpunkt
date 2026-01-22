@@ -76,7 +76,7 @@ struct SessionStorage final
     // Returns true if the session of the user with the given timestamp was removed
     bool remove(UserID user, const Timestamp& creation);
 
-    void getInfo(UserID user, std::vector<DTO::SessionInfo>& collector);
+    bool getInfo(UserID user, std::vector<DTO::SessionInfo>& collector);
 
   private:
     SessionStorage() = default;

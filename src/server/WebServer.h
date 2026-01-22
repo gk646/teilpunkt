@@ -13,14 +13,14 @@ struct WebThread final
 {
     std::thread thread;
     uWS::SSLApp* app;
-    int threadNum = 0;
+    size_t threadNum = 0;
 };
 
 // TODO add stats
 struct WebServer final
 {
-    explicit WebServer(int threads);
-    TPUNKT_MACROS_MOVE_ONLY(WebServer);
+    explicit WebServer(size_t threads);
+    TPUNKT_MACROS_DEL_CTORS(WebServer);
     ~WebServer();
 
     [[nodiscard]] const StaticFileStorage& getStaticFileStorage();
@@ -30,11 +30,11 @@ struct WebServer final
 
     StaticFileStorage staticFiles;
     std::vector<WebThread> webThreads;
-    int roundRobinNum = 0;
-    int threadCount = 0;
+    size_t roundRobinNum = 0;
+    size_t threadCount = 0;
 
     friend uWS::SSLApp& GetNextHandler();
-    friend void WebThreadFunc(int, uWS::SocketContextOptions*, volatile bool*);
+    friend void WebThreadFunc(size_t, const uWS::SocketContextOptions*, volatile bool*);
 };
 
 WebServer& GetWebServer();

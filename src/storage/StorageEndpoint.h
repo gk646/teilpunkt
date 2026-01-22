@@ -45,11 +45,13 @@ struct StorageEndpointCreateInfo final
 
 struct StorageEndpointData final
 {
+    StorageEndpointData(const StorageEndpointCreateInfo& info, UserID creator, EndpointID endpoint);
+
     FileName name;
     uint64_t maxSize = 0; // Max size in bytes
     StorageEndpointType type = StorageEndpointType::LOCAL_FILE_SYSTEM;
     UserID creator = UserID::INVALID;
-    EndpointID eid = EndpointID::INVALID;
+    EndpointID endpoint = EndpointID::INVALID;
 };
 
 // Datastore stores its files in /endpoints/{id}
@@ -61,33 +63,30 @@ struct StorageEndpoint final
 
     //===== File Manipulation =====//
 
-    StorageStatus fileCreate(UserID actor, FileID dir, const FileCreationInfo& info, CreateFileTransaction& action);
+    StorageStatus fileCreate(UserID actor, FileID dir, const FileCreationInfo& info);
     StorageStatus fileWrite(UserID user, FileID file, WriteFileTransaction& action);
     StorageStatus fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
     StorageStatus fileRemove(UserID user, FileID file);
     StorageStatus fileRename(UserID user, FileID file, const FileName& newName);
+
+
+    //===== Dir Manipulation =====//
+
+    StorageStatus dirCreate(UserID actor, FileID dir, const DirCreationInfo& info);
+    StorageStatus dirRemove();
+    StorageStatus dirRename();
+
+    // Collects all entries in the given dir (if user has access)
+    StorageStatus dirGetEntries(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries);
 
     //===== File Info =====//
 
     StorageStatus infoFile(User user, FileInfo& info);
     StorageStatus infoDir(User user, DTO::DirectoryInfo& info);
 
-    //===== Dir Manipulation =====//
-
-    StorageStatus dirAdd();
-    StorageStatus dirRemove();
-
-    StorageStatus dirChange();
-    StorageStatus dirRename();
-
-    // Collects all entries in the given dir the user has access to
-    StorageStatus dirGetInfo(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries);
-
-    StorageStatus clear();
-
     //===== Storage Info =====//
 
-    [[nodiscard]] const StorageEndpointData& getInfo() const;
+    [[nodiscard]] const StorageEndpointData& getData() const;
 
     // True if no active usages
     [[nodiscard]] bool canBeRemoved() const;

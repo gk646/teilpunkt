@@ -9,11 +9,18 @@ namespace tpunkt
 
 struct FileID final
 {
-    static FileID FromNum(uint64_t num);
-    static uint64_t ToNum(FileID fid);
+    static FileID FromString(const FixedString<32>& num);
+    static FixedString<32> ToString(FileID fid);
 
+    static FileID Root(EndpointID endpoint);
     FileID() = default;
     FileID(EndpointID endpoint, bool isDirectory);
+
+
+    [[nodiscard]] bool isValid() const
+    {
+        return uid != UINT32_MAX;
+    }
 
     [[nodiscard]] bool isDirectory() const
     {
@@ -32,7 +39,7 @@ struct FileID final
 
     [[nodiscard]] EndpointID getEndpoint() const
     {
-        return static_cast<EndpointID>(endpoint);
+        return endpoint;
     }
 
     bool operator==(const FileID&) const = default;
