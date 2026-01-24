@@ -69,6 +69,7 @@ export function renderBreadcrumb() {
             visitDirectory(entry.fid);
         });
         breadcrumb.appendChild(span);
+        span.className = 'breadcrumb-entry'
         if (index < navigationStack.length - 1) {
             breadcrumb.appendChild(document.createTextNode(' / '));
         }
@@ -157,32 +158,34 @@ async function initializeFileSystemUI() {
     }
 }
 
-// Show the add file modal
 function showAddFileModal() {
     addFileModal.style.display = 'block';
 }
 
-// Hide the add file modal
 function hideAddFileModal() {
     addFileModal.style.display = 'none';
 }
 
 // Handle form submission for adding a new file or folder
-function handleAddFileFormSubmit(e) {
+async function handleAddFileFormSubmit(e) {
     e.preventDefault();
     const fileName = document.getElementById('fileName').value;
     const fileType = document.getElementById('fileType').value;
 
     const lastElement = navigationStack[navigationStack.length - 1];
-    if (fileType === 'folder') {
-        BackendCreateDir(lastElement.fid, fileName);
-    } else {
-        BackendCreateFile(lastElement.fid, fileName);
-    }
+    try {
+        if (fileType === 'folder') {
+            await BackendCreateDir(lastElement.fid, fileName);
+        } else {
+            await BackendCreateFile(lastElement.fid, fileName);
+        }
 
-    hideAddFileModal();
-    if (navigationStack.length > 0) {
-        visitDirectory(navigationStack[navigationStack.length - 1].fid);
+        hideAddFileModal();
+        if (navigationStack.length > 0) {
+            visitDirectory(navigationStack[navigationStack.length - 1].fid);
+        }
+    } catch (error) {
+        console.error('Error creating file/folder:', error);
     }
 }
 
@@ -194,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addFileButton.addEventListener('click', showAddFileModal);
     closeModal.addEventListener('click', hideAddFileModal);
-    addFileForm.addEventListener('submit', handleAddFileFormSubmit);
+    addFileForm.addEventListener('submit',  handleAddFileFormSubmit);
 
     window.addEventListener('click', (e) => {
         if (e.target === addFileModal) {

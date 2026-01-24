@@ -1,0 +1,14 @@
+Checks: >
+  bugprone-*,
+  clang-analyzer-*,
+  mpi-*,
+  performance-*,
+  readability-*,
+  cert-*,
+  -cert-dcl50-cpp,
+  cppcoreguidelines-use-enum-class,
+  hicpp-multiway-paths-covered,
+  hicpp-exception-baseclass,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  openmp-use-default-none

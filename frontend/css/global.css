@@ -50,9 +50,8 @@ body, h1, h2, p, input, a, form {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    --font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif;
     transition: background 0.3s ease, color 0.3s ease;
-
 }
 
 a {
@@ -62,9 +61,6 @@ a {
     border-radius: 5px;
     color: var(--text-active);
 }
-
-
-
 
 button {
     cursor: pointer;

@@ -207,8 +207,8 @@ bool ServerEndpoint::IsRequestTooLarge(uWS::HttpResponse<true>* res, const std::
     return false;
 }
 
-void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, std::string_view data, const bool close,
-                                const ResponseFunc func)
+void ServerEndpoint::EndRequest(uWS::HttpResponse<true>* res, const int code, const std::string_view data,
+                                const bool close, const ResponseFunc func)
 {
     res->writeStatus(GetStatusString(code));
     res->writeHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains;");

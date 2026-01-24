@@ -32,14 +32,13 @@ export async function BackendCreateFile(directory, name) {
         directory: directory,
     };
 
-    const response = await fetchWithErrorHandling('/api/filesystem/file', {
+    await fetchWithErrorHandling('/api/filesystem/file', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body)
     });
-    return response.json();
 }
 
 export async function BackendCreateDir(directory, name) {
@@ -48,12 +47,11 @@ export async function BackendCreateDir(directory, name) {
         directory: directory,
     };
 
-    const response = await fetchWithErrorHandling('/api/filesystem/dir', {
+    await fetchWithErrorHandling('/api/filesystem/dir', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(body)
     });
-    return response.json();
 }

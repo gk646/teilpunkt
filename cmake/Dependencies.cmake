@@ -5,6 +5,7 @@ find_package(ZLIB REQUIRED)
 
 
 # Add a custom target to build uSockets with libuv and OpenSSL
+# Has to be exectued manually ... doesnt work automatically
 add_custom_target(build_usockets ALL
         COMMAND make default -C ${CMAKE_CURRENT_SOURCE_DIR}/external/uWebSocket WITH_LIBUV=1 WITH_OPENSSL=1
         COMMENT "Building uSockets with libuv & OpenSSL..."
