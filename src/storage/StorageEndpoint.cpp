@@ -46,7 +46,7 @@ StorageEndpointData::StorageEndpointData(const StorageEndpointCreateInfo& info, 
 }
 
 StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const EndpointID endpoint, const UserID creator)
-    : virtualFilesystem(DirCreationInfo{
+    : virtualFilesystem(DirectoryCreationInfo{
           .name = info.name, .creator = creator, .parent = FileID::Root(endpoint), .maxSize = info.maxSize}),
       data(info, creator, endpoint)
 {
@@ -65,41 +65,47 @@ StorageEndpoint::StorageEndpoint(const StorageEndpointCreateInfo& info, const En
     fileCreate(UserID::SERVER, virtualFilesystem.getRoot().getID(), fileInfo);
 }
 
+
 StorageStatus StorageEndpoint::fileCreate(const UserID actor, const FileID dir, const FileCreationInfo& info)
 {
     constexpr EventAction action = EventAction::FileSystemFileCreate;
     SpinlockGuard guard{lock};
     if(!IsValidFilename(info.name))
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_INVALID_FILE_NAME;
     }
 
     if(GetUAC().userCanAction(actor, dir, PermissionFlag::CREATE) != UACStatus::OK)
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_NO_UAC, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
     VirtualDirectory* directory = virtualFilesystem.getDir(dir);
     if(directory == nullptr)
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
     FileID newId{};
     if(!directory->fileAdd(info, newId))
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_NO_UNIQUE_NAME;
     }
 
-    LOG_EVENT_FILESYS(actor, action, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
-StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action)
+StorageStatus StorageEndpoint::fileWrite(UserID actor, FileID file, WriteFileTransaction& action)
+{
+}
+
+StorageStatus StorageEndpoint::fileRead(UserID actor, FileID file, size_t begin, size_t end,
+                                        ReadFileTransaction& action)
 {
     // Check if file exists - handle correct locking
     // virtualFilesystem.fileExists(file);
@@ -121,64 +127,89 @@ StorageStatus StorageEndpoint::fileRead(UserID user, FileID file, size_t begin, 
     return StorageStatus::OK;
 }
 
-StorageStatus StorageEndpoint::fileRename(UserID user, FileID file, const FileName& newName)
+StorageStatus StorageEndpoint::fileRename(UserID actor, FileID file, const FileName& newName)
 {
 }
 
-StorageStatus StorageEndpoint::dirCreate(UserID actor, FileID dir, const DirCreationInfo& info)
+StorageStatus StorageEndpoint::dirCreate(UserID actor, FileID dir, const DirectoryCreationInfo& info)
 {
     constexpr EventAction action = EventAction::FilesystemDirCreate;
     if(!IsValidFilename(info.name))
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_INVALID_FILE_NAME;
     }
 
     if(GetUAC().userCanAction(actor, dir, PermissionFlag::CREATE) != UACStatus::OK)
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_NO_UAC, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
     VirtualDirectory* directory = virtualFilesystem.getDir(dir);
     if(directory == nullptr)
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
     FileID newId{};
     if(!directory->dirAdd(info, newId))
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_INVALID_ARGUMENTS, FilesystemEventData{});
         return StorageStatus::ERR_NO_UNIQUE_NAME;
     }
 
-    LOG_EVENT_FILESYS(actor, action, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
-StorageStatus StorageEndpoint::dirGetEntries(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries)
+StorageStatus StorageEndpoint::dirGetEntries(UserID actor, FileID dir,
+                                             std::vector<DTO::ResponseDirectoryEntry>& entries)
 {
-    constexpr EventAction action = EventAction::FilesystemDirRead;
+    constexpr EventAction action = EventAction::FilesystemDirLookup;
     SpinlockGuard guard{lock};
     if(GetUAC().userCanAction(actor, dir, PermissionFlag::READ) != UACStatus::OK)
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_NO_UAC, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_UAC, FilesystemEventData{});
         return StorageStatus::ERR_NO_UAC_PERM;
     }
 
     const VirtualDirectory* directory = virtualFilesystem.getDir(dir);
     if(directory == nullptr)
     {
-        LOG_EVENT_FILESYS(actor, action, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_FILE, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_DIR;
     }
 
     directory->collectEntries(entries);
-    LOG_EVENT_FILESYS(actor, action, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
+
+StorageStatus StorageEndpoint::infoFile(UserID actor, FileID file, DTO::ResponseDirectoryEntry& info)
+{
+    constexpr EventAction action = EventAction::FilesystemFileInfo;
+    SpinlockGuard guard{lock};
+
+    if(GetUAC().userCanAction(actor, file, PermissionFlag::READ) != UACStatus::OK)
+    {
+        LOG_EVENT_FILESYS(actor, FAIL_NO_UAC, FilesystemEventData{});
+        return StorageStatus::ERR_NO_UAC_PERM;
+    }
+
+    VirtualFile* virtualFile = virtualFilesystem.findFile(file);
+    if(virtualFile == nullptr)
+    {
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        return StorageStatus::ERR_NO_SUCH_FILE;
+    }
+
+    info = DTO::ResponseDirectoryEntry::FromFile(*virtualFile);
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
+    return StorageStatus::OK;
+}
+
 
 const StorageEndpointData& StorageEndpoint::getData() const
 {

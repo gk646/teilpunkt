@@ -4,13 +4,7 @@
 namespace tpunkt
 {
 
-VirtualFilesystem::VirtualFilesystem(const DirCreationInfo& info) : root(info)
-{
-}
-
-VirtualFilesystem::~VirtualFilesystem() = default;
-
-VirtualFile* VirtualFilesystem::getFile(const FileID file)
+VirtualFile* VirtualFilesystem::findFile(const FileID file)
 {
     iterationCache.clear(); // For non-recursive iteration
     for(auto& dir : root.getDirs())
@@ -20,19 +14,17 @@ VirtualFile* VirtualFilesystem::getFile(const FileID file)
 
     while(!iterationCache.empty())
     {
-        auto& first = iterationCache.front();
-        for(auto& itFile : first->getFiles())
+        auto& first = iterationCache.back();
+        auto* result = first->findFile(file);
+        if(result != nullptr)
         {
-            if(itFile.getID() == file)
-            {
-                return &itFile;
-            }
+            return result;
         }
         for(auto& dir : first->getDirs())
         {
             iterationCache.push_back(&dir);
         }
-        iterationCache.pop_front();
+        iterationCache.pop_back();
     }
     return nullptr;
 }
@@ -49,7 +41,7 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
 
     while(!iterationCache.empty())
     {
-        auto& first = iterationCache.front();
+        auto& first = iterationCache.back();
         for(auto& itDir : first->getDirs())
         {
             if(itDir.getID() == dir)
@@ -58,14 +50,34 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
             }
             iterationCache.push_back(&itDir);
         }
-        iterationCache.pop_front();
+        iterationCache.pop_back();
     }
     return nullptr;
+}
+
+
+bool VirtualFilesystem::dirCanHoldSize(FileID dir, uint64_t additional)
+{
+    auto* target = getDir(dir);
+    if(target == nullptr)
+    {
+        return false;
+    }
+
+    iterationCache.clear();
+    //VirtualDirectory* parent = target->getInfo().parent;
+
 }
 
 VirtualDirectory& VirtualFilesystem::getRoot()
 {
     return root;
 }
+
+VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info) : root(info)
+{
+}
+
+VirtualFilesystem::~VirtualFilesystem() = default;
 
 } // namespace tpunkt

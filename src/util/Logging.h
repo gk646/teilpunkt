@@ -54,18 +54,18 @@ Logger& GetLogger();
     {                                                                                                                  \
         if constexpr(IsWarnEvent(EventStatus::status))                                                                 \
         {                                                                                                              \
-            LOG_WARNING(#type " : " #action " : " #status);                                                            \
+            LOG_WARNING("%s : %s : %s", #type, GetEventActionStr(action), #status);                                    \
         }                                                                                                              \
         else                                                                                                           \
         {                                                                                                              \
-            LOG_INFO(#type " : " #action " : " #status);                                                               \
+            LOG_INFO("%s : %s : %s", #type, GetEventActionStr(action), #status);                                       \
         }                                                                                                              \
         GetEventMonitor().logAuditTrace<EventType::type>(actor, action, EventStatus::status, data);                    \
     } while(false)
 
 // Special logs
-#define LOG_EVENT_FILESYS(actor, action, status, data) LOG_EVENT(actor, Filesystem, action, status, data)
-#define LOG_EVENT_AUTH(actor, action, status, data) LOG_EVENT(actor, Auth, action, status, data)
-#define LOG_EVENT_SERVER(actor, action, status, data) LOG_EVENT(actor, Server, action, status, data)
+#define LOG_EVENT_FILESYS(actor, status, data) LOG_EVENT(actor, Filesystem, action, status, data)
+#define LOG_EVENT_AUTH(actor, status, data) LOG_EVENT(actor, Auth, action, status, data)
+#define LOG_EVENT_SERVER(actor, status, data) LOG_EVENT(actor, Server, action, status, data)
 
 #endif // TPUNKT_LOGGER_H

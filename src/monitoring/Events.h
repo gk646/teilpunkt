@@ -11,8 +11,8 @@ namespace tpunkt
 enum class EventType : uint8_t
 {
     INVALID,
-    APIRequest, // API requests
-    Auth,      // Register, Login and user information retrieval
+    APIRequest, // Any request to any of the endpoints
+    Auth,       // Register, Login and user information retrieval
     Filesystem, // File-related operations
     Sessions,   // Authentication & session handling
     Instance,   // Instance events like settings, config
@@ -28,6 +28,7 @@ enum class EventAction : uint8_t
     UserLogin,
     UserRemove,
     UserChangeCredentials,
+    UserAddTOTP,
     // UserData
     UserDataGetName,
     UserDataGetWrappedKey,
@@ -49,11 +50,14 @@ enum class EventAction : uint8_t
     FilesystemFileWrite,
     FilesystemFileRemove,
     FilesystemDirCreate,
-    FilesystemDirRead,
+    FilesystemDirLookup,
+    FilesystemFileInfo,
     // TaskManager
     ThreadAdd,
     ThreadRemove,
 };
+
+const char* GetEventActionStr(EventAction action);
 
 enum class EventStatus : uint8_t
 {
@@ -62,7 +66,7 @@ enum class EventStatus : uint8_t
     INFO,                   //----------------
     INFO_SUCCESS,           // Success
 
-    FAIL_UNSPECIFIED,  // Something failed but It's further not specified
+    FAIL_UNSPECIFIED,       // Something failed but It's further not specified
     FAIL_INVALID_CREDENTIALS,
     FAIL_INVALID_TOKEN,
     FAIL_CONFIG_RESTRICTED, // Prevented due to instance config

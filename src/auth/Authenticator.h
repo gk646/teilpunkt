@@ -32,13 +32,10 @@ struct Authenticator final
     //===== User Management =====//
 
     // Existing user adds a new user
-    AuthStatus userAdd(UserID actor, const UserName& name, Credentials& consumed);
-
-    // New user added via endpoint
-    AuthStatus userAddServer(const UserName& name, Credentials& consumed);
+    AuthStatus userAdd(UserID actor, const UserName& name, Credentials& out);
 
     // Assigns token on success
-    AuthStatus userLogin(const UserName& name, Credentials& consumed, UserID& user);
+    AuthStatus userLoginPassword(DTO::RequestUserLoginPassword& consumed, UserID& user);
 
     // Deletes the given user and all their associated sessions
     AuthStatus userRemove(UserID actor, UserID user);

@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Signup</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="module" src="js/signup.js" defer></script>
-    <link rel="stylesheet" href="css/global.css" type="text/css">
-    <link rel="stylesheet" href="css/signup.css" type="text/css">
-    <title>Signup</title>
     <script src="js/theme-switcher.js"></script>
     <script src="js/libsodium.js" defer></script>
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <script src="js/qrcodegen.js" defer></script>
+    <link rel="stylesheet" href="css/global.css" type="text/css">
+    <link rel="stylesheet" href="css/signup.css" type="text/css">
 </head>
 <body>
 
@@ -67,5 +67,12 @@
         </form>
     </div>
 </div>
+
+<div id="qrPopup">
+    <h2>Please scan this QR code with an authenticator app</h2>
+    <canvas id="qrCanvas"></canvas>
+    <button id="closeButton">Continue to Login</button>
+</div>
+
 </body>
 </html>

@@ -10,7 +10,7 @@
 namespace tpunkt
 {
 
-struct DirCreationInfo final
+struct DirectoryCreationInfo final
 {
     FileName name;
     UserID creator = UserID::INVALID;
@@ -43,7 +43,7 @@ struct DirectoryStats final
 
 struct VirtualDirectory final
 {
-    VirtualDirectory(const DirCreationInfo& info);
+    VirtualDirectory(const DirectoryCreationInfo& info);
 
     //===== Get =====//
 
@@ -64,7 +64,7 @@ struct VirtualDirectory final
     bool fileDeleteAll();
 
     // Returns true and assigns dir if a new directory was added
-    bool dirAdd(const DirCreationInfo& info, FileID& dir);
+    bool dirAdd(const DirectoryCreationInfo& info, FileID& dir);
 
     // Returns true if a directory with the given name exists
     [[nodiscard]] bool dirNameExists(const FileName& name) const;
@@ -82,10 +82,11 @@ struct VirtualDirectory final
 
     [[nodiscard]] const DirectoryStats& getStats() const;
     [[nodiscard]] const DirectoryLimits& getLimits() const;
+    [[nodiscard]] const DirectoryInfo& getInfo() const;
     [[nodiscard]] FileID getID() const;
     std::vector<VirtualFile>& getFiles();
     std::vector<VirtualDirectory>& getDirs();
-    void collectEntries(std::vector<DTO::DirectoryEntry>& entries) const;
+    void collectEntries(std::vector<DTO::ResponseDirectoryEntry>& entries) const;
 
     //===== DTO =====//
 
@@ -102,8 +103,8 @@ struct VirtualDirectory final
     DirectoryLimits limits;
     std::vector<VirtualFile> files;
     std::vector<VirtualDirectory> dirs;
-    friend DTO::DirectoryEntry;
-    friend DTO::DirectoryInfo;
+    friend DTO::ResponseDirectoryEntry;
+    friend DTO::ResponseDirectoryInfo;
 };
 
 } // namespace tpunkt

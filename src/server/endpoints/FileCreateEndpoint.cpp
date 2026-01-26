@@ -19,15 +19,15 @@ void FileCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
         return;
     }
 
-    const auto handlerFunc = [ user, res ](std::string_view data, const bool last)
+    const auto handlerFunc = [ user, res ](std::string_view data, const bool isLast)
     {
-        if(!last) // Too long
+        if(!isLast) // Too long
         {
             EndRequest(res, 431, "Sent data too large");
             return;
         }
 
-        DTO::CreateRequest request;
+        DTO::RequestCreateFile request;
         auto error = glz::read_json(request, data);
         if(error)
         {

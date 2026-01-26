@@ -7,3 +7,65 @@ body {
     height: 100vh;
     transition: background 0.3s ease, color 0.3s ease;
 }
+
+
+
+#totpPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--background);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--foreground);
+    box-shadow: 0 0 10px var(--shadow-dark);
+    z-index: 1000;
+    text-align: center;
+    font-family: var(--font-family);
+    color: var(--text);
+    max-width: 300px;
+    width: 90%;
+}
+
+#totpPopup h2 {
+    color: var(--text);
+    margin-top: 0;
+    font-size: 1.1em;
+}
+
+#totpInputContainer {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#totpInput {
+    width: 200px;
+    padding: 10px;
+    font-size: 1.2em;
+    letter-spacing: 10px;
+    text-align: center;
+    background-color: var(--foreground);
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+}
+
+#submitTOTP {
+    background-color: var(--primary);
+    color: var(--text-active);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto 0;
+    font-family: var(--font-family);
+    transition: background-color 0.3s ease;
+}
+
+#submitTOTP:hover {
+    background-color: var(--secondary);
+}

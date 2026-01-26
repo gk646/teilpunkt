@@ -85,8 +85,8 @@
     background: var(--foreground);
     box-shadow: 0 2px 10px var(--shadow-dark);
     position: fixed;
-    top: 75px; /* below header */
-    left: 300px; /* to the right of the side menu (250px + 30px gap) */
+    top: 75px;
+    left: 300px;
     right: 0;
     z-index: 999;
     height: 50px;
@@ -129,7 +129,13 @@
     font: var(--font-family);
 }
 
-.add-file-button {
+.add-file-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#addFileButton {
     background-color: var(--primary);
     color: white;
     border: none;
@@ -144,6 +150,7 @@
     margin-right: 15px;
     margin-left: 15px;
 }
+
 
 /*/////////////////// MODAL ////////////////////////////////// */
 
@@ -251,3 +258,5 @@
     transform: scale(1.1);
     opacity: 0.7;
 }
+
+

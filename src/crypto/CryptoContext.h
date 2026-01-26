@@ -18,9 +18,10 @@ struct CryptoContext
     void encrypt(void* data, size_t len);
     void decrypt(void* data, size_t len);
 
-    [[nodiscard]] TimedOneTimeCode getTOTP(const TimedOneTimeKey& key) const;
-
-    [[nodiscard]] FixedString<256> getTOTPCreationString(const UserName& name, TimedOneTimeKey& out) const;
+    [[nodiscard]] TOTPCode getTOTPCode(const TOTPKey& key) const;
+    [[nodiscard]] TOTPInfo getTOTPCreationString(const UserName& name, const TOTPKey& key) const;
+    [[nodiscard]] TOTPKey generateTOTPKey() const;
+    [[nodiscard]] bool verifyTOTP(const TOTPKey& key, const TOTPCode& userCode) const;
 
   private:
     TPUNKT_MACROS_STRUCT(CryptoContext);

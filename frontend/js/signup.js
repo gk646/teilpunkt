@@ -1,15 +1,18 @@
 import {
-    clearAuthError,
     clearError,
-    displayAuthError,
-    fetchWithErrorHandling,
-    hashPassword,
+    elementMakeInvisible,
+    elementSetText,
     isPasskeyAvailable,
     redirectDashBoardLoggedIn,
-    showError,
+    setErrorAttached,
+    showQRCode,
     validatePassword,
     validateUsername
 } from './util.js';
+import {BackendRegisterUserPassword} from "./backend.js";
+
+const qrPopup = document.getElementById('qrPopup');
+
 
 document.addEventListener('DOMContentLoaded', () => {
     redirectDashBoardLoggedIn()
@@ -22,22 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirm-password');
 
-    // Initialize sodium once
-    const sodiumReady = (async () => {
-        await window.sodium.ready;
-        return window.sodium;
-    })();
 
     const validateConfirmPassword = (confirmElem) => {
         const passwordStr = passwordInput.value.trim();
         const confirmStr = confirmElem.value.trim();
         if (confirmStr !== passwordStr) {
-            showError(confirmElem, 'Passwords do not match.');
+            setErrorAttached(confirmElem, 'Passwords do not match.');
             return false;
         }
         clearError(confirmElem);
         return true;
     };
+
+    qrPopup.addEventListener('click', () => {
+        qrPopup.style.display = 'none';
+        window.location.href = '/login';
+
+    })
 
     // Attach real-time validation
     userNameInput.addEventListener('input', () => {
@@ -53,32 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
         validateConfirmPassword(confirmPasswordInput);
     });
 
-    async function registerUser(username, password) {
-        await sodiumReady;
-        let hashedPassword = hashPassword(password);
-        const requestBody = JSON.stringify({
-            name: username.trim(),
-            password: hashedPassword,
-        });
-
-        const result = await fetchWithErrorHandling('/api/register/password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Auth-Method': 'password'
-            },
-            body: requestBody
-        });
-
-        // Clear sensitive data
-        hashedPassword = null;
-        return result;
-    }
 
     // Handle form submission for password signup
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        clearAuthError(authError);
+        elementMakeInvisible(authError);
 
         const inputs = [userNameInput, passwordInput, confirmPasswordInput];
         const validators = [
@@ -91,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate all fields
         inputs.forEach((elem, idx) => {
             if (!elem.value.trim()) {
-                showError(elem, 'This field is required.');
+                setErrorAttached(elem, 'This field is required.');
                 isValid = false;
             } else {
                 // For confirm password, pass the element explicitly.
@@ -111,24 +94,27 @@ document.addEventListener('DOMContentLoaded', () => {
         let passwordValue = passwordInput.value.trim();
 
         try {
-            let result = registerUser(usernameValue, passwordValue);
+            let result = BackendRegisterUserPassword(usernameValue, passwordValue);
             userNameInput.value = '';
             passwordInput.value = '';
             confirmPasswordInput.value = '';
-            await result;
-            window.location.href = '/login';
+
+            await result.then(response => {
+                qrPopup.style.display = 'block'
+                showQRCode(response, document.getElementById("qrCanvas"))
+            });
         } catch (error) {
-            displayAuthError(authError, "The sign-up has failed. Please check your details and try again.");
+            elementSetText(authError, "The sign-up has failed. Please check your details and try again.");
             console.error('Error during registration:', error);
         }
     });
 
     //TODO ADD DEBUG USER
-    registerUser("hey", "123123123")
+    BackendRegisterUserPassword("hey", "123123123")
 
     if (isPasskeyAvailable()) {
         passkeyButton.addEventListener('click', async () => {
-            clearAuthError(authError);
+            elementMakeInvisible(authError);
 
             if (!validateUsername(userNameInput)) {
                 return;
@@ -200,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 //window.location.href = '/home';
             } catch (error) {
-                displayAuthError(authError, "Passkey signup failed. Please try again.");
+                elementSetText(authError, "Passkey signup failed. Please try again.");
                 console.error('Error during passkey signup:', error);
             }
         });

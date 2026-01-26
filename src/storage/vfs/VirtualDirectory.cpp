@@ -7,11 +7,13 @@
 namespace tpunkt
 {
 
-VirtualDirectory::VirtualDirectory(const DirCreationInfo& info)
+VirtualDirectory::VirtualDirectory(const DirectoryCreationInfo& info)
     : fid(info.parent.getEndpoint(), true),
       info(FileInfo{.name = info.name, .creator = info.creator, .owner = info.creator}, info.parent),
       limits(info.maxSize, false)
 {
+    files.reserve(16);
+    dirs.reserve(16);
 }
 
 VirtualFile* VirtualDirectory::findFile(const FileID file)
@@ -126,7 +128,7 @@ bool VirtualDirectory::fileDeleteImpl(FileID file)
 
 //===== Directories =====//
 
-bool VirtualDirectory::dirAdd(const DirCreationInfo& cInfo, FileID& dir)
+bool VirtualDirectory::dirAdd(const DirectoryCreationInfo& cInfo, FileID& dir)
 {
     if(dirNameExists(cInfo.name)) [[unlikely]]
     {
@@ -178,6 +180,11 @@ const DirectoryLimits& VirtualDirectory::getLimits() const
     return limits;
 }
 
+const DirectoryInfo& VirtualDirectory::getInfo() const
+{
+    return info;
+}
+
 FileID VirtualDirectory::getID() const
 {
     return fid;
@@ -187,23 +194,24 @@ std::vector<VirtualFile>& VirtualDirectory::getFiles()
 {
     return files;
 }
+
 std::vector<VirtualDirectory>& VirtualDirectory::getDirs()
 {
     return dirs;
 }
 
-void VirtualDirectory::collectEntries(std::vector<DTO::DirectoryEntry>& entries) const
+void VirtualDirectory::collectEntries(std::vector<DTO::ResponseDirectoryEntry>& entries) const
 {
     entries.clear();
     entries.reserve(files.size() + dirs.size() + 1);
 
     for(const auto& file : files)
     {
-        entries.push_back(DTO::DirectoryEntry::FromFile(file));
+        entries.push_back(DTO::ResponseDirectoryEntry::FromFile(file));
     }
     for(const auto& dir : dirs)
     {
-        entries.push_back(DTO::DirectoryEntry::FromDir(dir));
+        entries.push_back(DTO::ResponseDirectoryEntry::FromDir(dir));
     }
 }
 

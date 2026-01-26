@@ -14,19 +14,10 @@ namespace tpunkt
 void DirRootsEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     // Within a single thread this method is threadsafe
-    thread_local std::vector<DTO::DirectoryInfo> collector;
+    thread_local std::vector<DTO::ResponseDirectoryInfo> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
-    if(IsRateLimited(res, req))
-    {
-        return;
-    }
-
-    UserID user{};
-    if(!HasValidSession(res, req, user))
-    {
-        return;
-    }
+   TPUNKT_MACROS_AUTH_USER()
 
     res->onData(
         [ res, user ](std::string_view data, const bool last)

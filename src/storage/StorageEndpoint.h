@@ -6,7 +6,6 @@
 #include "datastructures/Spinlock.h"
 #include "server/DTO.h"
 #include "storage/datastore/DataStore.h"
-#include "storage/StorageTransaction.h"
 #include "storage/vfs/VirtualFilesystem.h"
 
 namespace tpunkt
@@ -64,25 +63,23 @@ struct StorageEndpoint final
     //===== File Manipulation =====//
 
     StorageStatus fileCreate(UserID actor, FileID dir, const FileCreationInfo& info);
-    StorageStatus fileWrite(UserID user, FileID file, WriteFileTransaction& action);
-    StorageStatus fileRead(UserID user, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
-    StorageStatus fileRemove(UserID user, FileID file);
-    StorageStatus fileRename(UserID user, FileID file, const FileName& newName);
-
+    StorageStatus fileWrite(UserID actor, FileID file, WriteFileTransaction& action);
+    StorageStatus fileRead(UserID actor, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
+    StorageStatus fileRename(UserID actor, FileID file, const FileName& newName);
 
     //===== Dir Manipulation =====//
 
-    StorageStatus dirCreate(UserID actor, FileID dir, const DirCreationInfo& info);
+    StorageStatus dirCreate(UserID actor, FileID dir, const DirectoryCreationInfo& info);
     StorageStatus dirRemove();
     StorageStatus dirRename();
 
     // Collects all entries in the given dir (if user has access)
-    StorageStatus dirGetEntries(UserID actor, FileID dir, std::vector<DTO::DirectoryEntry>& entries);
+    StorageStatus dirGetEntries(UserID actor, FileID dir, std::vector<DTO::ResponseDirectoryEntry>& entries);
 
     //===== File Info =====//
 
-    StorageStatus infoFile(User user, FileInfo& info);
-    StorageStatus infoDir(User user, DTO::DirectoryInfo& info);
+    StorageStatus infoFile(UserID actor, FileID file, DTO::ResponseDirectoryEntry& info);
+    StorageStatus infoDir(UserID actor, DTO::ResponseDirectoryInfo& info);
 
     //===== Storage Info =====//
 

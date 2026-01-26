@@ -24,17 +24,18 @@ void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpReq
             return;
         }
 
-        DTO::UserSignupPW signupData{};
+        DTO::RequestUserSignupPassword signupData{};
         const auto error = glz::read_json(signupData, data);
         if(error)
         {
-            EndRequest(res, 400, "Bad JSON");
+            EndRequest(res, 400, "Sent Bad JSON");
             return;
         }
 
         Credentials credentials;
         credentials.type = CredentialsType::PASSWORD;
         credentials.password = signupData.password;
+
         const auto status = Authenticator::GetInstance().userAdd(UserID::SERVER, signupData.name, credentials);
         if(status != AuthStatus::OK)
         {
@@ -42,7 +43,8 @@ void RegisterPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpReq
             return;
         }
 
-        EndRequest(res, 200);
+        const TOTPInfo info = GetCryptoContext().getTOTPCreationString(signupData.name, credentials.totpKey);
+        EndRequest(res, 200, info.view());
     };
 
     res->onData(handlerFunc);

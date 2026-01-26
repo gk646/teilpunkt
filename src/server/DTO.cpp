@@ -7,17 +7,17 @@
 namespace tpunkt::DTO
 {
 
-DirectoryInfo DirectoryInfo::FromDir(const VirtualDirectory& dir)
+ResponseDirectoryInfo ResponseDirectoryInfo::FromDir(const VirtualDirectory& dir)
 {
-    DirectoryInfo info{};
+    ResponseDirectoryInfo info{};
     info.name = dir.info.base.name;
     info.fid = dir.fid;
     return info;
 }
 
-DirectoryEntry DirectoryEntry::FromFile(const VirtualFile& file)
+ResponseDirectoryEntry ResponseDirectoryEntry::FromFile(const VirtualFile& file)
 {
-    DirectoryEntry entry{};
+    ResponseDirectoryEntry entry{};
     entry.name = file.info.name;
     entry.fid = file.fid;
     entry.isFile = true;
@@ -37,9 +37,9 @@ DirectoryEntry DirectoryEntry::FromFile(const VirtualFile& file)
     return entry;
 }
 
-DirectoryEntry DirectoryEntry::FromDir(const VirtualDirectory& dir)
+ResponseDirectoryEntry ResponseDirectoryEntry::FromDir(const VirtualDirectory& dir)
 {
-    DirectoryEntry entry{};
+    ResponseDirectoryEntry entry{};
     entry.name = dir.info.base.name;
     entry.fid = dir.fid;
     entry.isFile = false;

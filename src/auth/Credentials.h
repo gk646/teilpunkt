@@ -19,6 +19,7 @@ struct Credentials final
 {
     CredentialsType type = CredentialsType::INVALID;
     UserPassword password;
+    TOTPKey totpKey;
     UserPasskey passkey;
 
     bool operator==(const Credentials& other) const

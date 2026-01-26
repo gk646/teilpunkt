@@ -27,7 +27,7 @@ struct FixedString final
         }
     }
 
-    explicit FixedString(const std::string_view& string)
+     FixedString(const std::string_view& string)
     {
         assign(string.data(), string.size());
     }

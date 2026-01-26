@@ -15,15 +15,14 @@ namespace tpunkt
 // Returns only a simple status code - true on success - false on failure
 struct UserStorage final
 {
-
     // Returns true if a new user with is added - name must be unique
-    bool add(const UserName& name, const Credentials& credentials);
+    bool add(const UserName& name, Credentials& credentials);
 
     // Returns true if the user with the given id was removed
     bool remove(UserID user);
 
-    // Returns true and assigns user if a saved user matches the name and credentials
-    bool login(const UserName& name, const Credentials& credentials, UserID& user) const;
+    // Returns true and assigns user if a saved user matches the request
+    bool loginPassword(const DTO::RequestUserLoginPassword& request, UserID& user) const;
 
     // Returns true if the users data is successfully changed
     [[nodiscard]] bool changeCredentials(UserID user, const UserName& newName, const Credentials& newCredentials);

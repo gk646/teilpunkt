@@ -1,6 +1,45 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import {fetchWithErrorHandling} from './util.js';
+import {hashPassword} from "./crypto.js";
+
+
+export async function BackendLoginUserPassword(username, password, totp) {
+    let hashedPassword = await hashPassword(password);
+
+    let requestBody = JSON.stringify({
+        name: username,
+        password: hashedPassword,
+        totp: totp
+    });
+
+    return fetchWithErrorHandling('/api/auth/password', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: requestBody
+    })
+}
+
+export async function BackendRegisterUserPassword(username, password) {
+    let hashedPassword = await hashPassword(password);
+    const requestBody = JSON.stringify({
+        name: username.trim(),
+        password: hashedPassword,
+    });
+
+    const result = await fetchWithErrorHandling('/api/register/password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Auth-Method': 'password'
+        },
+        body: requestBody
+    });
+
+    hashedPassword = null
+    password = null;
+    return result.text();
+}
 
 // Returns an array of directory DTOs.
 export async function BackendFetchUserRoots() {
@@ -54,4 +93,40 @@ export async function BackendCreateDir(directory, name) {
         },
         body: JSON.stringify(body)
     });
+}
+
+export async function BackendUploadFile(file, fid) {
+    const chunkSize = 1024 * 512;
+
+    async function uploadChunk(chunk) {
+        const headers = new Headers();
+        headers.append('file-name', file.name);
+        headers.append('directory', fid);
+
+       await fetchWithErrorHandling('/api/filesystem/upload', {
+            method: 'POST',
+            body: chunk,
+            headers: headers
+        });
+    }
+
+    async function uploadFile() {
+        const totalChunks = Math.ceil(file.size / chunkSize);
+
+        for (let i = 0; i < totalChunks; i++) {
+            const start = i * chunkSize;
+            const end = Math.min(start + chunkSize, file.size);
+            const chunk = file.slice(start, end);
+
+            try {
+              await uploadChunk(chunk);
+                console.log(`Chunk ${i} uploaded successfully`);
+            } catch (error) {
+                console.error(`Error uploading chunk ${i}:`);
+                break;
+            }
+        }
+    }
+
+    await uploadFile();
 }

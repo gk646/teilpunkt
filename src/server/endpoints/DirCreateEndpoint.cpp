@@ -9,26 +9,17 @@ namespace tpunkt
 
 void DirCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(IsRateLimited(res, req))
-    {
-        return;
-    }
+    TPUNKT_MACROS_AUTH_USER()
 
-    UserID user{};
-    if(!HasValidSession(res, req, user))
+    const auto handlerFunc = [ user, res ](std::string_view data, const bool isLast)
     {
-        return;
-    }
-
-    const auto handlerFunc = [ user, res ](std::string_view data, const bool last)
-    {
-        if(!last) // Too long
+        if(!isLast) // Too long
         {
             EndRequest(res, 431, "Sent data too large");
             return;
         }
 
-        DTO::CreateRequest request;
+        DTO::RequestCreateFile request;
         auto error = glz::read_json(request, data);
         if(error)
         {
@@ -44,7 +35,7 @@ void DirCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* r
             return;
         }
 
-        const DirCreationInfo info{.name = request.name, .creator = user, .parent = request.directory};
+        const DirectoryCreationInfo info{.name = request.name, .creator = user, .parent = request.directory};
         status = endpoint->dirCreate(user, request.directory, info);
         if(status != StorageStatus::OK)
         {

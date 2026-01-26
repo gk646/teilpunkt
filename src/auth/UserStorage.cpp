@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <algorithm>
 #include <sodium/randombytes.h>
 #include "auth/UserStorage.h"
-
-#include <algorithm>
+#include "server/DTO.h"
 
 namespace tpunkt
 {
 constexpr size_t PW_HASH_OPS_LVL = crypto_pwhash_OPSLIMIT_MODERATE;
 constexpr size_t PW_HASH_MEM_LVL = crypto_pwhash_MEMLIMIT_INTERACTIVE;
 
-bool UserStorage::add(const UserName& name, const Credentials& credentials)
+bool UserStorage::add(const UserName& name, Credentials& credentials)
 {
     Credentials newCredentials = credentials;
     switch(credentials.type)
@@ -26,10 +26,13 @@ bool UserStorage::add(const UserName& name, const Credentials& credentials)
                 {
                     return false; // Out of memory
                 }
+                // Generate a new key
+                newCredentials.totpKey = GetCryptoContext().generateTOTPKey();
+                credentials.totpKey = newCredentials.totpKey;
             }
             break;
         case CredentialsType::PASSKEY:
-            break;
+            return false;
     }
 
     // Add user to user list
@@ -65,34 +68,38 @@ bool UserStorage::remove(const UserID user)
     return false;
 }
 
-bool UserStorage::login(const UserName& name, const Credentials& credentials, UserID& user) const
+bool UserStorage::loginPassword(const DTO::RequestUserLoginPassword& request, UserID& user) const
 {
     for(const auto& box : users)
     {
         const auto boxReader = box.get();
         const auto& userData = boxReader.get();
-        if(userData.name == name)
+
+        if(userData.name != request.name)
         {
-            switch(credentials.type)
-            {
-                case CredentialsType::INVALID:
-                    return false;
-                case CredentialsType::PASSWORD:
+            continue;
+        }
+
+        switch(userData.credentials.type)
+        {
+            case CredentialsType::INVALID:
+            case CredentialsType::PASSKEY:
+                return false;
+            case CredentialsType::PASSWORD:
+                {
+                    if(!GetCryptoContext().verifyTOTP(userData.credentials.totpKey, request.totp))
                     {
-                        const auto& storedPw = userData.credentials.password;
-                        const auto& inputPw = credentials.password;
-                        if(crypto_pwhash_str_verify(storedPw.c_str(), inputPw.c_str(), inputPw.size()) != 0)
-                        {
-                            return false;       // Failed comparison
-                        }
-                        user = userData.userID; // Save the userID
-                        return true;
+                        return false;
                     }
-                case CredentialsType::PASSKEY:
+                    const auto& storedPw = userData.credentials.password;
+                    const auto& inputPw = request.password;
+                    if(crypto_pwhash_str_verify(storedPw.c_str(), inputPw.c_str(), inputPw.size()) != 0)
                     {
+                        return false;       // Failed comparison
                     }
-                    break;
-            }
+                    user = userData.userID; // Save the userID
+                    return true;
+                }
         }
     }
     return false;

@@ -350,6 +350,8 @@ input.invalid {
     transition: opacity 0.3s ease;
     align-self: center;
     opacity: 0;
+    font-weight: bold;
+    text-align: center;
 }
 
 .login-container {

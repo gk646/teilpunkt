@@ -1,24 +1,38 @@
 const USERNAME_LEN = 3
 const PASSWORD_LEN = 7
-const HASH_LENGTH = 24 // Produces 32 length base 64
 const USER_ID_COOKIE = "tp-session-user"
 
-// Hash the password
-export function hashPassword(plainPassword) {
-    let hashedPassword = window.sodium.crypto_generichash(
-        HASH_LENGTH,
-        window.sodium.from_string(plainPassword)
-    );
-    return window.sodium.to_base64(hashedPassword)
-}
 
-export function showError(inputEl, message) {
+export function setErrorAttached(inputEl, message) {
     inputEl.classList.add('invalid');
     const errorEl = document.getElementById(`${inputEl.id}-error`);
     if (errorEl) {
         errorEl.textContent = message;
         errorEl.style.visibility = 'visible';
     }
+}
+
+export function showQRCode(data, canvas) {
+    const QRC = qrcodegen.QrCode;
+    const qr = QRC.encodeText(data, QRC.Ecc.MEDIUM);
+
+    function drawCanvas(qr, scale, border, lightColor, darkColor, canvas) {
+        if (scale <= 0 || border < 0)
+            throw new RangeError("Value out of range");
+
+        const size = (qr.size + border * 2) * scale;
+        canvas.width = size;
+        canvas.height = size;
+        let ctx = canvas.getContext("2d");
+        for (let y = -border; y < qr.size + border; y++) {
+            for (let x = -border; x < qr.size + border; x++) {
+                ctx.fillStyle = qr.getModule(x, y) ? darkColor : lightColor;
+                ctx.fillRect((x + border) * scale, (y + border) * scale, scale, scale);
+            }
+        }
+    }
+
+    drawCanvas(qr, 5, 4, '#FFFFFF', '#000000', canvas);
 }
 
 export function clearError(inputEl) {
@@ -30,19 +44,21 @@ export function clearError(inputEl) {
     }
 }
 
-export const clearAuthError = (authErrorEl) => {
-    authErrorEl.style.opacity = '0';
+export const elementMakeInvisible = (ele) => {
+    ele.style.opacity = '0';
 };
 
-export const displayAuthError = (authErrorEl, message) => {
-    authErrorEl.style.opacity = '1';
-    authErrorEl.textContent = message
+export const elementSetText = (ele, message) => {
+    ele.style.opacity = '1';
+    ele.textContent = message
+    ele.style.visibility = 'visible';
+
 };
 
 export const validateUsername = (userNameElement) => {
     const username = userNameElement.value.trim();
     if (username.length < USERNAME_LEN) {
-        showError(userNameElement, 'Username must be at least 3 characters');
+        setErrorAttached(userNameElement, 'Username must be at least 3 characters');
         return false;
     } else {
         clearError(userNameElement);
@@ -53,7 +69,7 @@ export const validateUsername = (userNameElement) => {
 export const validatePassword = (passwordElement) => {
     const password = passwordElement.value.trim();
     if (password.length < PASSWORD_LEN) {
-        showError(passwordElement, 'Password must be at least 7 characters');
+        setErrorAttached(passwordElement, 'Password must be at least 7 characters');
         return false;
     } else {
         clearError(passwordElement);

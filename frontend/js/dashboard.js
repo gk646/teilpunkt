@@ -1,4 +1,10 @@
-import {BackendCreateDir, BackendCreateFile, BackendFetchUserRoots, BackendLookupDirectory} from './backend.js';
+import {
+    BackendCreateDir,
+    BackendCreateFile,
+    BackendFetchUserRoots,
+    BackendLookupDirectory,
+    BackendUploadFile
+} from './backend.js';
 import {IconFile, IconOptions, IconShare} from './icons.js';
 
 const sideMenu = document.getElementById('sideMenu');
@@ -11,6 +17,7 @@ const addFileForm = document.getElementById('addFileForm');
 const menuBar = document.getElementById('menuBar');
 
 let navigationStack = [];
+
 
 function renderSideMenu(roots) {
     const ul = document.createElement('ul');
@@ -197,11 +204,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addFileButton.addEventListener('click', showAddFileModal);
     closeModal.addEventListener('click', hideAddFileModal);
-    addFileForm.addEventListener('submit',  handleAddFileFormSubmit);
+    addFileForm.addEventListener('submit', handleAddFileFormSubmit);
 
     window.addEventListener('click', (e) => {
         if (e.target === addFileModal) {
             hideAddFileModal();
         }
     });
+
+    document.getElementById('openFilePicker').addEventListener('click', function () {
+        document.getElementById('fileUpload').click();
+    });
+
+    document.getElementById('fileUpload').addEventListener('change', async function (event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const currentDir = navigationStack[navigationStack.length - 1].fid;
+        await BackendUploadFile(file, currentDir);
+        await visitDirectory(currentDir);
+    });
+
 });

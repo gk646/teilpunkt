@@ -2,7 +2,6 @@
 #ifndef TPUNKT_VIRTUAL_FILESYSTEM_H
 #define TPUNKT_VIRTUAL_FILESYSTEM_H
 
-#include <deque>
 #include "fwd.h"
 #include "storage/vfs/VirtualDirectory.h"
 #include "storage/vfs/VirtualFilesystemCache.h"
@@ -17,21 +16,24 @@ struct VirtualFilesystem
     //===== Lookup =====//
 
     // Full lookup
-    VirtualFile* getFile(FileID file);
+    VirtualFile* findFile(FileID file);
     VirtualDirectory* getDir(FileID dir);
+
+    bool dirCanHoldSize(FileID dir, uint64_t additional);
 
     // Returns the directory this file is in
     VirtualDirectory* getFileDir(FileID file);
 
     VirtualDirectory& getRoot();
 
+
   private:
-    explicit VirtualFilesystem(const DirCreationInfo& info);
+    explicit VirtualFilesystem(const DirectoryCreationInfo& info);
     TPUNKT_MACROS_MOVE_ONLY(VirtualFilesystem);
     ~VirtualFilesystem();
 
     VirtualDirectory root;
-    std::deque<VirtualDirectory*> iterationCache;
+    std::vector<VirtualDirectory*> iterationCache;
     friend StorageEndpoint;
 };
 

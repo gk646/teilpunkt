@@ -4,6 +4,8 @@
 #define TPUNKT_FWD_H
 
 #include <sodium/utils.h>
+#include <sodium/crypto_auth_hmacsha512.h>
+#include <sodium/crypto_pwhash.h>
 #include "config.h"
 
 namespace uWS
@@ -36,7 +38,7 @@ struct Collector;
 struct DataStore;
 struct ReadFileTransaction;
 struct StorageTransaction;
-struct CreateFileTransaction;
+struct WriteFileTransaction;
 struct FileCreationInfo;
 struct VirtualFilesystem;
 struct VirtualFile;
@@ -47,8 +49,11 @@ struct FileStats;
 namespace DTO
 {
 
-struct DirectoryInfo;
-struct DirectoryEntry;
+struct RequestUserLoginPassword;
+struct RequestUserSignupPassword;
+struct RequestUserSignupPasskey;
+struct ResponseDirectoryInfo;
+struct ResponseDirectoryEntry;
 struct SessionInfo;
 struct FileDownload;
 
@@ -65,7 +70,7 @@ struct FixedString;
 using SessionToken =
     FixedString<sodium_base64_ENCODED_LEN(TPUNKT_CRYPTO_SESSION_ID_LEN, sodium_base64_VARIANT_ORIGINAL_NO_PADDING)>;
 using UserName = FixedString<TPUNKT_STORAGE_USER_LEN>;
-using UserPassword = FixedString<TPUNKT_AUTH_PASSWORD_LEN>;
+using UserPassword = FixedString<crypto_pwhash_STRBYTES>;
 using UserPasskey = FixedString<TPUNKT_AUTH_PASSKEY_LEN>;
 using UserAgentString = FixedString<50>;
 using HashedIP = FixedString<16>;
@@ -74,8 +79,10 @@ using FileName = FixedString<TPUNKT_STORAGE_FILE_LEN>; // Max length for any sin
 using CipherKey = FixedString<TPUNKT_CRYPTO_KEY_LEN>;
 using InstanceSecret = FixedString<TPUNKT_INSTANCE_SECRET_MAX_LEN>;
 using TaskName = FixedString<25>;
-using TimedOneTimeKey = FixedString<32>;
-using TimedOneTimeCode = FixedString<32>;
+// Encoded in base32 so need around 1.6 times more space
+using TOTPKey = FixedString<crypto_auth_hmacsha512_KEYBYTES * 2>;
+using TOTPCode = FixedString<16>;
+using TOTPInfo = FixedString<256>;
 
 //===== Identifiers =====//
 

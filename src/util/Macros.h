@@ -69,4 +69,17 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
     (void)fprintf(stdout, STARTUP_MSG, TPUNKT_VERSION, BUILD_TIMESTAMP)
 
 
+#define TPUNKT_MACROS_AUTH_USER()                                                                                      \
+    if(IsRateLimited(res, req))                                                                                        \
+    {                                                                                                                  \
+        return;                                                                                                        \
+    }                                                                                                                  \
+                                                                                                                       \
+    UserID user{};                                                                                                     \
+    if(!HasValidSession(res, req, user))                                                                               \
+    {                                                                                                                  \
+        return;                                                                                                        \
+    }
+
+
 #endif // TPUNKT_MACROS_H

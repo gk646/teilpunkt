@@ -32,14 +32,14 @@ Storage& Storage::GetInstance()
     TPUNKT_MACROS_GLOBAL_GET(Storage);
 }
 
-StorageStatus Storage::getRoots(UserID user, std::vector<DTO::DirectoryInfo>& roots)
+StorageStatus Storage::getRoots(UserID user, std::vector<DTO::ResponseDirectoryInfo>& roots)
 {
     roots.clear();
 
     // TODO fix
     for(StorageEndpoint& endpoint : endpoints)
     {
-        roots.push_back(DTO::DirectoryInfo::FromDir(endpoint.virtualFilesystem.getRoot()));
+        roots.push_back(DTO::ResponseDirectoryInfo::FromDir(endpoint.virtualFilesystem.getRoot()));
     }
 
     return StorageStatus::OK;
@@ -47,12 +47,12 @@ StorageStatus Storage::getRoots(UserID user, std::vector<DTO::DirectoryInfo>& ro
 
 StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointCreateInfo& info)
 {
-    constexpr auto event = EventAction::StorageEndpointCreate;
+    constexpr auto action = EventAction::StorageEndpointCreate;
     SpinlockGuard lock{storageLock};
     // TODO Use a permission table to reuse roles
     if(Authenticator::GetInstance().getIsAdmin(actor) != AuthStatus::OK)
     {
-        LOG_EVENT_FILESYS(actor, event, FAIL_NO_ADMIN, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_ADMIN, FilesystemEventData{});
         return StorageStatus::ERR_NO_ADMIN;
     }
 
@@ -63,20 +63,20 @@ StorageStatus Storage::endpointCreate(const UserID actor, const StorageEndpointC
     }
     else
     {
-        LOG_EVENT_FILESYS(actor, event, FAIL_UNSPECIFIED, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_UNSPECIFIED, FilesystemEventData{});
         return StorageStatus::ERR_UNSUCCESSFUL;
     }
 
-    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
 StorageStatus Storage::endpointCreateFrom(const UserID actor, CreateInfo info, const char* file, bool recurse)
 {
-    constexpr auto event = EventAction::StorageEndpointCreateFrom;
+    constexpr auto action = EventAction::StorageEndpointCreateFrom;
     if(Authenticator::GetInstance().getIsAdmin(actor) != AuthStatus::OK)
     {
-        LOG_EVENT_FILESYS(actor, event, FAIL_NO_ADMIN, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_ADMIN, FilesystemEventData{});
         return StorageStatus::ERR_NO_ADMIN;
     }
 
@@ -92,13 +92,13 @@ StorageStatus Storage::endpointCreateFrom(const UserID actor, CreateInfo info, c
     LOG_FATAL("Not implemented");
 
     // TODO
-    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
 StorageStatus Storage::endpointGet(UserID actor, const EndpointID endpoint, StorageEndpoint*& ept)
 {
-    constexpr auto event = EventAction::StorageEndpointGet;
+    constexpr auto action = EventAction::StorageEndpointGet;
     SpinlockGuard lock{storageLock};
     StorageEndpoint* endpointPtr = nullptr;
 
@@ -112,26 +112,26 @@ StorageStatus Storage::endpointGet(UserID actor, const EndpointID endpoint, Stor
     }
     if(endpointPtr == nullptr) [[unlikely]]
     {
-        LOG_EVENT_FILESYS(actor, event, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
     ept = endpointPtr;
-    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 
 StorageStatus Storage::endpointDelete(UserID actor, const EndpointID endpoint)
 {
-    constexpr auto event = EventAction::StorageEndpointDelete;
+    constexpr auto action = EventAction::StorageEndpointDelete;
     SpinlockGuard lock{storageLock};
     const auto res =
         endpoints.remove_if([ & ](const StorageEndpoint& ept) { return ept.getData().endpoint == endpoint; }) > 0;
     if(!res)
     {
-        LOG_EVENT_FILESYS(actor, event, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_ENDPOINT, FilesystemEventData{});
         return StorageStatus::ERR_NO_SUCH_ENDPOINT;
     }
-    LOG_EVENT_FILESYS(actor, event, INFO_SUCCESS, FilesystemEventData{});
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 

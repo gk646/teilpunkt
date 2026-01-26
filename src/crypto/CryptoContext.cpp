@@ -8,7 +8,6 @@
 #include <thread>
 #include "crypto/CryptoContext.h"
 #include "datastructures/FixedString.h"
-#include "datastructures/Timestamp.h"
 #include "instance/InstanceConfig.h"
 #include "util/Logging.h"
 #include "util/Macros.h"
@@ -35,11 +34,6 @@ CryptoContext::~CryptoContext()
     TPUNKT_MACROS_GLOBAL_RESET(CryptoContext);
 }
 
-CryptoContext& GetCryptoContext()
-{
-    TPUNKT_MACROS_GLOBAL_GET(CryptoContext);
-}
-
 void CryptoContext::encrypt(void* data, const size_t len)
 {
     (void)data;
@@ -52,12 +46,12 @@ void CryptoContext::decrypt(void* data, const size_t len)
     (void)len;
 }
 
-TimedOneTimeCode CryptoContext::getTOTP(const TimedOneTimeKey& key) const
+TOTPCode CryptoContext::getTOTPCode(const TOTPKey& key) const
 {
     unsigned char hmac[ crypto_auth_hmacsha512_BYTES ];
     constexpr int hmac_len = crypto_auth_hmacsha512_BYTES;
 
-    auto timeNum = static_cast<uint64_t>(time(nullptr) / 30);
+    auto timeNum = static_cast<uint64_t>(time(nullptr));
     timeNum /= 30;                       // 30 second interval
 
     unsigned char timeBytes[ 8 + 1 ]{};
@@ -66,10 +60,9 @@ TimedOneTimeCode CryptoContext::getTOTP(const TimedOneTimeKey& key) const
         timeBytes[ i ] = timeNum & 0xFF; // Only take the first byte
         timeNum >>= 8;                   // Discard the first byte
     }
+    TOTPKey decodedKey;
 
-    TimedOneTimeKey decodedKey;
-    // Generates 20 bytes byte text
-    Base32Decode(key.c_str(), 32, decodedKey.data(), decodedKey.capacity());
+    Base32Decode(key.c_str(), key.size(), decodedKey.data(), decodedKey.capacity());
     crypto_auth_hmacsha512(hmac, timeBytes, 8, decodedKey.u_str());
 
     const uint64_t offset = (hmac[ hmac_len - 1 ] & 0x0F);
@@ -77,23 +70,39 @@ TimedOneTimeCode CryptoContext::getTOTP(const TimedOneTimeKey& key) const
                         ((hmac[ offset + 2 ] & 0xFF) << 8) | ((hmac[ offset + 3 ] & 0xFF)));
     codeNum %= 1'000'000;
 
-    TimedOneTimeCode code;
-    (void)sprintf(code.data(), "%0*" PRIu64, 6, codeNum);
+    TOTPCode code;
+    (void)snprintf(code.data(), code.capacity(), "%0*" PRIu64, 6, codeNum);
     return code;
 }
 
-FixedString<256> CryptoContext::getTOTPCreationString(const UserName& name, TimedOneTimeKey& out) const
+TOTPInfo CryptoContext::getTOTPCreationString(const UserName& name, const TOTPKey& key) const
 {
-    FixedString<256> result;
-    crypto_auth_hmacsha512_keygen(out.udata());
-    TimedOneTimeKey encodedKey;
-    // Generates 32 bytes base32 text
-    Base32Encode(out.data(), 20, encodedKey.data(), encodedKey.capacity());
-    out = encodedKey;
-    const char* fmt = "otpauth://totp/%s:%s?secret=%s&issuer=%s&algorithm=SHA512";
+    TOTPInfo result;
+    constexpr const char* fmt = "otpauth://totp/teilpunkt:%s?secret=%s&issuer=%s&algorithm=SHA512";
     const auto* instanceName = GetInstanceConfig().getString(StringParamKey::INSTANCE_NAME);
-    (void)snprintf(result.data(), result.capacity(), fmt, "teilpunkt", name.c_str(), out.c_str(), instanceName);
+    (void)snprintf(result.data(), result.capacity(), fmt, name.c_str(), key.c_str(), instanceName);
     return result;
+}
+
+TOTPKey CryptoContext::generateTOTPKey() const
+{
+    TOTPKey key;
+    crypto_auth_hmacsha512_keygen(key.udata());
+
+    TOTPKey encoded;
+    Base32Encode(key.c_str(), crypto_auth_hmacsha512_KEYBYTES, encoded.data(), encoded.capacity());
+    return encoded;
+}
+
+bool CryptoContext::verifyTOTP(const TOTPKey& key, const TOTPCode& userCode) const
+{
+    const TOTPCode serverCode = getTOTPCode(key);
+    return true;
+}
+
+CryptoContext& GetCryptoContext()
+{
+    TPUNKT_MACROS_GLOBAL_GET(CryptoContext);
 }
 
 } // namespace tpunkt

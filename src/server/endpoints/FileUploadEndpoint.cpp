@@ -1,78 +1,77 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <fstream>
 #include <HttpResponse.h>
-#include <iostream>
-#include <string>
-#include <string_view>
 #include <storage/Storage.h>
 #include "server/Endpoints.h"
+#include "server/DTOMappings.h"
+#include "storage/StorageTransaction.h"
 
 namespace tpunkt
 {
 
-class TestScope
-{
-  public:
-    explicit TestScope(const std::string& name) : name(name)
-    {
-        std::cout << "TestScope " << name << " constructed.\n";
-    }
-
-    TestScope(const TestScope& scope) : name(scope.name)
-    {
-        std::cout << "TestScope " << name << " copied.\n";
-    }
-
-    ~TestScope()
-    {
-        std::cout << "TestScope " << name << " destroyed.\n";
-        name = "Deleted";
-    }
-
-    void print(const std::string& message) const
-    {
-        std::cout << "TestScope " << name << ": " << message << "\n";
-    }
-
-  private:
-    std::string name;
-};
-
-
 void FileUploadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    // TODO make allocator to avoid dynamic memory here (fragmentation)
-    auto transaction = std::make_shared<TestScope>("Local Scope");
+    TPUNKT_MACROS_AUTH_USER()
 
-    std::string filePath = "./uploaded_file.txt";
-    auto file = std::make_shared<std::ofstream>(filePath, std::ios::binary);
+    const FileName fileName = GetHeader(req, "file-name");
+    if(fileName.isEmpty() || !IsValidFilename(fileName))
+    {
+        EndRequest(res, 400, "Invalid file name");
+        return;
+    }
 
-    res->onData(
-        [ file, transaction, res ](std::string_view chunk, bool isLast) mutable
+    const FileID directory = FileID::FromString(GetHeader(req, "directory"));
+    if(!directory.isValid())
+    {
+        EndRequest(res, 400, "Invalid directory");
+        return;
+    }
+
+    StorageEndpoint* endpoint = nullptr;
+    auto status = Storage::GetInstance().endpointGet(user, directory.getEndpoint(), endpoint);
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, "Invalid endpoint");
+        return;
+    }
+
+    FileCreationInfo creationInfo{.name = fileName, .creator = user, .endpoint = directory.getEndpoint()};
+    status = endpoint->fileCreate(user, directory, creationInfo);
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, GetStorageStatusStr(status));
+        return;
+    }
+
+    auto transaction = std::make_shared<WriteFileTransaction>();
+    status = endpoint->fileWrite(user, directory, *transaction.get());
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, GetStorageStatusStr(status));
+        return;
+    }
+
+    const auto handlerFunc = [ transaction, res ](std::string_view data, const bool isLast) mutable
+    {
+
+        transaction.get()->print("onData callback called.");
+        if(file->is_open())
         {
-            transaction.get()->print("onData callback called.");
-            if(file->is_open())
-            {
-                file->write(chunk.data(), chunk.size());
-            }
+            file->write(chunk.data(), chunk.size());
+        }
 
-            if(isLast)
-            {
-                printf("Is last true\n");
-                std::thread thread{[ & ]()
-                                   {
-                                       std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-                                       printf("Ending now\n");
-                                       EndRequest(res, 200);
-                                   }};
-                thread.detach();
-                file->close();
-            }
-        });
+        if(isLast)
+        {
+            printf("Is last true\n");
+            file->close();
+            EndRequest(res, 200);
+        }
+    };
+
+    res->onData(handlerFunc);
 
     res->onAborted(
-        [ file, transaction ]() mutable
+        [ res, transaction ]() mutable
         {
             transaction.get()->print("onAborted callback called.");
             if(file->is_open())
@@ -81,6 +80,7 @@ void FileUploadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
                 std::remove("./uploaded_file.txt");
             }
             std::cerr << "Upload aborted" << std::endl;
+            EndRequest(res, 400);
         });
 
     transaction.get()->print("handle method end.");

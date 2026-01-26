@@ -6,10 +6,11 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/global.css" type="text/css"/>
     <link rel="stylesheet" href="css/dashboard.css" type="text/css"/>
-    <script src="js/theme-switcher.js"></script>
-    <script type="module" src="js/dashboard.js" defer></script>
-    <script type="module" src="js/backend.js" defer></script>
-    <script type="module" src="js/icons.js" defer></script>
+    <script type="module" src="js/theme-switcher.js"></script>
+    <script type="module" src="js/dashboard.js" ></script>
+    <script type="module" src="js/backend.js" ></script>
+    <script type="module" src="js/icons.js" ></script>
+    <script type="module" src="js/qrcodegen.js" ></script>
 </head>
 <body>
 <div class="dashboard">
@@ -31,6 +32,7 @@
     <div class="menu-bar" id="menuBar">
         <div class="add-file-container">
             <button class="add-file-button" id="addFileButton">+</button>
+            <button class="button" id="openFilePicker">Upload</button>
         </div>
     </div>
 
@@ -56,5 +58,6 @@
         </form>
     </div>
 </div>
+<input type="file" id="fileUpload" style="display: none;" />
 </body>
 </html>

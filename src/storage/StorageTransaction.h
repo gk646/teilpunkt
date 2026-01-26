@@ -36,10 +36,10 @@ struct StorageTransaction
     bool isFinished = false;
 };
 
-struct CreateFileTransaction final : StorageTransaction
+struct WriteFileTransaction final : StorageTransaction
 {
-    CreateFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info, FileID dir);
-    ~CreateFileTransaction() override;
+    WriteFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info, FileID dir);
+    ~WriteFileTransaction() override;
 
     // Queues the create-action
     bool start(ResultCb callback);
@@ -49,11 +49,7 @@ struct CreateFileTransaction final : StorageTransaction
     VirtualFilesystem* system = nullptr;
     FileID dir;
     FileID file;
-    TPUNKT_MACROS_STRUCT(CreateFileTransaction);
-};
-
-struct WriteFileTransaction final : StorageTransaction
-{
+    TPUNKT_MACROS_STRUCT(WriteFileTransaction);
 };
 
 struct ReadFileTransaction final : StorageTransaction

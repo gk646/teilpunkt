@@ -32,13 +32,13 @@ bool StorageTransaction::shouldAbort() const
     return !isFinished || !isCommited;
 }
 
-CreateFileTransaction::CreateFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info,
+WriteFileTransaction::WriteFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info,
                                              const FileID dir)
     : StorageTransaction(store), info(info), system(&system), dir(dir)
 {
 }
 
-CreateFileTransaction::~CreateFileTransaction()
+WriteFileTransaction::~WriteFileTransaction()
 {
     if(shouldAbort())
     {
@@ -82,7 +82,7 @@ CreateFileTransaction::~CreateFileTransaction()
     }
 }
 
-bool CreateFileTransaction::start(ResultCb callback)
+bool WriteFileTransaction::start(ResultCb callback)
 {
     return datastore->createFile(file.getUID(), callback);
 }

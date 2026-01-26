@@ -14,33 +14,24 @@ namespace tpunkt
 void DirLookupEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
     // Within a single thread this method is threadsafe
-    thread_local std::vector<DTO::DirectoryEntry> collector;
+    thread_local std::vector<DTO::ResponseDirectoryEntry> collector;
     thread_local std::string jsonBuffer(TPUNKT_SERVER_JSON_THREAD_BUFFER_START, '0');
 
-    if(IsRateLimited(res, req))
-    {
-        return;
-    }
-
-    UserID user{};
-    if(!HasValidSession(res, req, user))
-    {
-        return;
-    }
+   TPUNKT_MACROS_AUTH_USER()
 
     collector.clear();
     jsonBuffer.clear();
 
     res->onData(
-        [ res, user ](std::string_view data, const bool last)
+        [ res, user ](std::string_view data, const bool isLast)
         {
-            if(!last) // Too long
+            if(!isLast) // Too long
             {
                 EndRequest(res, 431, "Sent data too large");
                 return;
             }
 
-            DTO::DirectoryRequest request;
+            DTO::RequestDirectoryInfo request;
             auto error = glz::read_json(request, data);
             if(error)
             {

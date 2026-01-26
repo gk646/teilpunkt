@@ -19,15 +19,15 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
         return;
     }
 
-    const auto handlerFunc = [ res, req ](std::string_view data, const bool last)
+    const auto handlerFunc = [ res, req ](std::string_view data, const bool isLast)
     {
-        if(!last)
+        if(!isLast)
         {
             EndRequest(res, 431, "Sent data too large");
             return;
         }
 
-        DTO::UserLoginPW authData{};
+        DTO::RequestUserLoginPassword authData{};
         const auto error = glz::read_json(authData, data);
         if(error)
         {
@@ -36,11 +36,7 @@ void AuthPasswordEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest
         }
 
         UserID user{};
-        Credentials credentials{};
-        credentials.type = CredentialsType::PASSWORD;
-        credentials.password = authData.password;
-
-        auto status = Authenticator::GetInstance().userLogin(authData.name, credentials, user);
+        auto status = Authenticator::GetInstance().userLoginPassword(authData, user);
         if(status != AuthStatus::OK)
         {
             EndRequest(res, 400, Authenticator::GetStatusStr(status));

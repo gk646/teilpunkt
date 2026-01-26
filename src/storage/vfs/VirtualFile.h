@@ -67,7 +67,7 @@ struct VirtualFile final
     FileStats stats{};
     FileHistory history{};
     friend VirtualDirectory;
-    friend DTO::DirectoryEntry;
+    friend DTO::ResponseDirectoryEntry;
 };
 
 } // namespace tpunkt

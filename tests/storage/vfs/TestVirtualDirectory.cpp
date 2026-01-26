@@ -18,7 +18,7 @@ FileCreationInfo getFileInfo(const FileName& name)
     return {.name = name, .creator = getUserID()};
 }
 
-DirCreationInfo getDirInfo(const char* name, const uint64_t maxSize, VirtualDirectory* parent)
+DirectoryCreationInfo getDirInfo(const char* name, const uint64_t maxSize, VirtualDirectory* parent)
 {
     return {.name = FileName{name}, .maxSize = maxSize, .parent = parent, .creator = getUserID()};
 }

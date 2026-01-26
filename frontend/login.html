@@ -9,7 +9,6 @@
     <title>login</title>
     <script src="js/theme-switcher.js"></script>
     <script src="js/libsodium.js" defer></script>
-    <link rel="icon" type="image/png" href="favicon.png"/>
 </head>
 <body>
 <!-- Logo Section -->
@@ -56,5 +55,14 @@
         </form>
     </div>
 </div>
+
+<div id="totpPopup">
+    <h2>Enter TOTP Code</h2>
+    <div id="totpInputContainer">
+        <input type="text" id="totpInput" maxlength="6" pattern="[0-9]*" autofocus>
+    </div>
+    <button id="submitTOTP">Submit</button>
+</div>
+
 </body>
 </html>

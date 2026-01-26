@@ -11,13 +11,20 @@ namespace tpunkt::DTO
 
 //===== Authentication =====//
 
-struct UserSignupPW final
+struct RequestUserSignupPassword final
 {
     UserName name;
     UserPassword password;
 };
 
-struct UserSignupPK final
+struct RequestUserLoginPassword final
+{
+    UserName name;
+    UserPassword password;
+    TOTPCode totp;
+};
+
+struct RequestUserSignupPasskey final
 {
     FixedString<TPUNKT_CRYPTO_KEY_LEN> challenge;
     struct
@@ -39,40 +46,34 @@ struct UserSignupPK final
 };
 
 
-struct UserLoginPW final
-{
-    UserName name;
-    UserPassword password;
-};
-
-
 //===== Filesystem =====//
 
 
-struct DirectoryRequest final
+struct RequestDirectoryInfo final
 {
-    // The user is already gained through auth with the cookie
     FileID directory;
 };
 
-struct CreateRequest final
-{
-    FileName name;
-    FileID directory;
-};
 
-struct DirectoryInfo
+struct ResponseDirectoryInfo
 {
-    static DirectoryInfo FromDir(const VirtualDirectory& dir);
+    static ResponseDirectoryInfo FromDir(const VirtualDirectory& dir);
 
     FileName name;
     FileID fid;
 };
 
-struct DirectoryEntry final
+struct RequestCreateFile final
 {
-    static DirectoryEntry FromFile(const VirtualFile& file);
-    static DirectoryEntry FromDir(const VirtualDirectory& dir);
+    FileName name;
+    FileID directory;
+};
+
+
+struct ResponseDirectoryEntry final
+{
+    static ResponseDirectoryEntry FromFile(const VirtualFile& file);
+    static ResponseDirectoryEntry FromDir(const VirtualDirectory& dir);
 
     FileName name;
     FileID fid;
@@ -96,12 +97,6 @@ struct SessionInfo final
     uint64_t creationUnix = 0;
     uint64_t expirationUnix = 0;
 };
-
-//===== Directories =====//
-
-
-//===== Requests =====//
-
 
 //===== Task Management =====//
 
