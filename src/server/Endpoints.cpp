@@ -298,7 +298,7 @@ bool ServerEndpoint::GetMetaData(uWS::HttpResponse<true>* res, uWS::HttpRequest*
     metaData.remoteAddress = res->getRemoteAddress();
 
     // Hash the remote address to only store anonymized data (inplace)
-    unsigned char* content = (unsigned char*)metaData.remoteAddress.data();
+    auto* content = (unsigned char*)metaData.remoteAddress.data();
     const size_t len = metaData.remoteAddress.size();
     crypto_generichash(content, len, content, len, nullptr, 0);
     return true;

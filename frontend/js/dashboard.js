@@ -1,11 +1,13 @@
 import {
-    BackendCreateDir,
-    BackendCreateFile,
+    BackendDirCreate, BackendDirDelete,
+    BackendDirLookup,
     BackendFetchUserRoots,
-    BackendLookupDirectory,
-    BackendUploadFile
+    BackendFileCreate,
+    BackendFileDelete,
+    BackendFileUpload
 } from './backend.js';
-import {IconFile, IconOptions, IconShare} from './icons.js';
+
+import {IconDelete, IconDownload, IconFile, IconOptions, IconShare} from './icons.js';
 
 const sideMenu = document.getElementById('sideMenu');
 const mainContent = document.getElementById('mainContent');
@@ -14,10 +16,8 @@ const addFileButton = document.getElementById('addFileButton');
 const addFileModal = document.getElementById('addFileModal');
 const closeModal = document.querySelector('.close');
 const addFileForm = document.getElementById('addFileForm');
-const menuBar = document.getElementById('menuBar');
 
 let navigationStack = [];
-
 
 function renderSideMenu(roots) {
     const ul = document.createElement('ul');
@@ -39,7 +39,7 @@ function renderSideMenu(roots) {
 
 async function visitDirectory(dirID) {
     try {
-        const directoryData = await BackendLookupDirectory(dirID);
+        const directoryData = await BackendDirLookup(dirID);
         renderBreadcrumb();
         renderDirectoryContents(directoryData);
     } catch (error) {
@@ -88,7 +88,6 @@ export function renderBreadcrumb() {
     }
 }
 
-
 function renderDirectoryContents(entries) {
     const fileBrowser = document.createElement('div');
     fileBrowser.className = 'file-browser';
@@ -117,26 +116,35 @@ function renderDirectoryContents(entries) {
         const actionsContainer = document.createElement('div');
         actionsContainer.className = 'file-actions';
 
-        const optionsButton = document.createElement('button');
-        optionsButton.className = 'file-action';
-        optionsButton.title = 'Options';
-        optionsButton.innerHTML = IconOptions();
-        optionsButton.addEventListener('click', (e) => {
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'file-action';
+        deleteButton.title = 'Delete';
+        deleteButton.innerHTML = IconDelete()
+        deleteButton.addEventListener('click', async (e) => {
             e.stopPropagation();
-            alert(`Options for ${entry.name}`);
-        });
+            const currentDir = navigationStack[navigationStack.length - 1].fid;
+            if (entry.isFile) {
+                await BackendFileDelete(entry.fid)
+            } else {
+                await BackendDirDelete(entry.fid)
+            }
+            await visitDirectory(currentDir)
+        })
 
-        const shareButton = document.createElement('button');
-        shareButton.className = 'file-action';
-        shareButton.title = 'Share';
-        shareButton.innerHTML = IconShare();
-        shareButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            alert(`Share ${entry.name}`);
-        });
+        if(entry.isFile) {
+            const downloadButton = document.createElement('button');
+            downloadButton.className = 'file-action';
+            downloadButton.title = 'Download';
+            downloadButton.innerHTML = IconDownload()
+            downloadButton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const currentDir = navigationStack[navigationStack.length - 1].fid;
 
-        actionsContainer.appendChild(optionsButton);
-        actionsContainer.appendChild(shareButton);
+            })
+            actionsContainer.appendChild(downloadButton);
+        }
+
+        actionsContainer.appendChild(deleteButton);
 
         fileItem.appendChild(iconContainer);
         fileItem.appendChild(fileName);
@@ -182,9 +190,9 @@ async function handleAddFileFormSubmit(e) {
     const lastElement = navigationStack[navigationStack.length - 1];
     try {
         if (fileType === 'folder') {
-            await BackendCreateDir(lastElement.fid, fileName);
+            await BackendDirCreate(lastElement.fid, fileName);
         } else {
-            await BackendCreateFile(lastElement.fid, fileName);
+            await BackendFileCreate(lastElement.fid, fileName);
         }
 
         hideAddFileModal();
@@ -220,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = event.target.files[0];
         if (!file) return;
         const currentDir = navigationStack[navigationStack.length - 1].fid;
-        await BackendUploadFile(file, currentDir);
+        await BackendFileUpload(file, currentDir);
         await visitDirectory(currentDir);
     });
 

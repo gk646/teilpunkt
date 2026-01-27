@@ -9,15 +9,7 @@ namespace tpunkt
 
 void FileCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    if(IsRateLimited(res, req))
-    {
-        return;
-    }
-    UserID user{};
-    if(!HasValidSession(res, req, user))
-    {
-        return;
-    }
+    TPUNKT_MACROS_AUTH_USER()
 
     const auto handlerFunc = [ user, res ](std::string_view data, const bool isLast)
     {
@@ -44,7 +36,8 @@ void FileCreateEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
         }
 
         const FileCreationInfo info{.name = request.name, .creator = user, .endpoint = request.directory.getEndpoint()};
-        status = endpoint->fileCreate(user, request.directory, info);
+        FileID newFile{};
+        status = endpoint->fileCreate(user, request.directory, info, newFile);
         if(status != StorageStatus::OK)
         {
             EndRequest(res, 400, GetStorageStatusStr(status));

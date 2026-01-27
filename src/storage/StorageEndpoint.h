@@ -62,17 +62,15 @@ struct StorageEndpoint final
 
     //===== File Manipulation =====//
 
-    StorageStatus fileCreate(UserID actor, FileID dir, const FileCreationInfo& info);
-    StorageStatus fileWrite(UserID actor, FileID file, WriteFileTransaction& action);
+    StorageStatus fileCreate(UserID actor, FileID dir, const FileCreationInfo& info, FileID& newFile);
+    StorageStatus fileDelete(UserID actor, FileID file);
+    StorageStatus fileWrite(UserID actor, FileID file, WriteFileTransaction& transaction);
     StorageStatus fileRead(UserID actor, FileID file, size_t begin, size_t end, ReadFileTransaction& action);
-    StorageStatus fileRename(UserID actor, FileID file, const FileName& newName);
 
     //===== Dir Manipulation =====//
 
     StorageStatus dirCreate(UserID actor, FileID dir, const DirectoryCreationInfo& info);
-    StorageStatus dirRemove();
-    StorageStatus dirRename();
-
+    StorageStatus dirDelete(UserID actor, FileID dir);
     // Collects all entries in the given dir (if user has access)
     StorageStatus dirGetEntries(UserID actor, FileID dir, std::vector<DTO::ResponseDirectoryEntry>& entries);
 

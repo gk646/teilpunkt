@@ -195,20 +195,20 @@
     border-top: 1px solid var(--background-selected);
     border-radius: 8px;
     overflow: hidden;
-    margin-top: 20px; /* gap between side panel and file list */
-    width: 100%; /* Ensure the file browser takes the full width of its container */
+    margin-top: 20px;
+    width: 100%;
 }
 
 .file-item {
     display: flex;
     align-items: center;
-    padding: 15px 10px; /* Increased padding for better spacing */
+    padding: 15px 10px;
     background: var(--foreground);
     border-bottom: 1px solid var(--background-selected);
     transition: background 0.2s ease;
     cursor: pointer;
-    border-radius: 0; /* rows touch seamlessly */
-    width: 800px; /* Fixed width for each file item */
+    border-radius: 0;
+    width: 800px;
 }
 
 .file-item:hover {
@@ -216,10 +216,10 @@
 }
 
 .file-icon {
-    margin-right: 20px; /* Increased margin for better spacing */
-    font-size: 1.5rem; /* Larger icon size */
-    width: 40px; /* Fixed width for icon container */
-    height: 40px; /* Fixed height for icon container */
+    margin-right: 20px;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -230,28 +230,28 @@
     font-size: 1.1rem;
     color: var(--text);
     word-break: break-all;
-    padding: 0 10px; /* Additional padding around the file name */
+    padding: 0 10px;
     font-family: var(--font-family);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: calc(800px - 120px); /* Adjusted to account for icon and actions */
+    max-width: calc(800px - 120px);
 }
 
 .file-actions {
     display: flex;
-    gap: 15px; /* Increased gap between action buttons */
-    margin-left: 10px; /* Additional margin to separate actions from the name */
-    width: 80px; /* Increased width for actions container to fit buttons */
+    gap: 15px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .file-action {
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 8px; /* Increased padding for better click area */
+    padding: 8px;
     transition: transform 0.2s ease, opacity 0.2s ease;
-    font-size: 1.2rem; /* Larger icon size for actions */
+    font-size: 1.2rem;
 }
 
 .file-action:hover {

@@ -251,6 +251,8 @@ bool LocalFileSystemDatastore::writeFile(WriteHandle& handle, const bool isLast,
 
 bool LocalFileSystemDatastore::closeWrite(WriteHandle& handle, const bool revert, ResultCb callback)
 {
+    callback(true);
+
     if(!handle.isValid())
     {
         RET_AND_CB_FALSE(); // We dont touch as its invalid
@@ -308,7 +310,6 @@ bool LocalFileSystemDatastore::closeWrite(WriteHandle& handle, const bool revert
         handle.tempfd = -1;
     }
 
-    callback(success);
     return success;
 }
 

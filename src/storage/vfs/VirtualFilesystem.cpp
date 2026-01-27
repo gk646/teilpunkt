@@ -6,15 +6,14 @@ namespace tpunkt
 
 VirtualFile* VirtualFilesystem::findFile(const FileID file)
 {
-    iterationCache.clear(); // For non-recursive iteration
-    for(auto& dir : root.getDirs())
-    {
-        iterationCache.push_back(&dir);
-    }
+    iterationCache.clear();
+    iterationCache.push_back(&root);
 
     while(!iterationCache.empty())
     {
-        auto& first = iterationCache.back();
+        auto* first = iterationCache.back();
+        iterationCache.pop_back();
+
         auto* result = first->findFile(file);
         if(result != nullptr)
         {
@@ -24,12 +23,11 @@ VirtualFile* VirtualFilesystem::findFile(const FileID file)
         {
             iterationCache.push_back(&dir);
         }
-        iterationCache.pop_back();
     }
     return nullptr;
 }
 
-VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
+VirtualDirectory* VirtualFilesystem::findDir(const FileID dir)
 {
     if(dir == root.getID())
     {
@@ -41,7 +39,9 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
 
     while(!iterationCache.empty())
     {
-        auto& first = iterationCache.back();
+        auto* first = iterationCache.back();
+        iterationCache.pop_back();
+
         for(auto& itDir : first->getDirs())
         {
             if(itDir.getID() == dir)
@@ -50,23 +50,36 @@ VirtualDirectory* VirtualFilesystem::getDir(const FileID dir)
             }
             iterationCache.push_back(&itDir);
         }
-        iterationCache.pop_back();
     }
     return nullptr;
 }
 
-
-bool VirtualFilesystem::dirCanHoldSize(FileID dir, uint64_t additional)
+VirtualDirectory* VirtualFilesystem::findContainingDir(FileID file)
 {
-    auto* target = getDir(dir);
-    if(target == nullptr)
-    {
-        return false;
-    }
-
     iterationCache.clear();
-    //VirtualDirectory* parent = target->getInfo().parent;
+    iterationCache.push_back(&root);
 
+    while(!iterationCache.empty())
+    {
+        auto* first = iterationCache.back();
+        iterationCache.pop_back();
+
+        auto* fileResult = first->findFile(file);
+        if(fileResult != nullptr) [[unlikely]]
+        {
+            return first;
+        }
+        auto* dirResult = first->findDir(file);
+        if(dirResult != nullptr) [[unlikely]]
+        {
+            return first;
+        }
+        for(auto& itDir : first->getDirs())
+        {
+            iterationCache.push_back(&itDir);
+        }
+    }
+    return nullptr;
 }
 
 VirtualDirectory& VirtualFilesystem::getRoot()
@@ -74,8 +87,21 @@ VirtualDirectory& VirtualFilesystem::getRoot()
     return root;
 }
 
+bool VirtualFilesystem::dirCanHoldSize(FileID dir, uint64_t additional)
+{
+    auto* target = findDir(dir);
+    if(target == nullptr)
+    {
+        return false;
+    }
+
+    iterationCache.clear();
+    // VirtualDirectory* parent = target->getInfo().parent;
+}
+
 VirtualFilesystem::VirtualFilesystem(const DirectoryCreationInfo& info) : root(info)
 {
+    iterationCache.reserve(64);
 }
 
 VirtualFilesystem::~VirtualFilesystem() = default;

@@ -8,7 +8,7 @@ namespace tpunkt
 {
 
 VirtualFile::VirtualFile(const FileCreationInfo& info)
-    : fid(info.endpoint, false), info(info.name, info.creator), stats(Timestamp::Now())
+    : fid(info.endpoint, false), info(info.name, info.creator, info.creator), stats(Timestamp::Now())
 {
 }
 

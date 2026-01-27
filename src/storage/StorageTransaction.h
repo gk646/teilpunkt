@@ -12,41 +12,41 @@ namespace tpunkt
 
 struct StorageTransaction
 {
-    explicit StorageTransaction(DataStore& store);
+    StorageTransaction(ResultCb callback, uWS::HttpResponse<true>* response);
     TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
     virtual ~StorageTransaction() = default;
 
+    void init(DataStore& store, VirtualFilesystem& vfs);
+
     // Commit the operation
-    void commit();
+    virtual void commit();
 
-    [[nodiscard]] bool getIsFinished() const;
-    // Once set cannot be reset
-    void setFinished();
-
-    uWS::HttpResponse<true>* response = nullptr;
-    uWS::Loop* loop = nullptr;
+    [[nodiscard]] bool getIsValid() const;
 
   protected:
-    DataStore* datastore = nullptr; // Always valid
+    uWS::HttpResponse<true>* response = nullptr;
+    uWS::Loop* loop = nullptr;
+    DataStore* datastore = nullptr;
+    VirtualFilesystem* filesystem = nullptr;
+    ResultCb callback;
 
     [[nodiscard]] bool shouldAbort() const;
 
   private:
     bool isCommited = false;
-    bool isFinished = false;
 };
 
 struct WriteFileTransaction final : StorageTransaction
 {
-    WriteFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info, FileID dir);
+    WriteFileTransaction(ResultCb callback, uWS::HttpResponse<true>* response, FileID dir, FileID file);
     ~WriteFileTransaction() override;
 
-    // Queues the create-action
-    bool start(ResultCb callback);
+    bool start();
+    void commit() override;
+    bool write(const std::string_view& data, bool isLast);
 
   private:
-    FileCreationInfo info;
-    VirtualFilesystem* system = nullptr;
+    WriteHandle handle;
     FileID dir;
     FileID file;
     TPUNKT_MACROS_STRUCT(WriteFileTransaction);

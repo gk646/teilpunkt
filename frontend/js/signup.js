@@ -109,9 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    //TODO ADD DEBUG USER
-    BackendRegisterUserPassword("hey", "123123123")
-
     if (isPasskeyAvailable()) {
         passkeyButton.addEventListener('click', async () => {
             elementMakeInvisible(authError);

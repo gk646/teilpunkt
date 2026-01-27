@@ -152,11 +152,12 @@ bool VirtualDirectory::dirDelete(const FileID dir)
     onAccess();
     if(!dir.isDirectory())
     {
-        LOG_WARNING("Trying to delete directory ");
+        LOG_WARNING("Calling dirDelete on non-Directory");
         return false;
     }
 
-    const auto result = std::erase_if(dirs, [ & ](const VirtualDirectory& e) { return e.fid == dir; }) > 0;
+    const auto result = std::erase_if(dirs, [ & ](VirtualDirectory& e)
+                                      { return e.getDirs().empty() && e.getFiles().empty() && e.fid == dir; }) > 0;
     if(result)
     {
         onModification();

@@ -97,7 +97,7 @@ TOTPKey CryptoContext::generateTOTPKey() const
 bool CryptoContext::verifyTOTP(const TOTPKey& key, const TOTPCode& userCode) const
 {
     const TOTPCode serverCode = getTOTPCode(key);
-    return true;
+    return sodium_memcmp(serverCode.c_str(), userCode.c_str(), serverCode.capacity()) == 0;
 }
 
 CryptoContext& GetCryptoContext()

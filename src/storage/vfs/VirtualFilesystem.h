@@ -17,15 +17,14 @@ struct VirtualFilesystem
 
     // Full lookup
     VirtualFile* findFile(FileID file);
-    VirtualDirectory* getDir(FileID dir);
+    VirtualDirectory* findDir(FileID dir);
 
-    bool dirCanHoldSize(FileID dir, uint64_t additional);
-
-    // Returns the directory this file is in
-    VirtualDirectory* getFileDir(FileID file);
+    // Returns the directory this file/dir is in
+    VirtualDirectory* findContainingDir(FileID file);
 
     VirtualDirectory& getRoot();
 
+    bool dirCanHoldSize(FileID dir, uint64_t additional);
 
   private:
     explicit VirtualFilesystem(const DirectoryCreationInfo& info);

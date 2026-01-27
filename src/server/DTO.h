@@ -69,6 +69,10 @@ struct RequestCreateFile final
     FileID directory;
 };
 
+struct RequestDelete final
+{
+    FileID file;
+};
 
 struct ResponseDirectoryEntry final
 {

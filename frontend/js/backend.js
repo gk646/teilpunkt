@@ -3,7 +3,6 @@
 import {fetchWithErrorHandling} from './util.js';
 import {hashPassword} from "./crypto.js";
 
-
 export async function BackendLoginUserPassword(username, password, totp) {
     let hashedPassword = await hashPassword(password);
 
@@ -47,14 +46,8 @@ export async function BackendFetchUserRoots() {
     return response.json();
 }
 
-// Returns an array of directory DTOs.
-export async function BackendFetchUserFavourites() {
-    const response = await fetchWithErrorHandling('/api/filesystem/favourites', {});
-    return response.json();
-}
-
 //Returns a directory object with an array of entries.
-export async function BackendLookupDirectory(directoryId) {
+export async function BackendDirLookup(directoryId) {
     const response = await fetchWithErrorHandling('/api/filesystem/dirLookup', {
         method: 'POST',
         headers: {
@@ -65,22 +58,7 @@ export async function BackendLookupDirectory(directoryId) {
     return response.json();
 }
 
-export async function BackendCreateFile(directory, name) {
-    const body = {
-        name: name,
-        directory: directory,
-    };
-
-    await fetchWithErrorHandling('/api/filesystem/file', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
-    });
-}
-
-export async function BackendCreateDir(directory, name) {
+export async function BackendDirCreate(directory, name) {
     const body = {
         name: name,
         directory: directory,
@@ -95,7 +73,36 @@ export async function BackendCreateDir(directory, name) {
     });
 }
 
-export async function BackendUploadFile(file, fid) {
+export async function BackendDirDelete(directory) {
+    const body = {
+        file: directory,
+    };
+
+    await fetchWithErrorHandling('/api/filesystem/dir', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+    });
+}
+
+export async function BackendFileCreate(directory, name) {
+    const body = {
+        name: name,
+        directory: directory,
+    };
+
+    await fetchWithErrorHandling('/api/filesystem/file', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+    });
+}
+
+export async function BackendFileUpload(file, fid) {
     const chunkSize = 1024 * 512;
 
     async function uploadChunk(chunk) {
@@ -129,4 +136,18 @@ export async function BackendUploadFile(file, fid) {
     }
 
     await uploadFile();
+}
+
+export async function BackendFileDelete(fid) {
+    const body = {
+        file: fid,
+    };
+
+    await fetchWithErrorHandling('/api/filesystem/file', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+    });
 }

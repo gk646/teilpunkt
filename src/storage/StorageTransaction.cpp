@@ -2,14 +2,19 @@
 
 #include <HttpResponse.h>
 #include "storage/StorageTransaction.h"
-#include "storage/vfs/VirtualFilesystem.h"
-#include "vfs/VirtualDirectory.h"
 
 namespace tpunkt
 {
 
-StorageTransaction::StorageTransaction(DataStore& store) : datastore(&store)
+StorageTransaction::StorageTransaction(ResultCb callback, uWS::HttpResponse<true>* response)
+    : response(response), loop(uWS::Loop::get()), callback(callback)
 {
+}
+
+void StorageTransaction::init(DataStore& store, VirtualFilesystem& vfs)
+{
+    datastore = &store;
+    filesystem = &vfs;
 }
 
 void StorageTransaction::commit()
@@ -17,74 +22,14 @@ void StorageTransaction::commit()
     isCommited = true;
 }
 
-bool StorageTransaction::getIsFinished() const
+bool StorageTransaction::getIsValid() const
 {
-    return isFinished;
-}
-
-void StorageTransaction::setFinished()
-{
-    isFinished = true;
+    return datastore != nullptr;
 }
 
 bool StorageTransaction::shouldAbort() const
 {
-    return !isFinished || !isCommited;
-}
-
-WriteFileTransaction::WriteFileTransaction(DataStore& store, VirtualFilesystem& system, const FileCreationInfo& info,
-                                             const FileID dir)
-    : StorageTransaction(store), info(info), system(&system), dir(dir)
-{
-}
-
-WriteFileTransaction::~WriteFileTransaction()
-{
-    if(shouldAbort())
-    {
-        VirtualDirectory* createDir = system->getDir(dir);
-        if(createDir == nullptr)
-        {
-            LOG_WARNING("Failed to revert transaction: Directory already deleted");
-        }
-        else if(!createDir->fileDelete(file))
-        {
-            LOG_WARNING("Failed to revert transaction: Filed already deleted");
-        }
-
-        const auto callback = [ & ](const bool success)
-        {
-            if(!success)
-            {
-                // TODO requeue task - make sure to delete
-                LOG_ERROR("Failed to revert transaction: Datastore failed to remove file");
-            }
-            else
-            {
-                auto endFunc = [ & ]
-                {
-                    response->writeStatus("500");
-                    response->end();
-                };
-                loop->defer(endFunc);
-            }
-        };
-        datastore->deleteFile(file.getUID(), callback);
-    }
-    else
-    {
-        auto endFunc = [ & ]
-        {
-            response->writeStatus("200 OK");
-            response->end();
-        };
-        loop->defer(endFunc);
-    }
-}
-
-bool WriteFileTransaction::start(ResultCb callback)
-{
-    return datastore->createFile(file.getUID(), callback);
+    return !isCommited || !getIsValid();
 }
 
 } // namespace tpunkt

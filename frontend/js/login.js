@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             e.target.value = value;
             if (value.length >= 6) {
+                totpPopup.style.display = 'none';
                 await handlePasswordLogin();
             }
         }
@@ -89,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isValid) { // Open totp code
             totpPopup.style.display = 'block';
             totpPopup.focus();
+            totpInput.focus();
             totpInput.text = '';
         }
     });

@@ -47,9 +47,11 @@ enum class EventAction : uint8_t
     StorageEndpointDelete,
     // Virtual File System
     FileSystemFileCreate,
-    FilesystemFileWrite,
+    FileSystemFileDelete,
     FilesystemFileRemove,
+    FilesystemFileWrite,
     FilesystemDirCreate,
+    FileSystemDirDelete,
     FilesystemDirLookup,
     FilesystemFileInfo,
     // TaskManager

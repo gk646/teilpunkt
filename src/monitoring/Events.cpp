@@ -56,8 +56,8 @@ const char* tpunkt::GetEventActionStr(EventAction action)
             return "FilesystemFileRemove";
         case EventAction::FilesystemDirCreate:
             return "FilesystemDirCreate";
-        case EventAction::FilesystemDirRead:
-            return "FilesystemDirRead";
+        case EventAction::FilesystemDirLookup:
+            return "FilesystemDirLookup";
         // TaskManager
         case EventAction::ThreadAdd:
             return "ThreadAdd";

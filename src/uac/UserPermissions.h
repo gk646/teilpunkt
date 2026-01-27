@@ -14,6 +14,7 @@ enum class PermissionFlag : uint8_t
     READ = 1 << 1,
     DELETE = 1 << 3,
     CREATE = 1 << 4,
+    WRITE = 1 << 5,
 };
 
 

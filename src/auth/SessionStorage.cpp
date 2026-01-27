@@ -124,11 +124,16 @@ bool SessionStorage::get(const UserID lookup, const SessionToken& token, const S
     }
 
     auto sessionList = userData->getSessions().get();
+
+    // Evict expired session on each adds
+    sessionList.erase_if([](const Session& session) { return session.isExpired(); });
+
     for(size_t i = 0; i < sessionList.size(); ++i)
     {
         auto& session = sessionList[ i ];
-        if(session.getToken() == token) // Found a match
+        if(sodium_memcmp(session.getToken().c_str(), token.c_str(), token.capacity()) == 0)
         {
+            // Found a match
             if(session.isValid(metaData))
             {
                 user = userData->getUser();

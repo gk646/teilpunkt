@@ -36,54 +36,49 @@ void FileUploadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* 
     }
 
     FileCreationInfo creationInfo{.name = fileName, .creator = user, .endpoint = directory.getEndpoint()};
-    status = endpoint->fileCreate(user, directory, creationInfo);
+    FileID newFile{};
+    status = endpoint->fileCreate(user, directory, creationInfo, newFile);
     if(status != StorageStatus::OK)
     {
         EndRequest(res, 400, GetStorageStatusStr(status));
         return;
     }
 
-    auto transaction = std::make_shared<WriteFileTransaction>();
-    status = endpoint->fileWrite(user, directory, *transaction.get());
-    if(status != StorageStatus::OK)
+    ResultCb callback = [ res ](bool success)
     {
-        EndRequest(res, 400, GetStorageStatusStr(status));
-        return;
-    }
-
-    const auto handlerFunc = [ transaction, res ](std::string_view data, const bool isLast) mutable
-    {
-
-        transaction.get()->print("onData callback called.");
-        if(file->is_open())
+        if(!success)
         {
-            file->write(chunk.data(), chunk.size());
-        }
-
-        if(isLast)
-        {
-            printf("Is last true\n");
-            file->close();
-            EndRequest(res, 200);
+            EndRequest(res, 400, "File write failed");
         }
     };
 
-    res->onData(handlerFunc);
+    auto transaction = std::make_shared<WriteFileTransaction>(callback, res, directory, newFile);
+    status = endpoint->fileWrite(user, newFile, *transaction.get());
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, GetStorageStatusStr(status));
+        return;
+    }
 
-    res->onAborted(
-        [ res, transaction ]() mutable
+    if(!transaction->getIsValid() || !transaction->start())
+    {
+        EndRequest(res, 400, "Failed to start transaction");
+        return;
+    }
+
+    res->onData(
+        [ transaction, res ](const std::string_view data, const bool isLast) mutable
         {
-            transaction.get()->print("onAborted callback called.");
-            if(file->is_open())
+            if(!transaction->write(data, isLast))
             {
-                file->close();
-                std::remove("./uploaded_file.txt");
+                EndRequest(res, 400, "Error writing file");
             }
-            std::cerr << "Upload aborted" << std::endl;
-            EndRequest(res, 400);
+            else if(isLast)
+            {
+                transaction->commit();
+            }
         });
-
-    transaction.get()->print("handle method end.");
+    res->onAborted([ res ] { EndRequest(res, 400); });
 }
 
 } // namespace tpunkt

@@ -18,8 +18,11 @@ Storage::Storage()
     LOG_INFO("Startup Disk Usage: %2d%%", GetDiskUsage());
 
     // TODO - properly detect first startup
-    CreateInfo info{.name = "Default", .maxSize = 10000, .type = StorageEndpointType::LOCAL_FILE_SYSTEM};
-    endpointCreate(UserID::SERVER, info);
+    CreateInfo info1{.name = "Endpoint 1", .maxSize = 10000, .type = StorageEndpointType::LOCAL_FILE_SYSTEM};
+    endpointCreate(UserID::SERVER, info1);
+
+    CreateInfo info2{.name = "Endoint 2", .maxSize = 10000, .type = StorageEndpointType::LOCAL_FILE_SYSTEM};
+    endpointCreate(UserID::SERVER, info2);
 }
 
 Storage::~Storage()
