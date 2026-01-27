@@ -81,7 +81,7 @@ using InstanceSecret = FixedString<TPUNKT_INSTANCE_SECRET_MAX_LEN>;
 using TaskName = FixedString<25>;
 // Encoded in base32 so need around 1.6 times more space
 using TOTPKey = FixedString<crypto_auth_hmacsha512_KEYBYTES * 2>;
-using TOTPCode = FixedString<6>;
+using TOTPCode = FixedString<16>;
 using TOTPInfo = FixedString<256>;
 
 //===== Identifiers =====//

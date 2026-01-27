@@ -54,7 +54,6 @@ struct RequestDirectoryInfo final
     FileID directory;
 };
 
-
 struct ResponseDirectoryInfo
 {
     static ResponseDirectoryInfo FromDir(const VirtualDirectory& dir);
@@ -70,6 +69,11 @@ struct RequestCreateFile final
 };
 
 struct RequestDelete final
+{
+    FileID file;
+};
+
+struct RequestFileDownload final
 {
     FileID file;
 };

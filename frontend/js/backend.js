@@ -103,39 +103,20 @@ export async function BackendFileCreate(directory, name) {
 }
 
 export async function BackendFileUpload(file, fid) {
-    const chunkSize = 1024 * 512;
+    const headers = new Headers();
+    headers.append('file-name', file.name);
+    headers.append('directory', fid);
 
-    async function uploadChunk(chunk) {
-        const headers = new Headers();
-        headers.append('file-name', file.name);
-        headers.append('directory', fid);
-
-       await fetchWithErrorHandling('/api/filesystem/upload', {
+    try {
+        await fetchWithErrorHandling('/api/filesystem/upload', {
             method: 'POST',
-            body: chunk,
+            body: file,
             headers: headers
         });
+        console.log('File uploaded successfully');
+    } catch (error) {
+        console.error('Error uploading file:');
     }
-
-    async function uploadFile() {
-        const totalChunks = Math.ceil(file.size / chunkSize);
-
-        for (let i = 0; i < totalChunks; i++) {
-            const start = i * chunkSize;
-            const end = Math.min(start + chunkSize, file.size);
-            const chunk = file.slice(start, end);
-
-            try {
-              await uploadChunk(chunk);
-                console.log(`Chunk ${i} uploaded successfully`);
-            } catch (error) {
-                console.error(`Error uploading chunk ${i}:`);
-                break;
-            }
-        }
-    }
-
-    await uploadFile();
 }
 
 export async function BackendFileDelete(fid) {
@@ -150,4 +131,35 @@ export async function BackendFileDelete(fid) {
         },
         body: JSON.stringify(body)
     });
+}
+
+export async function BackendFileDownload(fid) {
+
+    const headers = new Headers();
+    headers.append('file', fid);
+
+    const response = await fetchWithErrorHandling('/api/filesystem/download', {
+        method: 'POST',
+        headers: headers
+    });
+
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = 'download';
+    if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (filenameMatch && filenameMatch[1]) {
+            filename = filenameMatch[1];
+        }
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
 }

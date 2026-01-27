@@ -13,8 +13,8 @@ namespace tpunkt
 struct StorageTransaction
 {
     StorageTransaction(ResultCb callback, uWS::HttpResponse<true>* response);
-    TPUNKT_MACROS_MOVE_ONLY(StorageTransaction);
     virtual ~StorageTransaction() = default;
+    TPUNKT_MACROS_STRUCT(StorageTransaction);
 
     void init(DataStore& store, VirtualFilesystem& vfs);
 
@@ -54,19 +54,18 @@ struct WriteFileTransaction final : StorageTransaction
 
 struct ReadFileTransaction final : StorageTransaction
 {
-    ReadFileTransaction() = default;
+    ReadFileTransaction(ResultCb callback, uWS::HttpResponse<true>* response, FileID file);
     ~ReadFileTransaction() override;
 
-    bool readFile(size_t chunkSize, ReadCb callback)
-    {
-        // store->readFile(handle, )
-    }
+    bool start();
+    bool readFile();
 
   private:
+    bool canReadMore = true;
+    FileID file;
     ReadHandle handle;
-    TPUNKT_MACROS_MOVE_ONLY(ReadFileTransaction);
+    TPUNKT_MACROS_STRUCT(ReadFileTransaction);
 };
-
 
 } // namespace tpunkt
 

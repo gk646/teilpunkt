@@ -151,26 +151,26 @@ StorageStatus StorageEndpoint::fileWrite(UserID actor, FileID file, WriteFileTra
     return StorageStatus::OK;
 }
 
-StorageStatus StorageEndpoint::fileRead(UserID actor, FileID file, size_t begin, size_t end,
-                                        ReadFileTransaction& action)
+StorageStatus StorageEndpoint::fileRead(UserID actor, FileID file, ReadFileTransaction& transaction)
 {
-    // Check if file exists - handle correct locking
-    // virtualFilesystem.fileExists(file);
+    constexpr EventAction action = EventAction::FilesystemFileRead;
+    SpinlockGuard guard{lock};
 
-    // Track actions - allow to view active actions per user
-
-    // allow multiple reads - a closeWrite that doesn't revert closes all reads and then writes
-
-    // Retrieve users key
-    WrappedKey key;
-
-    // action = ReadTransaction();
-    ReadHandle handle;
-    // if(!dataStore->initRead(file.file, begin, end, handle))
+    if(GetUAC().userCanAction(actor, file, PermissionFlag::READ) != UACStatus::OK)
     {
-        return StorageStatus::ERR_UNSUCCESSFUL;
+        LOG_EVENT_FILESYS(actor, FAIL_NO_UAC, FilesystemEventData{});
+        return StorageStatus::ERR_NO_UAC_PERM;
     }
 
+    VirtualFile* virtualFile = virtualFilesystem.findFile(file);
+    if(virtualFile == nullptr)
+    {
+        LOG_EVENT_FILESYS(actor, FAIL_NO_SUCH_FILE, FilesystemEventData{});
+        return StorageStatus::ERR_NO_SUCH_FILE;
+    }
+
+    transaction.init(*dataStore, virtualFilesystem);
+    LOG_EVENT_FILESYS(actor, INFO_SUCCESS, FilesystemEventData{});
     return StorageStatus::OK;
 }
 

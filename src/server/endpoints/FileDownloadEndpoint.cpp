@@ -4,60 +4,74 @@
 #include "server/Endpoints.h"
 #include "storage/Storage.h"
 #include "storage/StorageTransaction.h"
+#include "server/DTOMappings.h"
 
 namespace tpunkt
 {
 
 void FileDownloadEndpoint::handle(uWS::HttpResponse<true>* res, uWS::HttpRequest* req)
 {
-    const size_t fileSize = 1 * 1024 * 1024; // 10 MB
+    TPUNKT_MACROS_AUTH_USER()
 
-    res->writeHeader("Content-Disposition", "attachment; filename=\"dummy.bin\"");
-    res->writeHeader("Content-Type", "application/octet-stream");
-    res->writeHeader("Content-Length", std::to_string(fileSize));
-
-    std::string dummyChunk(TPUNKT_SERVER_CHUNK_SIZE, 'x');
-
-    auto offset = 0;
-
-    // Initial direct writes until backpressure occurs
-    while(offset < fileSize)
+    const FileID file = FileID::FromString(GetHeader(req, "file"));
+    if(!file.isValid() || file.isDirectory())
     {
-        size_t remaining = fileSize - offset;
-        size_t toSend = std::min(TPUNKT_SERVER_CHUNK_SIZE, remaining);
-        bool canWrite = res->write(std::string_view(dummyChunk.data(), toSend));
-        offset += toSend;
-        if(!canWrite)
+        EndRequest(res, 400, "Invalid file");
+        return;
+    }
+
+    StorageEndpoint* endpoint = nullptr;
+    auto status = Storage::GetInstance().endpointGet(user, file.getEndpoint(), endpoint);
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, "Invalid endpoint");
+        return;
+    }
+
+
+    ResultCb callback = [ res ](bool success)
+    {
+        if(!success)
         {
-            break;
+            EndRequest(res, 400, "File write failed");
         }
+    };
+    auto transaction = std::make_shared<ReadFileTransaction>(callback, res, file);
+    status = endpoint->fileRead(user, file, *transaction.get());
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, GetStorageStatusStr(status));
+        return;
     }
 
-    if(offset >= fileSize)
+    if(!transaction->getIsValid() || !transaction->start())
     {
-        res->end();
+        EndRequest(res, 400, "Failed to start transaction");
+        return;
     }
+
+    DTO::ResponseDirectoryEntry info{};
+    status = endpoint->infoFile(user, file, info);
+    if(status != StorageStatus::OK)
+    {
+        EndRequest(res, 400, GetStorageStatusStr(status));
+        return;
+    }
+
+    res->writeHeader("Content-Disposition", std::string{"attachment; filename="} + std::string{info.name.view()});
+    res->writeHeader("Content-Type", "application/octet-stream");
+    res->writeHeader("Content-Length", std::to_string(info.sizeBytes));
+
+    transaction->readFile();
 
     res->onWritable(
-        [ res, fileSize, dummyChunk, offset ](size_t) mutable -> bool
+        [ transaction ](size_t) mutable -> bool
         {
-            while(offset < fileSize)
-            {
-                size_t remaining = fileSize - offset;
-                size_t toSend = std::min(TPUNKT_SERVER_CHUNK_SIZE, remaining);
-                bool canWrite = res->write(std::string_view(dummyChunk.data(), toSend));
-                offset += toSend;
-                if(!canWrite)
-                {
-                    // Backpressure: wait for next onWritable event
-                    return false;
-                }
-            }
-            res->end();
+            transaction->readFile();
             return true;
         });
 
-    res->onAborted([ res ]() { EndRequest(res, 500, "Server Error"); });
+    res->onAborted([ res ] { EndRequest(res, 500, "Server Error"); });
 }
 
 } // namespace tpunkt

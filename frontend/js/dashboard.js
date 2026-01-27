@@ -3,7 +3,7 @@ import {
     BackendDirLookup,
     BackendFetchUserRoots,
     BackendFileCreate,
-    BackendFileDelete,
+    BackendFileDelete, BackendFileDownload,
     BackendFileUpload
 } from './backend.js';
 
@@ -138,8 +138,7 @@ function renderDirectoryContents(entries) {
             downloadButton.innerHTML = IconDownload()
             downloadButton.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                const currentDir = navigationStack[navigationStack.length - 1].fid;
-
+                BackendFileDownload(entry.fid)
             })
             actionsContainer.appendChild(downloadButton);
         }

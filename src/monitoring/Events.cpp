@@ -58,11 +58,18 @@ const char* tpunkt::GetEventActionStr(EventAction action)
             return "FilesystemDirCreate";
         case EventAction::FilesystemDirLookup:
             return "FilesystemDirLookup";
-        // TaskManager
         case EventAction::ThreadAdd:
             return "ThreadAdd";
         case EventAction::ThreadRemove:
             return "ThreadRemove";
+        case EventAction::FileSystemFileDelete:
+            return "FileSystemFileDelete";
+        case EventAction::FilesystemFileRead:
+            return "FilesystemFileRead";
+        case EventAction::FileSystemDirDelete:
+            return "FileSystemDirDelete";
+        case EventAction::FilesystemFileInfo:
+            return "FileSystemFileInfo";
         default:
             return "UNKNOWN";
     }

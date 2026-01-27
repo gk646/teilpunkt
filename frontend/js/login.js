@@ -95,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+
     if (isPasskeyAvailable()) {
         // Handle passkey signup
         passkeyButton.addEventListener('click', async () => {

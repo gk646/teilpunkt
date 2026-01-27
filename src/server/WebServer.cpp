@@ -24,7 +24,7 @@ void CreateApp(uWS::SSLApp& app)
     app.post("/api/filesystem/file", FileCreateEndpoint::handle);
     app.del("/api/filesystem/file", FileDeleteEndpoint::handle);
     app.post("/api/filesystem/upload", FileUploadEndpoint::handle);
-    app.get("/api/filesystem/download", FileDownloadEndpoint::handle);
+    app.post("/api/filesystem/download", FileDownloadEndpoint::handle);
 
     // Dirs
     app.post("/api/filesystem/dir", DirCreateEndpoint::handle);

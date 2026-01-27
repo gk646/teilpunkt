@@ -50,6 +50,7 @@ enum class EventAction : uint8_t
     FileSystemFileDelete,
     FilesystemFileRemove,
     FilesystemFileWrite,
+    FilesystemFileRead,
     FilesystemDirCreate,
     FileSystemDirDelete,
     FilesystemDirLookup,

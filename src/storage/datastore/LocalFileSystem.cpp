@@ -182,7 +182,8 @@ bool LocalFileSystemDatastore::closeRead(ReadHandle& handle, ResultCb callback)
     }
     buffers[ handle.buffer ].unlock();
 
-    callback(success);
+    // TODO fix callback
+    //callback(success);
     return success;
 }
 
